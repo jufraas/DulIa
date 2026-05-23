@@ -92,10 +92,10 @@ curl -X POST http://localhost:8000/api/profile \
 ### Procesamiento backend (referencia)
 
 1. Parsear `profile` (JSON).
-2. Si hay `cv`: MarkItDown → `cv_markdown`.
-3. Construir prompt: perfil JSON + `cv_markdown` + ofertas BD.
+2. Si hay `cv`: módulo `backend/markitdown/` → `cv_markdown`.
+3. `build_gemini_prompt_vars(profile, cv_result)` — ver `docs/PROMPTS.md`.
 4. Llamar Gemini.
-5. Responder JSON de recomendaciones.
+5. Responder JSON de recomendaciones (`cv_parsed: true` si hubo CV).
 
 ---
 

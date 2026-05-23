@@ -11,7 +11,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Estructura creada |
-| Backend (FastAPI) | 🔲 No iniciado | Pendiente: `/profile`, MarkItDown, Gemini |
+| Backend (FastAPI) | 🚧 En progreso | Módulo `markitdown/` + `POST /profile` stub; falta Gemini |
 | Frontend (React+Vite) | 🚧 En progreso | Flujo demo completo; falta deploy |
 | Pipeline (scrapers) | 🔲 No iniciado | — |
 | Integración Gemini | 🔲 No iniciado | Ver PROMPTS.md |
@@ -39,12 +39,12 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 | Pieza | Estado |
 |-------|--------|
-| `GET /health` | 🔲 |
-| `POST /profile` (JSON) | 🔲 |
-| `POST /profile` (multipart + CV) | 🔲 |
-| MarkItDown PDF → markdown | 🔲 |
-| Prompt Gemini con cv_markdown | 🔲 |
-| CORS para frontend | 🔲 |
+| `GET /health` | ✅ stub |
+| `POST /profile` (JSON) | ✅ stub + mock |
+| `POST /profile` (multipart + CV) | ✅ MarkItDown en `backend/markitdown/` |
+| MarkItDown PDF → markdown | ✅ |
+| Prompt Gemini con cv_markdown | 🚧 vars listas; falta llamada API |
+| CORS para frontend | ✅ |
 
 ## Leyenda
 
