@@ -121,6 +121,7 @@ export const useProfileStore = create((set, get) => ({
   plan: null,
   radar: null,
   timeline: null,
+  analysis: null,
   apiUsesMock: true,
   sessionHydrated: false,
 
@@ -154,6 +155,10 @@ export const useProfileStore = create((set, get) => ({
     set({ timeline })
     persistSessionCacheFromState(get())
   },
+  setAnalysis: (analysis) => {
+    set({ analysis })
+    persistSessionCacheFromState(get())
+  },
   setApiUsesMock: (apiUsesMock) => set({ apiUsesMock }),
 
   reset: () => {
@@ -167,6 +172,7 @@ export const useProfileStore = create((set, get) => ({
       plan: null,
       radar: null,
       timeline: null,
+      analysis: null,
     })
   },
 }))

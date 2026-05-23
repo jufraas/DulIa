@@ -24,6 +24,7 @@ export async function hydrateSession() {
       if (cached.plan) store.setPlan(cached.plan)
       if (cached.radar) store.setRadar(cached.radar)
       if (cached.timeline) store.setTimeline(cached.timeline)
+      if (cached.analysis) store.setAnalysis(cached.analysis)
     }
 
     let profile = useProfileStore.getState().savedProfile
@@ -34,8 +35,8 @@ export async function hydrateSession() {
 
     profile = useProfileStore.getState().savedProfile
     if (profile) {
-      const { jobs, market, plan, radar } = useProfileStore.getState()
-      const needsBundle = !jobs.length || !market || !plan || !radar
+      const { jobs, market, plan, radar, analysis } = useProfileStore.getState()
+      const needsBundle = !jobs.length || !market || !plan || !radar || !analysis
 
       if (needsBundle) {
         const bundle = await loadResultsBundle(sessionId, profile)
@@ -44,6 +45,7 @@ export async function hydrateSession() {
         if (!plan && bundle.plan) store.setPlan(bundle.plan)
         if (!radar && bundle.radar) store.setRadar(bundle.radar)
         if (bundle.timeline) store.setTimeline(bundle.timeline)
+        if (!analysis && bundle.analysis) store.setAnalysis(bundle.analysis)
       }
 
       persistSessionCacheFromState(useProfileStore.getState())

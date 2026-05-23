@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { loadResultsBundle } from '../services/api'
 import { getOrCreateSessionId } from '../utils/session'
+import {
+  parseAnalysisResponse,
+  resolveEmployabilityScore,
+} from '../utils/analysisDisplay'
 import { useProfileStore } from '../store/useProfileStore'
 
 export function useResultsData() {
@@ -9,15 +13,20 @@ export function useResultsData() {
   const market = useProfileStore((s) => s.market)
   const plan = useProfileStore((s) => s.plan)
   const radar = useProfileStore((s) => s.radar)
+  const analysis = useProfileStore((s) => s.analysis)
   const setJobs = useProfileStore((s) => s.setJobs)
   const setMarket = useProfileStore((s) => s.setMarket)
   const setPlan = useProfileStore((s) => s.setPlan)
   const setRadar = useProfileStore((s) => s.setRadar)
   const setTimeline = useProfileStore((s) => s.setTimeline)
+  const setAnalysis = useProfileStore((s) => s.setAnalysis)
   const [loading, setLoading] = useState(false)
 
+  const insights = useMemo(() => parseAnalysisResponse(analysis), [analysis])
+
   useEffect(() => {
-    if (!savedProfile || (jobs.length > 0 && market && plan && radar)) return undefined
+    const hasBundle = jobs.length > 0 && market && plan && radar && analysis
+    if (!savedProfile || hasBundle) return undefined
 
     let cancelled = false
     const sessionId = getOrCreateSessionId()
@@ -25,7 +34,7 @@ export function useResultsData() {
     ;(async () => {
       setLoading(true)
       try {
-        if (jobs.length && market && plan && radar) return
+        if (jobs.length && market && plan && radar && analysis) return
 
         const bundle = await loadResultsBundle(sessionId, savedProfile)
         if (cancelled) return
@@ -35,6 +44,7 @@ export function useResultsData() {
         if (!plan && bundle.plan) setPlan(bundle.plan)
         if (!radar && bundle.radar) setRadar(bundle.radar)
         if (bundle.timeline) setTimeline(bundle.timeline)
+        if (!analysis && bundle.analysis) setAnalysis(bundle.analysis)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -49,17 +59,16 @@ export function useResultsData() {
     market,
     plan,
     radar,
+    analysis,
     setJobs,
     setMarket,
     setPlan,
     setRadar,
     setTimeline,
+    setAnalysis,
   ])
 
-  const topScore =
-    jobs.length > 0
-      ? Math.max(...jobs.map((j) => j.score_compatibilidad ?? 0))
-      : radar?.usuario?.preparacion ?? 0
+  const topScore = resolveEmployabilityScore({ insights, jobs, radar })
 
   const topJob = jobs.reduce(
     (best, job) =>
@@ -69,5 +78,16 @@ export function useResultsData() {
     /** @type {import('../store/useProfileStore').Job | null} */ (null),
   )
 
-  return { savedProfile, jobs, market, plan, radar, loading, topScore, topJob }
+  return {
+    savedProfile,
+    jobs,
+    market,
+    plan,
+    radar,
+    analysis,
+    insights,
+    loading,
+    topScore,
+    topJob,
+  }
 }

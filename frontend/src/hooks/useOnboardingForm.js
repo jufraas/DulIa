@@ -28,6 +28,7 @@ export function useOnboardingForm() {
   const setPlan = useProfileStore((s) => s.setPlan)
   const setRadar = useProfileStore((s) => s.setRadar)
   const setTimeline = useProfileStore((s) => s.setTimeline)
+  const setAnalysis = useProfileStore((s) => s.setAnalysis)
   const setSessionId = useProfileStore((s) => s.setSessionId)
   const savedProfile = useProfileStore((s) => s.savedProfile)
   const sessionHydrated = useProfileStore((s) => s.sessionHydrated)
@@ -179,7 +180,7 @@ export function useOnboardingForm() {
         const payload = buildProfilePayload(form)
         const savedProfile = await createProfile(payload)
 
-        const { jobs, market, plan, radar, timeline } = await loadResultsBundle(
+        const { jobs, market, plan, radar, timeline, analysis } = await loadResultsBundle(
           sessionId,
           savedProfile,
         )
@@ -191,6 +192,7 @@ export function useOnboardingForm() {
         if (plan) setPlan(plan)
         if (radar) setRadar(radar)
         if (timeline) setTimeline(timeline)
+        if (analysis) setAnalysis(analysis)
         clearWizardDraft()
         navigate('/resultados')
       } catch (err) {
@@ -209,6 +211,7 @@ export function useOnboardingForm() {
       setPlan,
       setRadar,
       setTimeline,
+      setAnalysis,
       setSessionId,
       navigate,
     ],

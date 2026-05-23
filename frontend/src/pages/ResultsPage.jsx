@@ -19,7 +19,8 @@ import { useSessionHydration } from '../hooks/useSessionHydration'
 /** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
   const { ready } = useSessionHydration()
-  const { savedProfile, jobs, market, loading, topScore, topJob, radar } = useResultsData()
+  const { savedProfile, jobs, market, loading, topScore, topJob, radar, insights } =
+    useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
   if (!ready) {
@@ -52,12 +53,13 @@ export default function ResultsPage() {
           </div>
 
           <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScoreCard score={topScore || radar?.usuario?.preparacion || 0} />
+            <ScoreCard score={topScore} comparativa={insights?.comparativa} />
             <div className="flex flex-col gap-4">
               <ProfileSummary
                 profile={savedProfile}
                 topScore={topScore}
                 topJobTitle={topJob?.titulo}
+                insights={insights}
               />
               <PdfDownloadCard onDownload={downloadPdf} downloading={downloading} />
             </div>
