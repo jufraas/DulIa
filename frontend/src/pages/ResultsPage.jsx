@@ -2,6 +2,8 @@ import { Navigate } from 'react-router-dom'
 import { Download, Sparkles } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
+import CareerTimeline from '../components/results/CareerTimeline'
+import CoachChatBubble from '../components/results/CoachChatBubble'
 import MarketThermometer from '../components/results/MarketThermometer'
 import OpportunitiesPreview from '../components/results/OpportunitiesPreview'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
@@ -19,7 +21,8 @@ import { useSessionHydration } from '../hooks/useSessionHydration'
 /** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
   const { ready } = useSessionHydration()
-  const { savedProfile, jobs, market, loading, topScore, topJob, radar } = useResultsData()
+  const { savedProfile, jobs, market, loading, topScore, topJob, radar, insights } =
+    useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
   if (!ready) {
@@ -52,12 +55,13 @@ export default function ResultsPage() {
           </div>
 
           <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScoreCard score={topScore || radar?.usuario?.preparacion || 0} />
+            <ScoreCard score={topScore} comparativa={insights?.comparativa} />
             <div className="flex flex-col gap-4">
               <ProfileSummary
                 profile={savedProfile}
                 topScore={topScore}
                 topJobTitle={topJob?.titulo}
+                insights={insights}
               />
               <PdfDownloadCard onDownload={downloadPdf} downloading={downloading} />
             </div>
@@ -79,6 +83,12 @@ export default function ResultsPage() {
 
           <RadarMatch profile={savedProfile} jobs={jobs} radar={radar} />
 
+          <div className="anim-in-delay-3 mt-6">
+            <CareerTimeline />
+          </div>
+
+          <CoachChatBubble />
+
           <div
             className="anim-in-delay-3 mt-12 flex flex-col items-center justify-between gap-6 rounded-[24px] p-9 sm:flex-row"
             style={{
@@ -92,7 +102,7 @@ export default function ResultsPage() {
                 Llévate tu plan completo
               </h3>
               <p className="mt-2 text-[15px] text-[color:var(--fg-2)]">
-                Tu score, perfil y plan de 30 días en un PDF que puedes compartir.
+                Score, análisis IA, plan, radar y vacantes en un PDF listo para compartir.
               </p>
             </div>
             <Button

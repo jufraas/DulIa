@@ -132,6 +132,20 @@ export function VacancyRow({ job }) {
           <FlagIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {job.flag}
         </div>
+        {(job.skillsMatch?.length > 0 || job.skillsMissing?.length > 0) && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {(job.skillsMatch ?? []).map((skill) => (
+              <span key={`match-${skill}`} className="chip-dl selected text-[11px]">
+                ✓ {skill}
+              </span>
+            ))}
+            {(job.skillsMissing ?? []).map((skill) => (
+              <span key={`missing-${skill}`} className="chip-dl text-[11px] opacity-80">
+                + {skill}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="text-right">

@@ -1,11 +1,15 @@
 import { jsPDF } from 'jspdf'
+import { parseAnalysisResponse, resolveEmployabilityScore } from './analysisDisplay'
 import { savedProfileToDisplayFields } from './formatProfileLabels'
 import { formatSalary } from './formatters'
+import { planToDisplayWeeks } from './planDisplay'
+import { RADAR_DIMENSION_KEYS, RADAR_DIMENSION_LABELS } from './radarApi'
 
 const MARGIN = 20
 const PAGE_WIDTH = 210
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2
 const LINE_HEIGHT = 7
+const PAGE_BOTTOM = 275
 
 const BRAND_DARK = [13, 13, 13]
 const BRAND_VIOLET = [124, 58, 237]
@@ -17,8 +21,18 @@ function splitLines(text, maxWidth, doc) {
   return doc.splitTextToSize(text, maxWidth)
 }
 
+/** @param {import('jspdf').jsPDF} doc @param {number} y @param {number} needed */
+function ensureSpace(doc, y, needed) {
+  if (y + needed > PAGE_BOTTOM) {
+    doc.addPage()
+    return MARGIN
+  }
+  return y
+}
+
 /** @param {import('jspdf').jsPDF} doc @param {number} y @param {string} title */
 function sectionTitle(doc, y, title) {
+  y = ensureSpace(doc, y, 14)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
   doc.setTextColor(...BRAND_DARK)
@@ -30,15 +44,47 @@ function sectionTitle(doc, y, title) {
 }
 
 /**
+ * @param {import('jspdf').jsPDF} doc
+ * @param {number} y
+ * @param {string[]} lines
+ * @param {number} [indent]
+ */
+function writeLines(doc, y, lines, indent = 0) {
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.setTextColor(51, 65, 85)
+
+  for (const line of lines) {
+    const wrapped = splitLines(line, CONTENT_WIDTH - indent, doc)
+    y = ensureSpace(doc, y, wrapped.length * LINE_HEIGHT + 2)
+    doc.text(wrapped, MARGIN + indent, y)
+    y += wrapped.length * LINE_HEIGHT + 3
+  }
+  return y
+}
+
+/**
  * @param {{
  *   profile: import('../store/useProfileStore').SavedProfile,
  *   jobs?: import('../store/useProfileStore').Job[],
  *   market?: import('../store/useProfileStore').MarketDashboard | null,
+ *   analysis?: unknown,
+ *   plan?: import('../store/useProfileStore').ActionPlan | null,
+ *   radar?: import('./radarApi').RadarChartData | null,
  * }} data
  */
-export function generateAnalysisPdf({ profile, jobs = [], market = null }) {
+export function generateAnalysisPdf({
+  profile,
+  jobs = [],
+  market = null,
+  analysis = null,
+  plan = null,
+  radar = null,
+}) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   let y = MARGIN
+  const insights = parseAnalysisResponse(analysis)
+  const score = resolveEmployabilityScore({ insights, jobs, radar })
 
   doc.setFillColor(...BRAND_DARK)
   doc.rect(0, 0, PAGE_WIDTH, 36, 'F')
@@ -76,60 +122,95 @@ export function generateAnalysisPdf({ profile, jobs = [], market = null }) {
     }
   }
 
+  y = sectionTitle(doc, y, 'Score de empleabilidad')
+  y = writeLines(doc, y, [
+    `Tu score: ${score}/100`,
+    insights?.comparativa ? insights.comparativa : null,
+    insights?.descripcion ? insights.descripcion : null,
+  ].filter((line) => line != null))
+
+  if (insights && (insights.fortalezas.length || insights.recomendaciones.length)) {
+    y = sectionTitle(doc, y, 'Análisis DulIA')
+    /** @type {string[]} */
+    const analysisLines = []
+    insights.fortalezas.forEach((f) => {
+      analysisLines.push(`+ ${f.label}: ${f.text}`)
+    })
+    insights.debilidades.forEach((d) => {
+      analysisLines.push(`→ ${d.label}: ${d.text}`)
+    })
+    insights.recomendaciones.forEach((r) => {
+      analysisLines.push(`• ${r}`)
+    })
+    y = writeLines(doc, y, analysisLines)
+  }
+
+  const weeks = planToDisplayWeeks(plan)
+  if (weeks.length || plan?.resumen_ejecutivo) {
+    y = sectionTitle(doc, y, 'Plan de 30 días')
+    if (plan?.resumen_ejecutivo) {
+      y = writeLines(doc, y, [plan.resumen_ejecutivo])
+    }
+    weeks.forEach((week) => {
+      y = writeLines(doc, y, [`${week.w} — ${week.title}`], 0)
+      week.tasks.forEach((task) => {
+        y = writeLines(doc, y, [`  ○ ${task}`], 0)
+      })
+      y += 2
+    })
+  }
+
+  if (radar?.usuario && radar?.mercado) {
+    y = sectionTitle(doc, y, 'Match radar (tú vs mercado)')
+    for (const key of RADAR_DIMENSION_KEYS) {
+      const label = RADAR_DIMENSION_LABELS[key]?.name ?? key
+      const you = radar.usuario[key]
+      const marketVal = radar.mercado[key]
+      if (you == null && marketVal == null) continue
+      y = writeLines(doc, y, [
+        `${label}: tú ${you ?? '—'} · mercado ${marketVal ?? '—'}`,
+      ])
+    }
+    y += 2
+  }
+
   if (jobs.length > 0) {
     const top = jobs.reduce((a, b) =>
       (a.score_compatibilidad ?? 0) >= (b.score_compatibilidad ?? 0) ? a : b,
     )
     y = sectionTitle(doc, y, 'Mejor match')
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(11)
-    doc.text(`${top.titulo} — ${top.empresa} (${top.score_compatibilidad}% match)`, MARGIN, y)
-    y += 10
+    y = writeLines(doc, y, [
+      `${top.titulo} — ${top.empresa} (${top.score_compatibilidad}% match)`,
+    ])
   }
 
   y = sectionTitle(doc, y, 'Vacantes recomendadas')
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
   jobs.forEach((job) => {
-    const line = `• ${job.titulo} (${job.empresa}) — ${job.score_compatibilidad}% — ${formatSalary(job.salario_min, job.salario_max)}`
-    const lines = splitLines(line, CONTENT_WIDTH - 4, doc)
-    if (y + lines.length * LINE_HEIGHT > 270) {
-      doc.addPage()
-      y = MARGIN
-    }
-    doc.text(lines, MARGIN + 2, y)
-    y += lines.length * LINE_HEIGHT + 3
+    const urlPart = job.url && job.semaforo !== 'red' ? ` · ${job.url}` : ''
+    const line = `• ${job.titulo} (${job.empresa}) — ${job.score_compatibilidad}% — ${formatSalary(job.salario_min, job.salario_max)}${urlPart}`
+    y = writeLines(doc, y, [line], 2)
   })
   y += 4
 
   if (market) {
     y = sectionTitle(doc, y, 'Termómetro del mercado')
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(10)
+    /** @type {string[]} */
     const marketLines = [
       `Vacantes activas: ${market.total_vacantes_activas ?? '—'}`,
       market.salario_promedio
         ? `Salario promedio: ${formatSalary(market.salario_promedio, undefined)}`
         : null,
-    ].filter(Boolean)
-    marketLines.forEach((line) => {
-      doc.text(String(line), MARGIN, y)
-      y += LINE_HEIGHT + 2
-    })
+      market.crecimiento_semanal_pct != null
+        ? `Crecimiento semanal: ${market.crecimiento_semanal_pct}%`
+        : null,
+    ].filter((line) => line != null)
+    y = writeLines(doc, y, marketLines)
     y += 4
   }
 
   y = sectionTitle(doc, y + 4, 'Tu perfil')
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
   savedProfileToDisplayFields(profile).forEach(({ label, value }) => {
-    const lines = splitLines(`${label}: ${value}`, CONTENT_WIDTH, doc)
-    if (y + lines.length * LINE_HEIGHT > 280) {
-      doc.addPage()
-      y = MARGIN
-    }
-    doc.text(lines, MARGIN, y)
-    y += lines.length * LINE_HEIGHT + 3
+    y = writeLines(doc, y, [`${label}: ${value}`])
   })
 
   const safeName = (profile.nombre || 'usuario')

@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-23 · Fase 1 backend Plan 2 verificada en Supabase + Gemini.
+**Última actualización:** 2026-05-23 · Backend Fase 1 Plan 2 verificada + Front Plan 2 UI (Sprints 1–3).
 
 ---
 
@@ -12,15 +12,18 @@
 | Pieza | Estado | Notas |
 |-------|--------|-------|
 | `loadResultsBundle()` | ✅ | Tras wizard y rehidratación |
-| `POST .../analyze` | ✅ Backend | **Fase 1:** 500/RLS corregidos — ver troubleshooting abajo |
-| `POST .../action-plan` | ✅ Backend | Requiere analyze previo en modo real |
-| `GET .../radar-data` | ✅ Backend | Depende de dashboard + análisis |
-| `GET .../timeline-data` | ✅ Backend | Requiere action-plan guardado |
-| UI resumen / skills IA | 🔲 Fase 2 | Front aún usa texto fijo + mocks si API falla |
+| `POST .../analyze` | ✅ | Store `analysis` → `ProfileSummary`, PDF; backend Fase 1 sin 500 |
+| `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
+| `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
+| `GET .../timeline-data` | ✅ | `CareerTimeline` |
 | `GET market/dashboard` | ✅ | Termómetro; fallback si `jobs.city` vacío |
-| Fallbacks offline | ✅ | Solo deben activarse si API cae — ver Network tab |
+| `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
+| Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
+| Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
+| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
+| PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 
-Decisión backend Fase 1: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
 
 ---
 
@@ -104,6 +107,8 @@ POST /api/profile/{session_id}/analyze?regenerate=true   ← forzar nuevo
 ```
 
 **UI sugerida:** cards de fortalezas/debilidades; badge con `nivel_preparacion.overall` (0–100).
+
+**Implementado:** `utils/analysisDisplay.js` → `ProfileSummary`, `ScoreCard`, PDF.
 
 ---
 
@@ -253,8 +258,9 @@ const sessionId = localStorage.getItem("dulia_session_id");
 const { jobs, market, plan, radar, timeline, analysis } =
   await loadResultsBundle(sessionId, savedProfile);
 
-// jobs → vacantes · market → MarketThermometer · plan → ThirtyDayPlan
-// radar → RadarMatch · timeline → (UI pendiente)
+// jobs → vacantes · market → MarketThermometer · plan → ThirtyDayPlan (tabs)
+// radar → RadarMatch · timeline → CareerTimeline · analysis → ProfileSummary
+// coach → CoachChatBubble (POST /coach/chat aparte del bundle)
 ```
 
 ---

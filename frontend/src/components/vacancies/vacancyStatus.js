@@ -53,5 +53,7 @@ export function mapJobToVacancyRow(job) {
       : 'Reciente',
     flag,
     url: job.url ?? null,
+    skillsMatch: job.habilidades_match ?? [],
+    skillsMissing: job.habilidades_faltantes ?? [],
   }
 }

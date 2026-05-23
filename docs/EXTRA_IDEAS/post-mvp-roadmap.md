@@ -29,49 +29,28 @@
 
 ### Termómetro de mercado en UI
 
-- **Qué:** Montar `MarketThermometer.jsx` en `/resultados` (componente ya existe; datos ya en store).
-- **Por qué:** Muestra que DulIA lee el mercado laboral local, no solo vacantes sueltas.
-- **Dueño:** Joufra.
-- **Backend:** ✅ `GET /market/dashboard`.
-- **Esfuerzo:** ~30 min.
+- **Estado:** ✅ `MarketThermometer` en `/resultados` y `/vacantes`.
 
 ### Burbuja / chat del coach
 
-- **Qué:** UI flotante que llama `postCoachChat()` (`api.js` ya listo).
-- **Por qué:** “Coach con IA” deja de ser promesa y se ve en vivo.
-- **Dueño:** Joufra (UI) — API: Migue.
-- **Backend:** ✅ `POST /coach/chat`.
-- **Estado:** Front UI pendiente.
+- **Estado:** ✅ `CoachChatBubble` + `useCoachChat.js` en `/resultados`.
 
 ### Plan 30 días desde backend (Carlos)
 
-- **Qué:** `GET /api/plan/{session_id}` con semanas personalizadas (Gemini + perfil).
-- **Por qué:** Plan genérico vs plan con nombre, ciudad y skills — se nota en demo.
-- **Dueño:** Carlos (backend) — front ya cableado (`getPlan()`, store, `ThirtyDayPlan.jsx`).
-- **Contrato:** [ENDPOINTS.md](../ENDPOINTS.md) sección `GET /api/plan/{session_id}`.
-- **Estado:** Contrato listo; backend pendiente.
+- **Estado:** ✅ Front usa `POST .../action-plan` (Plan 2); legacy `GET /plan/{id}` deprecado.
 
 ### Copy con datos reales (no hardcode)
 
-- **Qué:** Sustituir textos fijos por datos del store/API:
-  - “15.000 vacantes analizadas” → `market.total_vacantes_activas`
-  - “Top 28% del mercado” en `ScoreCard` → percentil real o quitar badge
-- **Dueño:** Joufra.
-- **Backend:** Percentil requeriría endpoint nuevo (opcional).
+- **Estado:** ✅ `OpportunitiesPreview` usa `market.total_vacantes_activas`; `ScoreCard` usa `comparativa` del analyze.
+- **Pendiente:** prototipos kit huérfanos (`Landing.jsx`, `Wizard.jsx`).
 
 ### Links externos en vacantes
 
-- **Qué:** Abrir `job.url` desde filas del panel `/vacantes`.
-- **Por qué:** Cierra el loop “encuentro → aplico”.
-- **Dueño:** Joufra.
-- **Backend:** Campo `url` ya en `JobOut`; pipeline debe poblarlo.
+- **Estado:** ✅ Preview + panel semáforo; mocks con URL demo.
 
 ### Plan 30d dentro del PDF
 
-- **Qué:** Incluir las 4 semanas y tareas en `generateAnalysisPdf.js`.
-- **Por qué:** El PDF promete “plan completo”; hoy solo perfil + jobs + mercado.
-- **Dueño:** Joufra o compartido.
-- **Depende de:** Plan en store (`plan`).
+- **Estado:** ✅ PDF incluye score, análisis IA, plan 30d, radar, jobs, mercado y perfil.
 
 ### Vacantes reales en BD
 

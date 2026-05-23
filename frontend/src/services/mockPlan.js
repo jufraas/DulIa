@@ -32,19 +32,33 @@ export const mockPlan = {
 export function buildMockPlanFromProfile(profile) {
   if (!profile?.nombre) return mockPlan
 
-  const skills = (profile.habilidades ?? []).slice(0, 2).join(', ') || 'tu stack'
+  const skillList = (profile.habilidades ?? [])
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 3)
   const city = profile.ciudad ?? 'tu ciudad'
   const firstName = profile.nombre.split(' ')[0]
+  const skillsSummary = skillList.length ? skillList.join(', ') : 'tu stack'
+  const skillsTitle =
+    skillList.length >= 2
+      ? `Refuerza ${skillList.slice(0, 2).join(' y ')}`
+      : skillList.length === 1
+        ? `Refuerza ${skillList[0]}`
+        : 'Sube tu nivel técnico'
+  const courseTasks =
+    skillList.length > 0
+      ? skillList.map((skill) => `Curso corto en ${skill}`)
+      : ['Curso corto en tu stack principal']
 
   return {
     session_id: profile.session_id,
-    resumen_ejecutivo: `Plan personalizado para ${firstName} en ${city}: refuerza ${skills}, actualiza tu perfil y postula con intención durante los próximos 30 días.`,
+    resumen_ejecutivo: `Plan personalizado para ${firstName} en ${city}: refuerza ${skillsSummary}, actualiza tu perfil y postula con intención durante los próximos 30 días.`,
     semanas: [
       {
         numero: 1,
         titulo: 'Afina tu perfil',
         tareas: [
-          `Actualiza tu CV con logros concretos, ${profile.nombre.split(' ')[0]}`,
+          `Actualiza tu CV con logros concretos, ${firstName}`,
           profile.ciudad ? `Busca vacantes en ${profile.ciudad}` : 'Define tu ciudad objetivo',
           'Completa LinkedIn con tu carrera y habilidades',
         ],
@@ -60,9 +74,9 @@ export function buildMockPlanFromProfile(profile) {
       },
       {
         numero: 3,
-        titulo: `Refuerza ${skills}`,
+        titulo: skillsTitle,
         tareas: [
-          `Curso corto en ${skills}`,
+          ...courseTasks,
           'Arma un mini proyecto para tu portafolio',
           'Pide feedback a un mentor o par',
         ],
@@ -77,5 +91,47 @@ export function buildMockPlanFromProfile(profile) {
         ],
       },
     ],
+    fase_60: {
+      titulo: 'Consolida entrevistas y networking',
+      objetivo: `Amplía tu red en ${city} y convierte postulaciones en conversaciones reales.`,
+      acciones: [
+        { tarea: 'Agenda 2 cafés virtuales con profesionales del sector' },
+        { tarea: 'Prepara respuestas STAR para entrevistas técnicas' },
+        { tarea: 'Publica un logro reciente en LinkedIn' },
+      ],
+      metricas: ['3 entrevistas agendadas', 'Red +15 contactos relevantes'],
+    },
+    fase_90: {
+      titulo: 'Cierra tu transición laboral',
+      objetivo: `Objetivo: oferta o pipeline sólido en ${city} con ${skillsSummary}.`,
+      acciones: [
+        { tarea: 'Negocia al menos una oferta o contrato' },
+        { tarea: 'Documenta aprendizajes del proceso de búsqueda' },
+        { tarea: 'Actualiza portafolio con proyecto del plan' },
+      ],
+      metricas: ['Oferta firmada o 5 procesos activos', 'Score de empleabilidad +15 pts'],
+    },
+    milestones: [
+      { dia: 30, logro: 'CV y LinkedIn optimizados; 5+ postulaciones enviadas' },
+      { dia: 60, logro: 'Primeras entrevistas y red ampliada' },
+      { dia: 90, logro: 'Oferta o pipeline sólido de oportunidades' },
+    ],
+    recursos_recomendados: skillList.length
+      ? skillList.map((skill) => ({
+          tipo: 'curso',
+          nombre: `Fundamentos de ${skill}`,
+          descripcion: `Curso corto para reforzar ${skill} según demanda en ${city}.`,
+          duracion: '20–40 horas',
+          costo_aprox: 'Gratis / bajo costo',
+        }))
+      : [
+          {
+            tipo: 'curso',
+            nombre: 'Habilidades blandas para entrevistas',
+            descripcion: 'Comunicación y storytelling profesional.',
+            duracion: '10 horas',
+            costo_aprox: 'Gratis',
+          },
+        ],
   }
 }

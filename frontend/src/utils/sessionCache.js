@@ -11,6 +11,7 @@ const WIZARD_DRAFT_KEY = 'dulia_wizard_draft'
  * @property {import('../store/useProfileStore').ActionPlan | null} [plan]
  * @property {import('../utils/radarApi').RadarChartData | null} [radar]
  * @property {unknown} [timeline]
+ * @property {unknown} [analysis]
  * @property {number} [updatedAt]
  */
 
@@ -49,6 +50,7 @@ export function clearSessionCache() {
  *   plan: import('../store/useProfileStore').ActionPlan | null
  *   radar: import('../utils/radarApi').RadarChartData | null
  *   timeline: unknown
+ *   analysis: unknown
  * }} state
  */
 export function persistSessionCacheFromState(state) {
@@ -66,6 +68,7 @@ export function persistSessionCacheFromState(state) {
     plan: state.plan,
     radar: state.radar,
     timeline: state.timeline,
+    analysis: state.analysis,
   })
 }
 

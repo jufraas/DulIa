@@ -59,7 +59,7 @@ export default function PdfDownloadCard({ onDownload, downloading = false }) {
           <div className="mt-1 font-[family-name:var(--font-display)] text-[26px] font-extrabold leading-[1.15] tracking-[-0.02em]">
             Descargar mi plan
             <br />
-            de 30 días
+            completo
           </div>
         </div>
       </div>

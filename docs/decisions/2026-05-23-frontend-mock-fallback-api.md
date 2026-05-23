@@ -20,7 +20,7 @@ Fallbacks en `frontend/src/services/api.js` y módulos auxiliares. Desde 2026-05
 | `parseCvPdf()` | `mockCvPrefill.js` | ✅ |
 | `postCoachChat()` | `mockCoachChat.js` | ✅ |
 | `postProfileAnalyze()` | `buildMockAnalysisFromProfile` | ✅ |
-| `postActionPlan()` | `buildMockPlanFromProfile` | ✅ |
+| `postActionPlan()` | `buildMockPlanFromProfile` (nombre, ciudad, 1 curso/habilidad) | ✅ |
 | `getRecommendedJobs()` | `buildMockJobsFromProfile` | ✅ |
 | `getMarketDashboard()` | `buildMockMarketFromProfile` | ✅ |
 | `getRadarData()` | `buildMockRadarFromProfile` | ✅ |
