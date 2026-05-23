@@ -4,11 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-<<<<<<< Updated upstream
-2026-05-23 — Estructura del repositorio inicializada.
-=======
-2026-05-23 — Onboarding + pantalla de resultados implementados en frontend.
->>>>>>> Stashed changes
+2026-05-23 — PDF de resultados implementado en frontend (jsPDF).
 
 ## Estado por módulo
 
@@ -16,18 +12,12 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Estructura creada, primer commit hecho |
 | Backend (FastAPI) | 🔲 No iniciado | — |
-<<<<<<< Updated upstream
-| Frontend (React+Vite) | 🔲 No iniciado | — |
-=======
-| Frontend (React+Vite) | 🚧 En progreso | Landing + onboarding + resultados (mock); falta PDF |
->>>>>>> Stashed changes
+| Frontend (React+Vite) | 🚧 En progreso | Flujo demo completo con mock; falta formulario ampliado y deploy |
 | Pipeline (scrapers) | 🔲 No iniciado | — |
 | Integración Gemini | 🔲 No iniciado | — |
 | Base de datos | 🔲 No definida | Ver SCHEMA.md |
 | Deploy | 🔲 No iniciado | — |
 
-<<<<<<< Updated upstream
-=======
 ## Frontend — avance detallado
 
 | Pantalla / pieza | Estado |
@@ -38,9 +28,10 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Onboarding (formulario perfil) | ✅ |
 | Pantalla de resultados | ✅ |
 | Integración Axios → backend (fallback mock) | ✅ |
-| Descarga PDF (jsPDF) | 🔲 |
+| Descarga PDF (jsPDF) | ✅ |
+| Formulario ampliado (wizard 3 pasos) | ✅ |
+| Deploy producción | 🔲 |
 
->>>>>>> Stashed changes
 ## Leyenda
 
 | Símbolo | Significado |
@@ -52,13 +43,5 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Próximos pasos inmediatos
 
-<<<<<<< Updated upstream
-1. Definir schema de BD → actualizar SCHEMA.md
-2. Definir contrato de endpoints → actualizar ENDPOINTS.md
-3. Cada módulo arranca su setup inicial (ver README.md)
-=======
-1. Frontend: botón descargar PDF en resultados
-2. Backend: implementar `POST /profile` con mismo contrato que ENDPOINTS.md
-3. Definir schema de BD → actualizar SCHEMA.md
-4. Backend: arrancar FastAPI con `/health`
->>>>>>> Stashed changes
+1. Frontend: commit en rama `FRONT` + deploy (Vercel/Netlify)
+2. Backend: implementar `POST /profile` con contrato en ENDPOINTS.md

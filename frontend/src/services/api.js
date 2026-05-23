@@ -8,13 +8,7 @@ const api = axios.create({
 })
 
 /**
- * @param {{
- *   name: string,
- *   city: string,
- *   education: string,
- *   skills: string,
- *   interests: string,
- * }} profile
+ * @param {import('../store/useProfileStore').ProfileForm} profile
  */
 export async function submitProfile(profile) {
   try {

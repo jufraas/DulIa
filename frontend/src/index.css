@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@source "../index.html";
+@source "./**/*.{js,jsx}";
+
 html {
   scroll-behavior: smooth;
 }
@@ -9,4 +12,9 @@ body {
   background: #020617;
   color: white;
   -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
 }

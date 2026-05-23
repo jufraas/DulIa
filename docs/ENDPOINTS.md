@@ -11,8 +11,6 @@ https://<dominio>/api       ← producción (por definir)
 
 ## Endpoints previstos
 
-_Llenar cuando backend y frontend acuerden el contrato._
-
 | Método | Ruta | Descripción | Estado |
 |--------|------|-------------|--------|
 | GET | `/health` | Health check del servidor | 🔲 |
@@ -26,19 +24,28 @@ _Llenar cuando backend y frontend acuerden el contrato._
 - Errores siguen el formato: `{ "detail": "mensaje de error" }`.
 - Autenticación: por definir (probablemente sin auth en el hackathon).
 
-<<<<<<< Updated upstream
-=======
 ## Cuerpo de `POST /profile` (borrador frontend)
 
-> Implementado en `frontend/src/pages/OnboardingPage.jsx`. Backend debe confirmar o ajustar.
+> Implementado en `frontend/src/pages/OnboardingPage.jsx` (wizard 3 pasos). Backend debe confirmar o ajustar.
 
 ```json
 {
   "name": "María González",
   "city": "Barranquilla",
+  "age_range": "21-25",
+  "current_situation": "recien_egresado",
+  "education_level": "universitario",
   "education": "Comunicación social",
+  "has_experience": false,
+  "experience_summary": "",
   "skills": "Canva, edición de video, redacción",
-  "interests": "Marketing digital, contenido para redes"
+  "soft_skills": "comunicación, creatividad",
+  "interests": "Marketing digital, contenido para redes",
+  "work_mode": "hibrido",
+  "opportunity_type": "empleo",
+  "availability": "inmediata",
+  "tools": "Canva, CapCut",
+  "portfolio_url": "https://linkedin.com/in/ejemplo"
 }
 ```
 
@@ -62,7 +69,6 @@ _Llenar cuando backend y frontend acuerden el contrato._
 }
 ```
 
->>>>>>> Stashed changes
 ---
 
 _Actualizar este archivo cuando backend confirme el contrato._

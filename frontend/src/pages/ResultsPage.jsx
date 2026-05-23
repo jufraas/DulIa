@@ -1,14 +1,27 @@
+import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { ArrowLeft, Briefcase, Map, Sparkles, Target } from 'lucide-react'
+import { ArrowLeft, Briefcase, Download, Map, Sparkles } from 'lucide-react'
+import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { useProfileStore } from '../store/useProfileStore'
 
 export default function ResultsPage() {
   const result = useProfileStore((s) => s.result)
   const profile = useProfileStore((s) => s.profile)
+  const [downloading, setDownloading] = useState(false)
 
   if (!result) {
     return <Navigate to="/comenzar" replace />
+  }
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true)
+    try {
+      const { generateAnalysisPdf } = await import('../utils/generateAnalysisPdf')
+      generateAnalysisPdf({ profile, result })
+    } finally {
+      setDownloading(false)
+    }
   }
 
   return (
@@ -97,17 +110,27 @@ export default function ResultsPage() {
               </ol>
             </article>
 
-            <div className="rounded-2xl border border-dashed border-white/15 p-5 text-center">
-              <Target className="mx-auto h-6 w-6 text-slate-500" aria-hidden />
-              <p className="mt-2 text-sm text-slate-400">
-                Descarga en PDF — próximo paso del MVP
+            <div className="rounded-2xl border border-cyan-500/20 bg-slate-900/50 p-5 text-center sm:p-6">
+              <Download className="mx-auto h-6 w-6 text-cyan-400" aria-hidden />
+              <p className="mt-2 text-sm text-slate-300">
+                Llévate tu plan en PDF y compártelo o imprímelo.
               </p>
-              <Link
-                to="/"
-                className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-white/15 px-5 text-sm font-medium text-white transition hover:bg-white/5"
-              >
-                Volver al inicio
-              </Link>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <Button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={downloading}
+                  className="w-full sm:w-auto"
+                >
+                  {downloading ? 'Generando PDF…' : 'Descargar mi plan'}
+                </Button>
+                <Link
+                  to="/"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/15 px-6 text-base font-semibold text-white transition hover:bg-white/5 sm:w-auto"
+                >
+                  Volver al inicio
+                </Link>
+              </div>
             </div>
           </div>
         </Container>
