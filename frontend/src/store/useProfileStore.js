@@ -70,6 +70,7 @@ import {
  * @property {number} score_compatibilidad
  * @property {string[]} [habilidades_match]
  * @property {string[]} [habilidades_faltantes]
+ * @property {string|null} [url]
  */
 
 /**
