@@ -1,0 +1,210 @@
+/* ===========================================================
+   DulIA — Color & Type Tokens
+   Dark-first system. Purple/violet gradients + magenta CTAs.
+   =========================================================== */
+
+:root {
+  /* ---------- BRAND COLORS ---------- */
+
+  /* Surface — deep blacks */
+  --bg-0:        #0D0D0D;   /* page */
+  --bg-1:        #131319;   /* raised surface */
+  --bg-2:        #1A1A24;   /* card */
+  --bg-3:        #22222F;   /* hover / pressed surface */
+
+  /* Purple/violet brand ramp */
+  --violet-100:  #EDE9FE;
+  --violet-200:  #DDD6FE;
+  --violet-300:  #C4B5FD;
+  --violet-400:  #C084FC;   /* gradient end */
+  --violet-500:  #A855F7;   /* gradient mid */
+  --violet-600:  #7C3AED;   /* gradient start / primary */
+  --violet-700:  #6D28D9;
+  --violet-800:  #4C1D95;
+  --violet-900:  #2E1065;
+
+  /* Magenta — CTA spark */
+  --magenta-300: #F9A8D4;
+  --magenta-400: #F472B6;
+  --magenta-500: #EC4899;   /* primary CTA */
+  --magenta-600: #DB2777;
+  --magenta-700: #BE185D;
+
+  /* Semantic */
+  --success:     #34D399;
+  --warning:     #FBBF24;
+  --danger:      #F87171;
+  --info:        #60A5FA;
+
+  /* Score ring stops (0→100) */
+  --score-low:   #F87171;
+  --score-mid:   #FBBF24;
+  --score-high:  #34D399;
+
+  /* ---------- TEXT ---------- */
+  --fg-1:        #FAFAFC;   /* primary text */
+  --fg-2:        #C9C9D6;   /* secondary text */
+  --fg-3:        #8A8A9B;   /* tertiary / muted */
+  --fg-4:        #5A5A6B;   /* placeholder / disabled */
+  --fg-on-cta:   #FFFFFF;
+
+  /* ---------- BORDERS ---------- */
+  --border-1:    rgba(255,255,255,0.06);   /* subtle dividers */
+  --border-2:    rgba(255,255,255,0.10);   /* card borders */
+  --border-glow: rgba(168,85,247,0.35);    /* signature purple glow border */
+  --border-focus: rgba(236,72,153,0.65);
+
+  /* ---------- GRADIENTS ---------- */
+  --grad-brand:    linear-gradient(135deg, #7C3AED 0%, #A855F7 50%, #C084FC 100%);
+  --grad-brand-h:  linear-gradient(90deg,  #7C3AED 0%, #A855F7 50%, #C084FC 100%);
+  --grad-cta:      linear-gradient(135deg, #EC4899 0%, #A855F7 100%);
+  --grad-cta-hot:  linear-gradient(135deg, #F472B6 0%, #C084FC 100%);
+  --grad-bg-blob:  radial-gradient(circle at 20% 0%, rgba(124,58,237,0.25) 0%, transparent 55%),
+                   radial-gradient(circle at 80% 100%, rgba(236,72,153,0.18) 0%, transparent 55%);
+  --grad-card:     linear-gradient(180deg, rgba(168,85,247,0.06) 0%, rgba(168,85,247,0.00) 100%);
+  --grad-text:     linear-gradient(90deg, #C084FC 0%, #EC4899 100%);
+
+  /* ---------- SHADOWS / GLOWS ---------- */
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md:    0 6px 18px rgba(0,0,0,0.45);
+  --shadow-lg:    0 22px 60px rgba(0,0,0,0.55);
+  --glow-violet:  0 0 0 1px rgba(168,85,247,0.20), 0 8px 32px rgba(124,58,237,0.18);
+  --glow-violet-strong: 0 0 0 1px rgba(168,85,247,0.45), 0 14px 44px rgba(124,58,237,0.35);
+  --glow-magenta: 0 0 0 1px rgba(236,72,153,0.30), 0 10px 30px rgba(236,72,153,0.30);
+  --glow-cta:     0 10px 28px rgba(236,72,153,0.40), 0 4px 12px rgba(168,85,247,0.30);
+
+  /* ---------- RADII ---------- */
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  20px;   /* default card */
+  --r-xl:  24px;   /* hero card */
+  --r-2xl: 32px;
+  --r-pill: 999px;
+
+  /* ---------- SPACING ---------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+
+  /* ---------- MOTION ---------- */
+  --ease-out:   cubic-bezier(0.16, 1, 0.30, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:   140ms;
+  --dur-base:   220ms;
+  --dur-slow:   420ms;
+
+  /* ---------- TYPE ---------- */
+  --font-display: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    "Inter", "Poppins", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --fs-display: clamp(48px, 6vw, 84px);
+  --fs-h1:      clamp(36px, 4vw, 56px);
+  --fs-h2:      clamp(28px, 3vw, 40px);
+  --fs-h3:      24px;
+  --fs-h4:      20px;
+  --fs-body-lg: 18px;
+  --fs-body:    16px;
+  --fs-sm:      14px;
+  --fs-xs:      12px;
+
+  --lh-tight:   1.08;
+  --lh-snug:    1.25;
+  --lh-body:    1.55;
+  --lh-loose:   1.7;
+
+  --ls-tight:   -0.03em;
+  --ls-snug:    -0.015em;
+  --ls-normal:  0;
+  --ls-wide:    0.02em;
+  --ls-eyebrow: 0.14em;
+}
+
+/* ===========================================================
+   SEMANTIC TYPE PRESETS
+   Use these as element selectors OR utility classes.
+   =========================================================== */
+
+html, body {
+  background: var(--bg-0);
+  color: var(--fg-1);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.display, h1.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  color: var(--fg-1);
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-snug);
+}
+
+h3, .h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-snug);
+}
+
+h4, .h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-snug);
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--violet-300);
+}
+
+.body-lg, p.lg { font-size: var(--fs-body-lg); line-height: var(--lh-body); color: var(--fg-2); }
+.body         { font-size: var(--fs-body);    line-height: var(--lh-body); color: var(--fg-2); }
+.small        { font-size: var(--fs-sm);      line-height: var(--lh-body); color: var(--fg-3); }
+.caption      { font-size: var(--fs-xs);      line-height: var(--lh-body); color: var(--fg-3); letter-spacing: var(--ls-wide); }
+
+.text-gradient {
+  background: var(--grad-text);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.mono { font-family: var(--font-mono); }

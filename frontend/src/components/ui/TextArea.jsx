@@ -6,18 +6,18 @@ export default function TextArea({ label, error, hint, id, className = '', ...pr
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className="text-sm font-medium text-slate-200">
+      <label htmlFor={inputId} className="label-dl">
         {label}
       </label>
       <textarea
         id={inputId}
-        className={`min-h-24 resize-y rounded-xl border bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 ${
-          error ? 'border-red-500/60' : 'border-white/10'
-        } ${className}`}
+        className={`field-dl min-h-24 resize-y ${error ? 'border-[color:var(--danger)]' : ''} ${className}`}
         {...props}
       />
-      {hint && !error && <p className="text-xs text-slate-500">{hint}</p>}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {hint && !error && (
+        <p className="text-xs text-[color:var(--fg-4)]">{hint}</p>
+      )}
+      {error && <p className="text-xs text-[color:var(--danger)]">{error}</p>}
     </div>
   )
 }

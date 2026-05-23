@@ -1,37 +1,48 @@
 /**
- * @param {import('react').ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary', loading?: boolean }} props
+ * @param {import('react').ButtonHTMLAttributes<HTMLButtonElement> & {
+ *   variant?: 'primary' | 'secondary' | 'ghost',
+ *   size?: 'sm' | 'md' | 'lg',
+ *   loading?: boolean,
+ *   iconLeft?: import('react').ReactNode,
+ *   iconRight?: import('react').ReactNode,
+ * }} props
  */
 export default function Button({
   variant = 'primary',
+  size = 'md',
   loading = false,
+  iconLeft,
+  iconRight,
   children,
   className = '',
   disabled,
+  type = 'button',
   ...props
 }) {
-  const base =
-    'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 text-base font-semibold transition disabled:cursor-not-allowed'
-  const variants = {
-    primary:
-      'bg-cyan-500 text-slate-900 hover:bg-cyan-400 disabled:bg-cyan-500/50 disabled:text-slate-900/70',
-    secondary:
-      'border border-white/15 text-white hover:bg-white/5 disabled:opacity-50',
-  }
+  const sizeClass = size !== 'md' ? ` ${size}` : ''
+  const variantClass = `btn btn-${variant}${sizeClass}`
 
   return (
     <button
-      type="button"
-      className={`${base} ${variants[variant]} ${className}`}
+      type={type}
+      className={`${variantClass} ${className}`.trim()}
       disabled={disabled || loading}
       {...props}
     >
       {loading ? (
         <>
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900/30 border-t-slate-900" />
+          <span
+            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+            aria-hidden
+          />
           Analizando...
         </>
       ) : (
-        children
+        <>
+          {iconLeft}
+          {children}
+          {iconRight}
+        </>
       )}
     </button>
   )

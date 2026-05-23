@@ -1,4 +1,5 @@
 import { Compass, Layers, MapPinOff } from 'lucide-react'
+import IconBox from '../brand/IconBox'
 import Section from '../ui/Section'
 
 const problems = [
@@ -28,19 +29,17 @@ export default function ProblemSection() {
       id="problema"
       title="El problema que resolvemos"
       subtitle="En Colombia, millones de jóvenes buscan empleo sin orientación personalizada ni datos locales accionables."
-      className="bg-slate-900/50"
     >
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {problems.map(({ icon: Icon, title, description }) => (
-          <li
-            key={title}
-            className="rounded-2xl border border-white/10 bg-slate-800/50 p-6 transition hover:border-cyan-500/30"
-          >
-            <span className="mb-4 inline-flex rounded-xl bg-cyan-500/15 p-3 text-cyan-400">
-              <Icon className="h-6 w-6" aria-hidden />
-            </span>
-            <h3 className="text-lg font-semibold text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {problems.map(({ icon: Icon, title, description }, i) => (
+          <li key={title} className="card-dl hoverable" style={{ padding: 28 }}>
+            <IconBox variant={i === 1 ? 'magenta' : 'violet'}>
+              <Icon className="h-6 w-6 text-white" strokeWidth={2} aria-hidden />
+            </IconBox>
+            <h3 className="mt-5 text-[22px] font-bold tracking-[-0.015em] text-[color:var(--fg-1)]">
+              {title}
+            </h3>
+            <p className="mt-2 text-[15px] leading-relaxed text-[color:var(--fg-3)]">
               {description}
             </p>
           </li>

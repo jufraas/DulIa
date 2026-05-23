@@ -21,25 +21,25 @@ export default function Select({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={selectId} className="text-sm font-medium text-slate-200">
+      <label htmlFor={selectId} className="label-dl">
         {label}
       </label>
       <select
         id={selectId}
-        className={`min-h-11 rounded-xl border bg-slate-900/80 px-4 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 ${
-          error ? 'border-red-500/60' : 'border-white/10'
-        } ${!props.value ? 'text-slate-500' : ''} ${className}`}
+        className={`field-dl appearance-none ${error ? 'border-[color:var(--danger)]' : ''} ${!props.value ? 'text-[color:var(--fg-4)]' : ''} ${className}`}
         {...props}
       >
         <option value="">{placeholder}</option>
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} className="text-slate-900">
+          <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}
       </select>
-      {hint && !error && <p className="text-xs text-slate-500">{hint}</p>}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {hint && !error && (
+        <p className="text-xs text-[color:var(--fg-4)]">{hint}</p>
+      )}
+      {error && <p className="text-xs text-[color:var(--danger)]">{error}</p>}
     </div>
   )
 }

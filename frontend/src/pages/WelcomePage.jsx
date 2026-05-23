@@ -1,3 +1,4 @@
+import PageShell from '../components/layout/PageShell'
 import SiteFooter from '../components/layout/SiteFooter'
 import SiteHeader from '../components/layout/SiteHeader'
 import AudienceSection from '../components/welcome/AudienceSection'
@@ -9,9 +10,9 @@ import ProblemSection from '../components/welcome/ProblemSection'
 
 export default function WelcomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-white">
+    <PageShell>
       <SiteHeader />
-      <main className="flex-1">
+      <main className="relative z-[1] flex-1">
         <HeroSection />
         <ProblemSection />
         <HowItWorksSection />
@@ -20,6 +21,6 @@ export default function WelcomePage() {
         <CTABanner />
       </main>
       <SiteFooter />
-    </div>
+    </PageShell>
   )
 }

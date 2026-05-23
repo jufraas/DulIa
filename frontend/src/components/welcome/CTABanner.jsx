@@ -1,30 +1,37 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import Button from '../ui/Button'
 import Container from '../ui/Container'
 
 export default function CTABanner() {
   return (
-    <section id="comenzar" className="py-16 sm:py-20">
+    <section id="comenzar" className="relative z-[1] py-16 sm:py-20">
       <Container>
-        <div className="relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/20 via-slate-800 to-slate-900 px-6 py-12 text-center sm:px-12">
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(34,211,238,0.15),_transparent_50%)]"
-            aria-hidden
-          />
-          <div className="relative">
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              ¿Listo para descubrir tu ruta?
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-slate-300">
-              En el siguiente paso completarás tu perfil y recibirás
-              recomendaciones personalizadas con oportunidades reales.
-            </p>
-            <Link
-              to="/comenzar"
-              className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-cyan-500 px-8 text-base font-semibold text-slate-900 transition hover:bg-cyan-400"
-            >
-              Empezar mi análisis
-              <ArrowRight className="h-5 w-5" aria-hidden />
+        <div
+          className="card-dl px-6 py-12 text-center sm:px-14 sm:py-14"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(236,72,153,0.10) 100%)',
+            borderColor: 'rgba(168,85,247,0.45)',
+          }}
+        >
+          <h2
+            className="m-0 font-[family-name:var(--font-display)] font-extrabold leading-[1.15] tracking-[-0.02em] text-[color:var(--fg-1)]"
+            style={{ fontSize: 'clamp(28px, 4vw, 36px)' }}
+          >
+            ¿Listo? Tres pasos. Dos minutos.
+            <br />
+            <span className="gradient-text">Tu plan está esperando.</span>
+          </h2>
+          <div className="mt-8">
+            <Link to="/comenzar">
+              <Button
+                variant="primary"
+                size="lg"
+                iconRight={<ArrowRight className="h-5 w-5" aria-hidden />}
+              >
+                Descubre tu potencial
+              </Button>
             </Link>
           </div>
         </div>
