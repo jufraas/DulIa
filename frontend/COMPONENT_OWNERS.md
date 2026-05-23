@@ -18,6 +18,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/services/mockCoachChat.js` | Fallback coach offline |
 | `src/services/mockPlan.js` | Fallback plan 30d offline |
 | `src/utils/planDisplay.js` | Normaliza plan API → UI |
+| `src/utils/radarMatchData.js` | Perfil + jobs → ejes del `RadarMatch` |
 | `src/store/useProfileStore.js` | Estado global + persistencia cache |
 | `src/utils/sessionCache.js` | Lectura/escritura localStorage sesión |
 
@@ -27,10 +28,11 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------------|
 | `src/components/welcome/*` | Pantalla 01 — Landing (kit ReBrand): splash, hero, features |
 | `src/components/motion/RevealOnScroll.jsx` | Framer Motion — scroll reveal y entrada al montar |
-| `src/components/layout/LandingFooter.jsx` | Footer landing |
+| `src/components/layout/LandingFooter.jsx` | Footer landing (copyright) |
+| `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Pantalla 03 — Resultados (ScoreCard, ThirtyDayPlan, PdfDownloadCard, …) |
+| `src/components/results/*` | Pantalla 03 — Resultados (`RadarMatch`, `ThirtyDayPlan`, …) |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 
@@ -40,7 +42,7 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------|
 | `src/pages/WelcomePage.jsx` | Landing — splash + fases (`splash`/`exit`/`done`) |
 | `src/pages/OnboardingPage.jsx` | Wizard |
-| `src/pages/ResultsPage.jsx` | Resultados |
+| `src/pages/ResultsPage.jsx` | Resultados — incluye `RadarMatch` |
 | `src/App.jsx` | Rutas (`/sobre` = Migue) |
 | `src/index.css` / `src/styles/*` | Design system (`dulia-tokens.css`, `dulia-kit.css`) |
 | `ReBrand/` | Referencia visual — no editar para producción |
@@ -50,7 +52,9 @@ Estructura para trabajar en paralelo sin conflictos.
 Contenido movido al kit ReBrand o a `/sobre`; no importados en la app:
 
 - `src/components/welcome/ProblemSection.jsx`, `AudienceSection.jsx`, `BusinessModelSection.jsx`
-- `src/components/results/ResultsHeader.jsx`, `ResultsHeroTitle.jsx`, `ResultsBottomCta.jsx`, `OpportunitiesList.jsx`, `MarketThermometer.jsx`, `UserProfileCard.jsx`
+- `src/components/results/ResultsHeader.jsx`, `ResultsHeroTitle.jsx`, `ResultsBottomCta.jsx`, `OpportunitiesList.jsx`, `UserProfileCard.jsx`
+- `MarketThermometer.jsx` (componente existe; montaje en `/resultados` pendiente)
+- `src/pages/Landing.jsx`, `Results.jsx`, `Vacancies.jsx`, `Wizard.jsx` — prototipos kit (`window.DK`); la app usa `*Page.jsx`
 
 ## Rutas del kit
 

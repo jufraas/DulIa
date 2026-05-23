@@ -70,10 +70,10 @@ export async function parseCvPdf(file) {
     return data
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 400) {
-      throw new Error(String(err.response.data?.detail ?? 'Archivo inválido'))
+      throw new Error(String(err.response.data?.detail ?? 'Archivo inválido'), { cause: err })
     }
     if (axios.isAxiosError(err) && err.response?.status === 422) {
-      throw new Error(String(err.response.data?.detail ?? 'No pudimos leer el PDF'))
+      throw new Error(String(err.response.data?.detail ?? 'No pudimos leer el PDF'), { cause: err })
     }
     if (import.meta.env.DEV) {
       console.warn('[DulIA] parseCvPdf: usando prefill mock local', err)

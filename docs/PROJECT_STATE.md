@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Landing con splash + scroll animations (Framer Motion), coach API, plan 30d, ESLint, roadmap post-MVP.
+2026-05-23 — RadarMatch en resultados, footer copyright, ESLint limpio, tipos kit prototipo.
 
 ## Estado por módulo
 
@@ -27,7 +27,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/` | Landing (splash + hero + features scroll reveal) | Joufra / Migue | ✅ |
 | `/sobre` | Sobre DulIA | Migue | ✅ |
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
-| `/resultados` | Score, perfil, top jobs, plan 30d, PDF | Joufra | 🚧 falta termómetro + chat UI |
+| `/resultados` | Score, perfil, jobs, plan 30d, **RadarMatch**, PDF | Joufra / Migue | 🚧 falta termómetro + chat UI |
 | `/vacantes` | Panel semáforo (verde/amarillo/rojo) | Joufra | ✅ |
 
 ### Piezas transversales (Migue — API / sesión)
@@ -36,6 +36,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |-------|--------|-------|
 | Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
+| `RadarMatch` en `/resultados` | ✅ | Joufra (UI) + `radarMatchData.js` (perfil/jobs); ejes estimados |
+| Footers — copyright | ✅ | `© {year} DulIA` en `LandingFooter` y `SiteFooter` |
 | Integración Axios → API | ✅ | `services/api.js` + fallbacks mock |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
@@ -45,7 +47,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `postCoachChat()` | ✅ API | UI burbuja → Joufra |
 | `getPlan()` | ✅ front | Backend Carlos pendiente |
 | Descarga PDF (jsPDF) | ✅ | Perfil + jobs + mercado (plan en PDF pendiente) |
-| ESLint | ✅ | Ignora `.vite/**`, `ReBrand/**`, `node_modules/**` |
+| ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
 
 ### Pendiente UI (Joufra — pre-pitch)
@@ -56,6 +58,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Burbuja chat coach | Alta | Usar `postCoachChat()` de `api.js` |
 | Copy con datos reales | Media | `total_vacantes_activas` vs “15.000” hardcode |
 | Plan 30d en PDF | Baja | `generateAnalysisPdf.js` |
+| RadarMatch en PDF | Baja | Gráfica solo en UI por ahora |
 | Links `url` en vacantes | Baja | Campo en API |
 
 Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).

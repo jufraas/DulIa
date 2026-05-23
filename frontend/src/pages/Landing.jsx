@@ -1,5 +1,5 @@
 /* === DulIA Landing === */
-const { Logo, Button, Header, Chip, IconBox, Icon } = window.DK;
+const { Logo, Button, Header, IconBox, Icon, ScoreRing } = window.DK;
 
 function Landing({ onStart, onVacancies }) {
   return (
@@ -130,9 +130,6 @@ function Landing({ onStart, onVacancies }) {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <Logo height={22}/>
-            <span style={{ color: "var(--fg-3)", fontSize: 13 }}>
-              Hecho con <span style={{color:"var(--magenta-400)"}}>♥</span> en Barranquilla · 2026
-            </span>
           </div>
           <div style={{ color: "var(--fg-3)", fontSize: 13 }}>
             krl0s · Migue · Jose · Jufra
@@ -220,7 +217,7 @@ function HeroPreview() {
 }
 
 function ScoreRingDemo() {
-  return <window.DK.ScoreRing value={78} size={200} stroke={14}/>;
+  return <ScoreRing value={78} size={200} stroke={14} />;
 }
 
 function MiniStat({ label, value, tone }) {

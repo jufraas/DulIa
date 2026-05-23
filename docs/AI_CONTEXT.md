@@ -36,6 +36,7 @@ POST /profile ──► GET jobs + market + plan (paralelo)
      │
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
+     │  (score, plan 30d, Match Radar)
      │                              │
      └── Coach (UI Joufra) ─────────┘ postCoachChat()
      ▲
@@ -47,6 +48,7 @@ Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
 - Borrador del wizard en `dulia_wizard_draft` si refresca en `/comenzar`.
 - UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
 - **Landing motion:** `framer-motion` + `RevealOnScroll` (splash en `WelcomePage`, hero `trigger="mount"`, secciones `trigger="scroll"`).
+- **Resultados:** `RadarMatch.jsx` montado; datos desde store vía `radarMatchData.js` (ejes estimados hasta endpoint dedicado).
 
 ## Rutas y dueños frontend
 

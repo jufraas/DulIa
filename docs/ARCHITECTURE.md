@@ -33,7 +33,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 | `/` | Landing — splash, pitch, features con scroll reveal, CTA |
 | `/sobre` | Sobre DulIA — problema, audiencia, modelo, equipo |
 | `/comenzar` | Wizard onboarding (3 pasos) |
-| `/resultados` | Score, resumen perfil, preview vacantes, plan 30d, PDF |
+| `/resultados` | Score, resumen perfil, preview vacantes, plan 30d, **Match Radar**, PDF |
 | `/vacantes` | Panel de vacantes con semáforo de confianza |
 
 **Flujo de datos:**
@@ -83,7 +83,7 @@ backend/
 2. Frontend envía `POST /api/profile` con `session_id`.
 3. Backend estructura perfil (Gemini) y guarda en `profiles`.
 4. Frontend pide jobs + market + plan en paralelo.
-5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d (store).
+5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d, **Match Radar** (store).
 6. **Vacantes** (`/vacantes`): listado completo con semáforo.
 7. Usuario descarga **PDF**.
 8. (Opcional) **Coach** → `postCoachChat()` / `POST /api/coach/chat` (UI pendiente).
@@ -107,7 +107,7 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | session_id | Genera en localStorage | Clave de persistencia anónima |
 | Cache sesión | `sessionCache.js` (localStorage) | — |
 | Rehidratación | `sessionHydration.js` al boot | `GET /profile/{session_id}` |
-| Matching vacantes | Muestra scores y semáforo | Calcula `score_compatibilidad` |
+| Matching vacantes | Scores, semáforo y **RadarMatch** (4 ejes estimados desde perfil/jobs) | Calcula `score_compatibilidad` |
 | Termómetro mercado | Datos en store; `MarketThermometer.jsx` no montado | Agrega sobre `jobs` |
 | Plan 30 días | `ThirtyDayPlan` lee store (`getPlan` + mock) | `GET /plan/{session_id}` pendiente |
 | Coach / chat | `postCoachChat()` en api.js; UI burbuja pendiente | Gemini + perfil |
@@ -124,7 +124,7 @@ frontend/src/
 ├── services/        # api.js, mock*.js, sessionHydration.js
 ├── store/           # useProfileStore.js (profile, jobs, market, plan)
 ├── styles/          # dulia-tokens.css, dulia-kit.css
-└── utils/           # session, sessionCache, planDisplay, buildProfilePayload, generateAnalysisPdf
+└── utils/           # session, sessionCache, planDisplay, radarMatchData, buildProfilePayload, generateAnalysisPdf
 ```
 
 ## Roadmap post-MVP
@@ -144,5 +144,5 @@ Spinoff emprendimiento (no mezclar en MVP): [EXTRA_IDEAS/ideallamativamacondo.md
 - Termómetro de mercado no montado en `/resultados` (solo PDF).
 - Burbuja del coach sin UI (API lista).
 - `GET /plan` backend pendiente (front usa mock personalizado).
-- Plan 30d no incluido en PDF aún.
+- Plan 30d y **RadarMatch** no incluidos en PDF aún.
 - Deploy producción pendiente.

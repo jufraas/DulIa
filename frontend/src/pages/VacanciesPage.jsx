@@ -24,16 +24,19 @@ export default function VacanciesPage() {
   const [loading, setLoading] = useState(!jobs.length)
 
   useEffect(() => {
-    if (jobs.length) return
+    if (jobs.length) return undefined
     let cancelled = false
-    setLoading(true)
-    getRecommendedJobs(getOrCreateSessionId())
-      .then((data) => {
+
+    ;(async () => {
+      setLoading(true)
+      try {
+        const data = await getRecommendedJobs(getOrCreateSessionId())
         if (!cancelled) setJobs(data)
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false)
-      })
+      }
+    })()
+
     return () => {
       cancelled = true
     }

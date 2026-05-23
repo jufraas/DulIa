@@ -93,11 +93,7 @@ export default function SiteFooter() {
           style={{ borderColor: 'rgba(168,85,247,0.12)' }}
         >
           <p className="caption">© {year} DulIA. Todos los derechos reservados.</p>
-          <p className="caption">
-            Hecho con{' '}
-            <span style={{ color: 'var(--magenta-400)' }}>♥</span> en Barranquilla
-            · krl0s · Migue · Jose · Joufra
-          </p>
+          <p className="caption">krl0s · Migue · Jose · Joufra</p>
         </div>
       </Container>
     </footer>

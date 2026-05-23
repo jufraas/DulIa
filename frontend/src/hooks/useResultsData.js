@@ -14,28 +14,28 @@ export function useResultsData() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!savedProfile || (jobs.length > 0 && market && plan)) return
+    if (!savedProfile || (jobs.length > 0 && market && plan)) return undefined
 
     let cancelled = false
-    setLoading(true)
-
     const sessionId = getOrCreateSessionId()
     const city = savedProfile.ciudad
 
-    Promise.all([
-      jobs.length ? Promise.resolve(jobs) : getRecommendedJobs(sessionId),
-      market ? Promise.resolve(market) : getMarketDashboard({ city }),
-      plan ? Promise.resolve(plan) : getPlan(sessionId, savedProfile),
-    ])
-      .then(([nextJobs, nextMarket, nextPlan]) => {
+    ;(async () => {
+      setLoading(true)
+      try {
+        const [nextJobs, nextMarket, nextPlan] = await Promise.all([
+          jobs.length ? Promise.resolve(jobs) : getRecommendedJobs(sessionId),
+          market ? Promise.resolve(market) : getMarketDashboard({ city }),
+          plan ? Promise.resolve(plan) : getPlan(sessionId, savedProfile),
+        ])
         if (cancelled) return
         if (!jobs.length) setJobs(nextJobs)
         if (!market) setMarket(nextMarket)
         if (!plan) setPlan(nextPlan)
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false)
-      })
+      }
+    })()
 
     return () => {
       cancelled = true

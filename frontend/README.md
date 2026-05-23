@@ -33,7 +33,7 @@ VITE_API_URL=http://localhost:8000/api
 | `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF opcional |
-| `/resultados` | Resultados | Score, perfil, top jobs, plan 30d, PDF |
+| `/resultados` | Resultados | Score, perfil, vacantes, plan 30d, **Match Radar**, PDF |
 | `/vacantes` | Vacantes | Panel con semáforo verde/amarillo/rojo |
 
 ## Flujo de datos
@@ -73,7 +73,7 @@ src/
 │   ├── sessionHydration.js
 │   └── mock*.js        # fallbacks offline
 ├── store/useProfileStore.js
-├── utils/              # session, sessionCache, planDisplay, …
+├── utils/              # session, sessionCache, planDisplay, radarMatchData, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 
@@ -90,6 +90,15 @@ Referencia de diseño (no producción): `ReBrand/DulIA Design System (1)/`.
 
 Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../docs/decisions/2026-05-23-frontend-landing-animations.md).
 
+## Resultados (`/resultados`)
+
+| Sección | Componente |
+|---------|------------|
+| Score + resumen | `ScoreCard`, `ProfileSummary` |
+| Vacantes + plan | `OpportunitiesPreview`, `ThirtyDayPlan` |
+| Match radar | `RadarMatch.jsx` — perfil vs top 3 vacantes (4 ejes); datos vía `utils/radarMatchData.js` |
+| PDF | `generateAnalysisPdf.js` (sin radar ni plan 30d aún) |
+
 ## División de trabajo
 
 Ver [COMPONENT_OWNERS.md](./COMPONENT_OWNERS.md).
@@ -104,8 +113,10 @@ Post-MVP (login, timeline plan, pitch): [../docs/EXTRA_IDEAS/post-mvp-roadmap.md
 
 ## ESLint
 
-`eslint.config.js` ignora `dist/`, `.vite/**`, `ReBrand/**` y `node_modules/**`.  
-`npm run lint` analiza principalmente `src/`. Quedan ~8 avisos reales en código de producción (effects, imports sin usar).
+`eslint.config.js` ignora `dist/`, `.vite/**`, `ReBrand/**`, `node_modules/**` y **prototipos kit** (`src/pages/Landing.jsx`, `Results.jsx`, `Vacancies.jsx`, `Wizard.jsx`, `components/components.jsx`).  
+`npm run lint` pasa en **0 errores** sobre el código de producción (`WelcomePage`, `ResultsPage`, hooks, etc.).
+
+Tipos globales del kit (`window.DK`) en `src/vite-env.d.ts` para los prototipos Joufra.
 
 ## Documentación del proyecto
 

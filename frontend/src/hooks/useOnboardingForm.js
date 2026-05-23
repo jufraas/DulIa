@@ -45,15 +45,20 @@ export function useOnboardingForm() {
   const [cvSuccessMessage, setCvSuccessMessage] = useState('')
 
   useEffect(() => {
-    if (!sessionHydrated || draftRestored || savedProfile) return
+    if (!sessionHydrated || draftRestored || savedProfile) return undefined
 
     const sessionId = getOrCreateSessionId()
     const draft = readWizardDraft(sessionId)
-    if (draft) {
-      setStep(draft.step)
-      setForm(draft.form)
-    }
-    setDraftRestored(true)
+
+    const id = window.requestAnimationFrame(() => {
+      if (draft) {
+        setStep(draft.step)
+        setForm(draft.form)
+      }
+      setDraftRestored(true)
+    })
+
+    return () => window.cancelAnimationFrame(id)
   }, [sessionHydrated, draftRestored, savedProfile])
 
   useEffect(() => {
