@@ -1,17 +1,27 @@
 import { Link } from 'react-router-dom'
-import { AlertTriangle, ArrowRight, Briefcase } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Briefcase, ExternalLink } from 'lucide-react'
 import { formatSalary } from '../../utils/formatters'
+import { useProfileStore } from '../../store/useProfileStore'
 
 /**
  * Top 3 vacantes + link al panel — kit ReBrand Results.jsx → Opportunities
  * @param {{ jobs: import('../../store/useProfileStore').Job[] }} props
  */
 export default function OpportunitiesPreview({ jobs }) {
+  const market = useProfileStore((s) => s.market)
+
   const top = [...jobs]
     .sort((a, b) => (b.score_compatibilidad ?? 0) - (a.score_compatibilidad ?? 0))
     .slice(0, 3)
 
   const redCount = jobs.filter((j) => j.semaforo === 'red').length
+  const marketTotal = market?.total_vacantes_activas
+  const marketLabel =
+    marketTotal != null
+      ? `${marketTotal.toLocaleString('es-CO')} vacantes activas${market.ciudad_filtro ? ` · ${market.ciudad_filtro}` : ''}`
+      : jobs.length > 0
+        ? `${jobs.length} vacantes analizadas para ti`
+        : 'Analizando mercado…'
 
   return (
     <div className="card-dl p-7">
@@ -20,7 +30,7 @@ export default function OpportunitiesPreview({ jobs }) {
           <Briefcase className="h-3.5 w-3.5" aria-hidden />
           Oportunidades para ti
         </div>
-        <span className="text-xs text-[color:var(--fg-3)]">15.000 vacantes analizadas</span>
+        <span className="text-right text-xs text-[color:var(--fg-3)]">{marketLabel}</span>
       </div>
       <h3 className="mb-5 text-[22px] font-bold tracking-[-0.015em] text-[color:var(--fg-1)]">
         {top.length > 0
@@ -31,6 +41,7 @@ export default function OpportunitiesPreview({ jobs }) {
       <div className="flex flex-col gap-3">
         {top.map((job) => {
           const hot = (job.score_compatibilidad ?? 0) >= 90
+          const canApply = job.url && job.semaforo !== 'red'
           return (
             <div
               key={job.id}
@@ -70,6 +81,17 @@ export default function OpportunitiesPreview({ jobs }) {
                     {formatSalary(job.salario_min, job.salario_max)}
                   </strong>
                 </div>
+                {canApply && (
+                  <a
+                    href={job.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--violet-200)] hover:underline"
+                  >
+                    Ver vacante
+                    <ExternalLink className="h-3 w-3" aria-hidden />
+                  </a>
+                )}
               </div>
               <div
                 className="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold"
@@ -112,6 +134,7 @@ export default function OpportunitiesPreview({ jobs }) {
 
       <Link
         to="/vacantes"
+        state={{ returnTo: '/resultados' }}
         className="btn btn-secondary mt-3.5 w-full justify-center"
       >
         Ver el panel completo con semáforo

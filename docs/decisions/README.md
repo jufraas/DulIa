@@ -37,6 +37,7 @@ Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEM
 | 2026-05-23 | [2026-05-23-frontend-zustand-estado-perfil.md](./2026-05-23-frontend-zustand-estado-perfil.md) | Zustand para perfil y resultados |
 | 2026-05-23 | [2026-05-23-frontend-session-rehydration.md](./2026-05-23-frontend-session-rehydration.md) | Cache local + GET profile al refresh |
 | 2026-05-23 | [2026-05-23-frontend-landing-animations.md](./2026-05-23-frontend-landing-animations.md) | Splash + Framer Motion (`RevealOnScroll`) |
+| 2026-05-23 | [2026-05-23-frontend-plan2-ui-sprints-complete.md](./2026-05-23-frontend-plan2-ui-sprints-complete.md) | Sprints 1–3: analyze UI, coach, timeline, PDF |
 | 2026-05-23 | [2026-05-23-frontend-plan2-locations-thermometer.md](./2026-05-23-frontend-plan2-locations-thermometer.md) | Plan 2 API, termómetro UI, mocks bundle |
 | 2026-05-23 | [2026-05-23-frontend-colombia-locations-wizard.md](./2026-05-23-frontend-colombia-locations-wizard.md) | Selects DANE departamento → municipio |
 

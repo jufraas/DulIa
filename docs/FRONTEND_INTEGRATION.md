@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-23 · Plan 2 integrado en frontend + termómetro en UI.
+**Última actualización:** 2026-05-23 · Plan 2 UI completa (Sprints 1–3): analyze, coach, timeline, tabs plan, PDF.
 
 ---
 
@@ -12,15 +12,18 @@
 | Pieza | Estado | Notas |
 |-------|--------|-------|
 | `loadResultsBundle()` | ✅ | Tras wizard y rehidratación |
-| `POST .../analyze` | ✅ | Fallback: `buildMockAnalysisFromProfile` |
-| `POST .../action-plan` | ✅ | `ThirtyDayPlan` ← `fase_30` |
-| `GET .../radar-data` | ✅ | `RadarMatch.jsx` (5 dimensiones) |
-| `GET .../timeline-data` | ✅ API | UI timeline pendiente (datos en store) |
-| `GET market/dashboard` | ✅ | `MarketThermometer` en `/resultados` y `/vacantes` |
-| Fallbacks offline | ✅ | `mockResultsBundle.js` — rellena huecos al perfil |
-| Wizard ubicación | ✅ | 32 deptos / 1.119 municipios (DANE) |
+| `POST .../analyze` | ✅ | Store `analysis` → `ProfileSummary`, PDF |
+| `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
+| `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
+| `GET .../timeline-data` | ✅ | `CareerTimeline` |
+| `GET market/dashboard` | ✅ | Termómetro, copy vacantes, PDF |
+| `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
+| Fallbacks offline | ✅ | `mockResultsBundle.js` |
+| Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
+| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
+| PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 
-Ver decisión: [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](decisions/2026-05-23-frontend-plan2-locations-thermometer.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md).
 
 ---
 
@@ -103,6 +106,8 @@ POST /api/profile/{session_id}/analyze?regenerate=true   ← forzar nuevo
 ```
 
 **UI sugerida:** cards de fortalezas/debilidades; badge con `nivel_preparacion.overall` (0–100).
+
+**Implementado:** `utils/analysisDisplay.js` → `ProfileSummary`, `ScoreCard`, PDF.
 
 ---
 
@@ -252,8 +257,9 @@ const sessionId = localStorage.getItem("dulia_session_id");
 const { jobs, market, plan, radar, timeline, analysis } =
   await loadResultsBundle(sessionId, savedProfile);
 
-// jobs → vacantes · market → MarketThermometer · plan → ThirtyDayPlan
-// radar → RadarMatch · timeline → (UI pendiente)
+// jobs → vacantes · market → MarketThermometer · plan → ThirtyDayPlan (tabs)
+// radar → RadarMatch · timeline → CareerTimeline · analysis → ProfileSummary
+// coach → CoachChatBubble (POST /coach/chat aparte del bundle)
 ```
 
 ---

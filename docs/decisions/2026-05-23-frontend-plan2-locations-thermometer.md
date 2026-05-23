@@ -37,7 +37,7 @@ Parser en `utils/radarApi.js`. Vacantes reales arriba del gráfico (score del ba
 |------|----------------|
 | Jobs | `buildMockJobsFromProfile` — ciudad, match skills, score |
 | Market | `buildMockMarketFromProfile` — ciudad/sector |
-| Plan | `buildMockPlanFromProfile` — nombre, ciudad, skills |
+| Plan | `buildMockPlanFromProfile` — nombre, ciudad, **1 tarea por habilidad** (semana 3) |
 | Radar | `buildMockRadarFromProfile` |
 | Timeline | `buildMockTimelineFromProfile` |
 | Análisis | `buildMockAnalysisFromProfile` |
@@ -60,6 +60,12 @@ Parser en `utils/radarApi.js`. Vacantes reales arriba del gráfico (score del ba
 
 Datos: store `market` o `getMarketDashboard()` al entrar si faltaba.
 
+### 6. Navegación resultados ↔ vacantes
+
+- Desde `/resultados`, **Ver panel completo con semáforo** → `/vacantes` con `state.returnTo = '/resultados'`.
+- Botón **Volver a mi análisis** en `VacanciesPage` (no regresa al landing `/`).
+- Sin perfil en store → redirect a `/comenzar`; rehidratación vía `useSessionHydration`.
+
 ## Archivos clave
 
 | Archivo | Rol |
@@ -74,10 +80,9 @@ Datos: store `market` o `getMarketDashboard()` al entrar si faltaba.
 
 ## Pendiente (no bloquea MVP)
 
-- UI timeline (`timeline` ya en store)
-- Burbuja coach
-- Plan + radar en PDF
-- Tabs plan 60/90 días
+Completado en [2026-05-23-frontend-plan2-ui-sprints-complete.md](./2026-05-23-frontend-plan2-ui-sprints-complete.md): timeline UI, coach, PDF, tabs 60/90.
+
+Queda: deploy prod, pipeline jobs reales, limpieza prototipos kit huérfanos.
 
 ## Referencias
 

@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — FRONT: Plan 2 integrado (action-plan, radar API), termómetro en UI, ubicaciones DANE (1.119 municipios), mocks personalizados offline.
+2026-05-23 — FRONT MVP: Sprints 1–3 (Plan 2 UI + PDF); pendiente deploy y pipeline jobs reales.
 
 ## Estado por módulo
 
@@ -12,7 +12,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
 | Backend (FastAPI) | 🚧 Fases 0–10 + Plan 2 F3 | `parse-cv`, coach, analyze/action-plan, radar/timeline API; deploy pendiente |
-| Frontend (React+Vite) | 🚧 En progreso | Kit ReBrand (5 rutas), RadarMatch UI, rehidratación; pulido Joufra pendiente |
+| Frontend (React+Vite) | ✅ MVP UI | Plan 2 completo en pantalla; deploy pendiente |
 | Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
 | Integración Gemini | ✅ | Profile, coach, CV parse; rate limit 10/min |
 | Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |
@@ -27,8 +27,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/` | Landing (splash + hero + features scroll reveal) | Joufra / Migue | ✅ |
 | `/sobre` | Sobre DulIA | Migue | ✅ |
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
-| `/resultados` | Score, perfil, **termómetro**, jobs, plan 30d, **RadarMatch** (API), PDF | Joufra / Migue | 🚧 falta chat UI + timeline UI |
-| `/vacantes` | **Termómetro** + panel semáforo | Joufra | ✅ |
+| `/resultados` | Score, perfil, **termómetro**, jobs, plan 30-60-90, **RadarMatch**, timeline, **coach**, PDF completo | Joufra / Migue | ✅ |
+| `/vacantes` | **Termómetro** + semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -40,6 +40,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
 | `MarketThermometer` | ✅ | Montado en `/resultados` y `/vacantes` |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
+| Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
+| Navegación resultados ↔ vacantes | ✅ | `OpportunitiesPreview` → `/vacantes`; botón **Volver a mi análisis** → `/resultados` |
 | Footers — copyright | ✅ | `© {year} DulIA` en `LandingFooter` y `SiteFooter` |
 | Integración Axios → API | ✅ | `services/api.js` + `mockResultsBundle.js` |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
@@ -47,23 +49,25 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Subida CV PDF | ✅ | `POST /profile/parse-cv` + fallback en `api.js` |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
-| `postCoachChat()` | ✅ API | UI burbuja → Joufra |
-| Descarga PDF (jsPDF) | ✅ | Perfil + jobs + mercado (plan/radar en PDF pendiente) |
+| `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |
+| Coach chat UI | ✅ | `CoachChatBubble` en `/resultados` |
+| Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
+| Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
+| Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |
+| Links `url` en vacantes | ✅ | Preview + panel semáforo; mock con URLs demo |
+| Descarga PDF (jsPDF) | ✅ | Score, análisis, plan 30d, radar, jobs, mercado, perfil |
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
 
-### Pendiente UI (Joufra — pre-pitch)
+### Pendiente UI (pre-pitch)
 
 | Pieza | Prioridad | Notas |
 |-------|-----------|-------|
-| Burbuja chat coach | Alta | Usar `postCoachChat()` de `api.js` |
-| UI timeline Plan 2 | Media | Datos en store; componente pendiente |
-| Copy con datos reales | Media | Evitar cifras hardcode en landing |
-| Plan 30d + radar en PDF | Baja | `generateAnalysisPdf.js` |
-| Links `url` en vacantes | Baja | Campo en API |
-| Tabs plan 60/90 días | Baja | Backend devuelve fases; UI solo fase_30 |
+| Deploy Vercel + backend prod | Alta | `VITE_API_URL`, CORS |
+| Prueba E2E back real | Alta | `USE_MOCK_DATA=false` |
+| Copy landing hardcode | Baja | Prototipos kit `Landing.jsx` / `Wizard.jsx` (huérfanos) |
 
-Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
+Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
 
 ## Backend — fases
 

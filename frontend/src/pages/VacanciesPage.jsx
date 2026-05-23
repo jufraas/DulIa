@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Briefcase, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
@@ -13,12 +13,16 @@ import { mapJobToVacancyRow } from '../components/vacancies/vacancyStatus'
 import IconBox from '../components/brand/IconBox'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import SessionLoading from '../components/shared/SessionLoading'
 import { getMarketDashboard, getRecommendedJobs } from '../services/api'
 import { useProfileStore } from '../store/useProfileStore'
 import { getOrCreateSessionId } from '../utils/session'
+import { useSessionHydration } from '../hooks/useSessionHydration'
 
 /** Pantalla 04 — Panel de vacantes con semáforo (kit ReBrand) */
 export default function VacanciesPage() {
+  const { ready } = useSessionHydration()
+  const location = useLocation()
   const jobs = useProfileStore((s) => s.jobs)
   const savedProfile = useProfileStore((s) => s.savedProfile)
   const market = useProfileStore((s) => s.market)
@@ -51,7 +55,7 @@ export default function VacanciesPage() {
     ;(async () => {
       setLoading(true)
       try {
-        const data = await getRecommendedJobs(getOrCreateSessionId())
+        const data = await getRecommendedJobs(getOrCreateSessionId(), savedProfile)
         if (!cancelled) setJobs(data)
       } finally {
         if (!cancelled) setLoading(false)
@@ -61,7 +65,7 @@ export default function VacanciesPage() {
     return () => {
       cancelled = true
     }
-  }, [jobs.length, setJobs])
+  }, [jobs.length, savedProfile, setJobs])
 
   const rows = useMemo(() => jobs.map(mapJobToVacancyRow), [jobs])
 
@@ -77,6 +81,17 @@ export default function VacanciesPage() {
 
   const filtered =
     filter === 'all' ? rows : rows.filter((j) => j.status === filter)
+
+  const returnTo =
+    location.state?.returnTo ?? (savedProfile ? '/resultados' : '/')
+
+  if (!ready) {
+    return <SessionLoading />
+  }
+
+  if (!savedProfile) {
+    return <Navigate to="/comenzar" replace />
+  }
 
   return (
     <PageShell>
@@ -99,9 +114,9 @@ export default function VacanciesPage() {
                 <span className="gradient-text">solo aplicas a las buenas</span>.
               </h1>
             </div>
-            <Link to="/">
+            <Link to={returnTo}>
               <Button variant="secondary" iconLeft={<ArrowLeft className="h-4 w-4" />}>
-                Volver
+                Volver a mi análisis
               </Button>
             </Link>
           </div>

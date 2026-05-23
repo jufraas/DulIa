@@ -9,9 +9,9 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 1. Captura perfil en wizard (**3 pasos**, campos en español).
 2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
 3. Backend calcula matching con vacantes y expone dashboard de mercado.
-4. Frontend muestra resultados, termómetro de mercado, plan 30d, radar y genera PDF (jsPDF).
-5. Coach: `postCoachChat()` → `POST /api/coach/chat` (API ✅; UI burbuja pendiente Joufra).
-6. Plan 2: `loadResultsBundle()` → analyze + action-plan + radar/timeline (front ✅ integrado).
+4. Frontend muestra resultados completos: análisis IA, termómetro, plan 30-60-90, radar, timeline, vacantes con semáforo y PDF (jsPDF).
+5. Coach: `CoachChatBubble` → `postCoachChat()` → `POST /api/coach/chat` (UI ✅).
+6. Plan 2: `loadResultsBundle()` → analyze + action-plan + radar/timeline (front ✅).
 
 ## Contexto del hackathon
 
@@ -35,10 +35,10 @@ Onboarding (/comenzar, 3 pasos)
 POST /profile ──► loadResultsBundle()
      │  analyze → action-plan → jobs + market + radar + timeline
      ▼
-Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
-     │  score, termómetro, plan 30d, Match Radar (API)
+Resultados (/resultados) ──► Vacantes (/vacantes) ──► Volver a análisis (/resultados) ──► PDF
+     │  score, análisis IA, termómetro, plan (tabs 30/60/90), radar, timeline
      │                              │
-     └── Coach (UI Joufra) ─────────┘ postCoachChat()
+     └── CoachChatBubble ───────────┘ postCoachChat()
      ▲
      └── refresh OK: rehidratación (cache + GET /profile)
 ```
@@ -48,7 +48,7 @@ Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
 - Borrador del wizard en `dulia_wizard_draft` si refresca en `/comenzar`.
 - UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
 - **Landing motion:** `framer-motion` + `RevealOnScroll` (splash en `WelcomePage`, hero `trigger="mount"`, secciones `trigger="scroll"`).
-- **Resultados:** `RadarMatch` con `GET .../radar-data`; `MarketThermometer` en `/resultados` y `/vacantes`.
+- **Resultados:** `ProfileSummary` (analyze), `RadarMatch`, `CareerTimeline`, `CoachChatBubble`, `ThirtyDayPlan` (tabs 30/60/90), PDF completo.
 - **Wizard ubicación:** selects DANE 32 deptos / 1.119 municipios (`colombiaLocations.js`).
 
 ## Rutas y dueños frontend
@@ -68,7 +68,7 @@ Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 | Módulo | Estado |
 |--------|--------|
 | Backend | ✅ Fases 0–10 (mock + real); falta deploy |
-| Frontend | 🚧 Kit ReBrand integrado; falta deploy |
+| Frontend | ✅ MVP UI completo; falta deploy prod |
 | Pipeline | 🚧 Datos en `jobs` pendientes |
 | Gemini | ✅ Profile extraction + coach |
 
@@ -116,7 +116,7 @@ backend/
 | [PROMPTS.md](PROMPTS.md) | Prompts Gemini |
 | [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | División frontend |
 | [decisions/2026-05-23-frontend-landing-animations.md](decisions/2026-05-23-frontend-landing-animations.md) | Splash + scroll animations landing |
-| [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](decisions/2026-05-23-frontend-plan2-locations-thermometer.md) | Plan 2 front + termómetro + mocks |
+| [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) | Sprints 1–3: analyze UI, coach, timeline, PDF |
 | [decisions/2026-05-23-frontend-colombia-locations-wizard.md](decisions/2026-05-23-frontend-colombia-locations-wizard.md) | Selects ubicación DANE |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Fase 2: login, timeline plan, pulido pitch |
 | [EXTRA_IDEAS/ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer (no MVP) |

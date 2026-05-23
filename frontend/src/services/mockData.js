@@ -19,6 +19,7 @@ export const mockJobs = [
     score_compatibilidad: 84,
     habilidades_match: ['python', 'git'],
     habilidades_faltantes: ['postgresql', 'fastapi'],
+    url: 'https://www.linkedin.com/jobs/search/?keywords=python%20backend',
   },
   {
     id: 'mock-job-2',
@@ -39,6 +40,7 @@ export const mockJobs = [
     score_compatibilidad: 71,
     habilidades_match: ['excel', 'python'],
     habilidades_faltantes: ['power bi'],
+    url: 'https://www.linkedin.com/jobs/search/?keywords=analista%20datos',
   },
   {
     id: 'mock-job-3',
