@@ -79,3 +79,7 @@ Al implementar o modificar un endpoint: actualizar `ENDPOINTS.md` en el mismo ca
 - CORS abierto (`*`) en dev — restringir al dominio del frontend al deployar.
 - Sin autenticación: se usa `session_id` (UUID generado por el frontend) como identificador.
 - Supabase proyecto: el del hackathon DulIA (no GravityClaw — ese es personal).
+| SCHEMA.md | Estructura de datos |
+| ENDPOINTS.md | Contrato de la API |
+| DECISIONS.md | Índice de decisiones técnicas |
+| decisions/ | Un `.md` por decisión (contexto, por qué, alternativas) |

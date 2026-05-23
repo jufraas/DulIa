@@ -66,10 +66,10 @@ python main.py
 
 | Nombre | Rol |
 |--------|-----|
-| Carlos (krl0s) | Backend — FastAPI, integración IA |
-| Compa 1 | Frontend — React, Vite, Tailwind |
-| Compa 2 | Data Pipeline — scrapers Python |
-| Otros | IA + integración general |
+| krl0s | Backend — FastAPI, integración IA |
+| Migue | Frontend — React, Vite, Tailwind |
+| Jose | Data Pipeline — scrapers Python |
+| Jufra | IA + integración general, Pitch |
 
 ---
 

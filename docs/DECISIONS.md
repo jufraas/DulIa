@@ -1,4 +1,4 @@
-# DECISIONS — Log de decisiones técnicas
+# DECISIONS — Índice de decisiones técnicas
 
 > Registra aquí cada decisión importante: qué se eligió, por qué, y qué alternativas se descartadas.
 
@@ -16,7 +16,24 @@
 | 2026-05-23 | slowapi 10 req/min por IP en POST profile y coach | Protege cuota Gemini en hackathon; 429 estándar | Sin rate limit |
 | 2026-05-23 | CORS vía `CORS_ORIGINS` + `APP_ENV` | Prod solo orígenes explícitos; dev `*` sin credentials | CORS fijo en código |
 | 2026-05-23 | Tabla `jobs` en inglés + campos pipeline | Compatible Adzuna; API al front sigue en español vía `job_mapper` | Solo español en BD |
+> Cada decisión importante tiene su propio archivo en [`decisions/`](./decisions/).
 
----
+## Cómo registrar una decisión
 
-_Agrega una fila cada vez que el equipo tome una decisión técnica relevante._
+1. Copia [`decisions/_TEMPLATE.md`](./decisions/_TEMPLATE.md).
+2. Guárdala como `decisions/YYYY-MM-DD-[area]-[slug].md`.
+3. Añádela al índice en [`decisions/README.md`](./decisions/README.md).
+
+## Índice rápido
+
+| Fecha | Área | Decisión | Archivo |
+|-------|------|----------|---------|
+| 2026-05-23 | backend | FastAPI | [decisions/2026-05-23-backend-fastapi.md](./decisions/2026-05-23-backend-fastapi.md) |
+| 2026-05-23 | frontend | React + Vite + Tailwind | [decisions/2026-05-23-frontend-react-vite-tailwind.md](./decisions/2026-05-23-frontend-react-vite-tailwind.md) |
+| 2026-05-23 | ia | Google Gemini | [decisions/2026-05-23-ia-gemini.md](./decisions/2026-05-23-ia-gemini.md) |
+| 2026-05-23 | frontend | Landing antes del onboarding | [decisions/2026-05-23-frontend-landing-antes-onboarding.md](./decisions/2026-05-23-frontend-landing-antes-onboarding.md) |
+| 2026-05-23 | frontend | Mock fallback API | [decisions/2026-05-23-frontend-mock-fallback-api.md](./decisions/2026-05-23-frontend-mock-fallback-api.md) |
+| 2026-05-23 | frontend | React Router (SPA) | [decisions/2026-05-23-frontend-react-router-flujo-spa.md](./decisions/2026-05-23-frontend-react-router-flujo-spa.md) |
+| 2026-05-23 | frontend | Zustand estado perfil | [decisions/2026-05-23-frontend-zustand-estado-perfil.md](./decisions/2026-05-23-frontend-zustand-estado-perfil.md) |
+
+Ver índice completo y convenciones: **[decisions/README.md](./decisions/README.md)**
