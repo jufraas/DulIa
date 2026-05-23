@@ -41,10 +41,10 @@ VITE_API_URL=http://localhost:8000/api
 1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; opcional: CV → `parseCvPdf`).
 2. **POST** `/api/profile` con `session_id` (UUID en `localStorage`, clave `dulia_session_id`).
 3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
-4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`).
+4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
-6. `/resultados` → enlace al panel semáforo en `/vacantes`; **Volver a mi análisis** regresa con datos intactos.
-7. PDF con jsPDF.
+6. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
+7. PDF (`generateAnalysisPdf.js`): score, análisis, plan, radar, vacantes, mercado, perfil.
 
 Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
 

@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — FRONT: Sprint 3 — PDF completo, copy dinámico vacantes, links apply; Sprints 1–2 (analyze UI, coach, timeline, tabs plan).
+2026-05-23 — FRONT MVP: Sprints 1–3 (Plan 2 UI + PDF); pendiente deploy y pipeline jobs reales.
 
 ## Estado por módulo
 
@@ -12,7 +12,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
 | Backend (FastAPI) | 🚧 Fases 0–10 + Plan 2 F3 | `parse-cv`, coach, analyze/action-plan, radar/timeline API; deploy pendiente |
-| Frontend (React+Vite) | 🚧 En progreso | Kit ReBrand (5 rutas), RadarMatch UI, rehidratación; pulido Joufra pendiente |
+| Frontend (React+Vite) | ✅ MVP UI | Plan 2 completo en pantalla; deploy pendiente |
 | Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
 | Integración Gemini | ✅ | Profile, coach, CV parse; rate limit 10/min |
 | Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |

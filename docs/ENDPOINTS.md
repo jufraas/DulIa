@@ -75,7 +75,7 @@ Fallbacks offline: `mockResultsBundle.js` (personalizado al perfil). Ver [FRONTE
 | Clave | Contenido |
 |-------|-----------|
 | `dulia_session_id` | UUID de sesión anónima |
-| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `formSnapshot` |
+| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`, `formSnapshot` |
 | `dulia_wizard_draft` | Borrador del wizard si refresca en `/comenzar` |
 
 > En mock, `GET /profile` devuelve 404 — el frontend confía en `dulia_session_data` tras completar el wizard.
@@ -277,7 +277,7 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 |-------|-----|
 | `semaforo` | `green` 🟢 · `yellow` 🟡 · `red` 🔴 (las rojas no aparecen en esta lista) |
 | `score_compatibilidad` | 0–100, calculado en backend |
-| `habilidades_match` / `habilidades_faltantes` | Para chips y CTA de mejora |
+| `habilidades_match` / `habilidades_faltantes` | Chips en `/vacantes` y preview; CTA de mejora |
 | `url` | Link a la vacante (si el pipeline lo envía) |
 | `repost_count` / `hires_youth` | Metadatos pipeline (fantasmas / jóvenes) |
 
@@ -364,7 +364,7 @@ Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil pre
 
 **Errores:** `404` sin perfil · `500` error interno.
 
-**Frontend:** `loadResultsBundle()` → `postActionPlan()` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockPlan.js` — plantilla con nombre, ciudad y **una tarea de curso por habilidad** (no plan IA completo).
+**Frontend:** `loadResultsBundle()` → store → UI (`ProfileSummary`, `ThirtyDayPlan`, `RadarMatch`, `CareerTimeline`, `CoachChatBubble`) + `generateAnalysisPdf.js`.
 
 ---
 
@@ -638,8 +638,8 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/` | Landing |
 | `/sobre` | Sobre DulIA |
 | `/comenzar` | Wizard onboarding (3 pasos) |
-| `/resultados` | Score, perfil, top jobs, plan 30d, PDF |
-| `/vacantes` | Panel semáforo; volver a `/resultados` |
+| `/resultados` | Análisis IA, plan (tabs 30/60/90), radar, timeline, coach, PDF |
+| `/vacantes` | Semáforo, chips skills, links `url`; volver a `/resultados` |
 
 Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
 

@@ -80,10 +80,9 @@ Datos: store `market` o `getMarketDashboard()` al entrar si faltaba.
 
 ## Pendiente (no bloquea MVP)
 
-- UI timeline (`timeline` ya en store)
-- Burbuja coach
-- Plan + radar en PDF
-- Tabs plan 60/90 días
+Completado en [2026-05-23-frontend-plan2-ui-sprints-complete.md](./2026-05-23-frontend-plan2-ui-sprints-complete.md): timeline UI, coach, PDF, tabs 60/90.
+
+Queda: deploy prod, pipeline jobs reales, limpieza prototipos kit huérfanos.
 
 ## Referencias
 

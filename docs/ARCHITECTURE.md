@@ -33,7 +33,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 | `/` | Landing — splash, pitch, features con scroll reveal, CTA |
 | `/sobre` | Sobre DulIA — problema, audiencia, modelo, equipo |
 | `/comenzar` | Wizard onboarding (3 pasos) |
-| `/resultados` | Score, resumen perfil, **termómetro**, preview vacantes, plan 30d, **Match Radar**, PDF |
+| `/resultados` | Score, análisis IA, termómetro, preview vacantes, plan 30-60-90 (tabs), radar, timeline, coach, PDF |
 | `/vacantes` | **Termómetro** + panel de vacantes con semáforo de confianza |
 
 **Flujo de datos:**
@@ -46,8 +46,8 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 - **Persistencia:** cache en `dulia_session_data` (incluye plan, radar, timeline); borrador wizard en `dulia_wizard_draft`.
 - **Rehidratación** al cargar app (`sessionHydration.js`): cache → `GET /profile` → `loadResultsBundle` si faltan datos.
 - Fallbacks: `mockResultsBundle.js` (personalizado al perfil) + `mockData`, `mockCvPrefill`, `mockProfileFromPayload`, `mockPlan`, `mockCoachChat`.
-- PDF (jsPDF): perfil + vacantes + mercado (plan en PDF pendiente).
-- **Coach UI** pendiente (Joufra); API `postCoachChat()` lista.
+- PDF (jsPDF): score, análisis IA, plan 30d, radar, vacantes, mercado, perfil.
+- **Coach:** `CoachChatBubble` → `postCoachChat()`.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 - **Motion landing:** `framer-motion` vía `components/motion/RevealOnScroll.jsx`; splash orquestado en `WelcomePage` (ver [decisión landing animations](decisions/2026-05-23-frontend-landing-animations.md)).
 
@@ -87,7 +87,7 @@ backend/
 5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d, **Match Radar** (store).
 6. **Vacantes** (`/vacantes`): listado completo con semáforo; **Volver** regresa a `/resultados` (store conserva perfil y análisis).
 7. Usuario descarga **PDF**.
-8. (Opcional) **Coach** → `postCoachChat()` / `POST /api/coach/chat` (UI pendiente).
+8. **Coach** → `CoachChatBubble` / `POST /api/coach/chat`.
 
 Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
 
@@ -111,8 +111,8 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | Matching vacantes | Scores, semáforo y **RadarMatch** (5 ejes vía API) | Calcula `score_compatibilidad` |
 | Termómetro mercado | `MarketThermometer` en `/resultados` y `/vacantes` | Agrega sobre `jobs` |
 | Plan 30 días | `ThirtyDayPlan` ← `POST .../action-plan` o mock por perfil (1 curso por habilidad) | Plan 2 + Gemini |
-| Coach / chat | `postCoachChat()` en api.js; UI burbuja pendiente | Gemini + perfil |
-| PDF plan de acción | Genera (jsPDF) | — |
+| Coach / chat | `CoachChatBubble` → `postCoachChat()` | Gemini + perfil |
+| PDF plan de acción | `generateAnalysisPdf.js` (score, analyze, plan, radar, jobs, market) | — |
 
 ## Estructura frontend relevante
 
@@ -123,9 +123,9 @@ frontend/src/
 │   └── motion/RevealOnScroll.jsx   # whileInView (scroll) | animate (mount)
 ├── hooks/           # useOnboardingForm, useResultsData, useSessionHydration, usePdfDownload
 ├── services/        # api.js, mockResultsBundle.js, mock*.js, sessionHydration.js
-├── store/           # useProfileStore.js (profile, jobs, market, plan, radar, timeline)
+├── store/           # useProfileStore.js (profile, jobs, market, plan, radar, timeline, analysis)
 ├── constants/       # colombiaLocations.js (DANE)
-└── utils/           # session, sessionCache, planDisplay, radarApi, buildProfilePayload, generateAnalysisPdf
+└── utils/           # session, sessionCache, planDisplay, radarApi, analysisDisplay, timelineDisplay, generateAnalysisPdf
 ```
 
 ## Roadmap post-MVP
@@ -142,7 +142,6 @@ Spinoff emprendimiento (no mezclar en MVP): [EXTRA_IDEAS/ideallamativamacondo.md
 
 ## Limitaciones conocidas (MVP)
 
-- Burbuja del coach sin UI (API lista).
-- Timeline Plan 2 en store pero sin componente visual.
-- Plan 30d y **RadarMatch** no incluidos en PDF aún.
-- Deploy producción pendiente.
+- Deploy producción pendiente (Vercel + backend + CORS).
+- Copy hardcode en prototipos kit huérfanos (`Landing.jsx`, `Wizard.jsx`) — no afecta `*Page.jsx`.
+- Vacantes reales dependen del pipeline en Supabase (`USE_MOCK_DATA=false`).
