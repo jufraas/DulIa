@@ -181,8 +181,10 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 | `semaforo` | `green` 🟢 · `yellow` 🟡 · `red` 🔴 (las rojas no aparecen en esta lista) |
 | `score_compatibilidad` | 0–100, calculado en backend |
 | `habilidades_match` / `habilidades_faltantes` | Para chips y CTA de mejora |
+| `url` | Link a la vacante (si el pipeline lo envía) |
+| `repost_count` / `hires_youth` | Metadatos pipeline (fantasmas / jóvenes) |
 
-> `url` existe en la tabla `jobs` (pipeline) pero **aún no** se expone en este endpoint.
+> BD `jobs` en **inglés** (`title`, `company`, `status`, …). Ver `docs/PIPELINE_JOBS.md`. La API sigue en español.
 
 **Scoring (referencia):** 40% skills + 20% ciudad + 25% experiencia + 15% educación. Ver `docs/SCHEMA.md`.
 

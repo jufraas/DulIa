@@ -15,6 +15,7 @@
 | 2026-05-23 | Coach responde JSON (`respuesta` + `sugerencias_rapidas`) | Chips en el frontend; fallback a texto plano si Gemini no devuelve JSON | Solo texto libre |
 | 2026-05-23 | slowapi 10 req/min por IP en POST profile y coach | Protege cuota Gemini en hackathon; 429 estándar | Sin rate limit |
 | 2026-05-23 | CORS vía `CORS_ORIGINS` + `APP_ENV` | Prod solo orígenes explícitos; dev `*` sin credentials | CORS fijo en código |
+| 2026-05-23 | Tabla `jobs` en inglés + campos pipeline | Compatible Adzuna; API al front sigue en español vía `job_mapper` | Solo español en BD |
 
 ---
 

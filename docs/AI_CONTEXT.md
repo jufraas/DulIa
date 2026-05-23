@@ -64,6 +64,7 @@ backend/
 | **ENDPOINTS.md** | **Contrato API — fuente de verdad para el frontend** |
 | ARCHITECTURE.md | Cómo se conectan los módulos |
 | SCHEMA.md | Estructura de datos (tablas en Supabase) |
+| PIPELINE_JOBS.md | Contrato `jobs` en inglés para el pipeline |
 | PROJECT_STATE.md | Fases y estado por módulo |
 | DECISIONS.md | Por qué se tomó cada decisión |
 | PROMPTS.md | System prompts de Gemini |

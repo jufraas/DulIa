@@ -46,33 +46,39 @@ Perfil estructurado del usuario, extraído por Gemini a partir del onboarding co
 
 ## Tabla: `jobs`
 
-Vacantes laborales scrapeadas por el pipeline. El pipeline escribe aquí; el backend solo lee.
+Vacantes laborales (schema **inglés**, compatible Adzuna/pipeline). El pipeline escribe aquí; el backend lee y expone JSON en español al frontend.
+
+> Contrato detallado para el equipo de pipeline: **`docs/PIPELINE_JOBS.md`**
 
 | Columna | Tipo | Nulable | Default | Descripción |
 |---------|------|---------|---------|-------------|
 | `id` | `uuid` | NO | `gen_random_uuid()` | PK |
-| `titulo` | `text` | NO | — | Título de la vacante |
-| `empresa` | `text` | NO | — | Nombre de la empresa |
-| `ciudad` | `text` | SÍ | — | Ciudad (ej: "Barranquilla") |
-| `departamento` | `text` | SÍ | — | Departamento |
-| `salario_min` | `integer` | SÍ | — | Salario mínimo en COP (null si no publicado) |
-| `salario_max` | `integer` | SÍ | — | Salario máximo en COP |
-| `habilidades_requeridas` | `text[]` | SÍ | `'{}'` | Skills requeridos |
-| `sector` | `text` | SÍ | — | Sector económico (ej: "tecnología", "logística") |
-| `experiencia_requerida` | `numeric` | SÍ | `0` | Años de experiencia requeridos |
-| `nivel_educativo_req` | `text` | SÍ | — | Nivel educativo mínimo requerido |
-| `modalidad` | `text` | SÍ | — | `presencial`, `remoto`, `hibrido` |
-| `semaforo` | `text` | NO | `'green'` | `green` 🟢 / `yellow` 🟡 / `red` 🔴 (calidad de la vacante) |
-| `fuente` | `text` | NO | — | Portal de origen (ej: "computrabajo", "elempleo") |
-| `url` | `text` | SÍ | — | URL original de la vacante |
-| `hash_unico` | `text` | NO | — | SHA256 de `titulo+empresa+url` para deduplicación |
-| `publicado_at` | `timestamptz` | SÍ | — | Fecha de publicación original |
-| `scrapeado_at` | `timestamptz` | NO | `now()` | Fecha en que el pipeline la capturó |
-| `activo` | `boolean` | NO | `true` | Si la vacante sigue vigente |
+| `title` | `text` | NO | — | Título de la vacante |
+| `company` | `text` | NO | — | Empresa |
+| `city` | `text` | SÍ | — | Ciudad (score + filtros) |
+| `department` | `text` | SÍ | — | Departamento |
+| `location` | `text` | SÍ | — | Texto libre "Ciudad, Depto" (pipeline Adzuna) |
+| `salary_min` | `integer` | SÍ | — | Salario mínimo COP |
+| `salary_max` | `integer` | SÍ | — | Salario máximo COP |
+| `skills_required` | `text[]` | SÍ | `'{}'` | Skills requeridos |
+| `sector` | `text` | SÍ | — | Sector (mercado + score) |
+| `experience_required` | `numeric` | SÍ | `0` | Años de experiencia |
+| `education_level_req` | `text` | SÍ | — | Nivel educativo mínimo |
+| `modality` | `text` | SÍ | — | `presencial`, `remoto`, `hibrido` |
+| `status` | `text` | NO | `'green'` | `green` 🟢 / `yellow` 🟡 / `red` 🔴 |
+| `source` | `text` | NO | — | Origen (adzuna, mock, etc.) |
+| `url` | `text` | SÍ | — | URL de la vacante |
+| `unique_hash` | `text` | NO | — | SHA256(title+company+url), UNIQUE |
+| `description` | `text` | SÍ | — | Descripción |
+| `posted_at` | `timestamptz` | SÍ | — | Fecha publicación |
+| `scraped_at` | `timestamptz` | NO | `now()` | Fecha de captura |
+| `active` | `boolean` | NO | `true` | Vacante vigente |
+| `repost_count` | `integer` | NO | `0` | Reposts (fantasmas) |
+| `hires_youth` | `boolean` | SÍ | `false` | Contrata jóvenes |
 
-**Índices:** `hash_unico` (único), `ciudad`, `sector`, `semaforo`, `activo`, `empresa`
+**Índices:** `unique_hash` (único), `city`, `sector`, `status`, `active`, `company`
 
-> **Nota para el pipeline:** el campo `semaforo` lo calcula el pipeline según heurísticas (empresa reconocida, salario publicado, descripción detallada, etc.). El backend filtra `semaforo != 'red'` y `activo = true` en recomendaciones.
+> El backend filtra `status != 'red'` y `active = true`. Si solo hay `location`, infiere `city`/`department` del texto.
 
 ---
 
@@ -87,7 +93,7 @@ Estadísticas agregadas por empresa. Se puede recalcular con una query sobre `jo
 | `sector` | `text` | SÍ | — | Sector principal |
 | `ciudad_principal` | `text` | SÍ | — | Ciudad donde más publica |
 | `total_vacantes` | `integer` | NO | `0` | Total de vacantes activas |
-| `vacantes_verdes` | `integer` | NO | `0` | Vacantes con `semaforo = 'green'` |
+| `vacantes_verdes` | `integer` | NO | `0` | Vacantes con `status = 'green'` en `jobs` |
 | `ratio_calidad` | `numeric` | SÍ | — | `vacantes_verdes / total_vacantes` |
 | `contrata_jovenes` | `boolean` | SÍ | — | Si tiene vacantes sin experiencia requerida |
 | `ultima_publicacion` | `timestamptz` | SÍ | — | Fecha de la vacante más reciente |

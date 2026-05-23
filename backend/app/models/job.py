@@ -20,6 +20,9 @@ class JobOut(BaseModel):
     semaforo: str                           # green | yellow | red
     descripcion: Optional[str]
     publicado_at: Optional[datetime]
+    url: Optional[str] = None
+    repost_count: Optional[int] = None
+    hires_youth: Optional[bool] = None
     # campos calculados por el backend al hacer matching
     score_compatibilidad: Optional[int] = None
     habilidades_match: list[str] = []
