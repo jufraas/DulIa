@@ -11,8 +11,8 @@ DulIA es una plataforma web que usa inteligencia artificial para orientar a jóv
 | Capa | Tecnología |
 |------|-----------|
 | Backend API | Python 3.14 · FastAPI · Uvicorn |
-| Frontend | React 18 · Vite · Tailwind CSS |
-| Data Pipeline | Python · scrapers async |
+| Frontend | React 19 · Vite · Tailwind CSS |
+| Data Pipeline | Python · scrapers async / Adzuna |
 | IA | Google Gemini API |
 | Base de datos | PostgreSQL 17 · Supabase (ver [SCHEMA.md](docs/SCHEMA.md)) |
 
@@ -41,16 +41,17 @@ cd DulIa
 # 2. Backend
 cd backend
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env   # USE_MOCK_DATA=true para dev sin credenciales
+cp .env.example .env       # USE_MOCK_DATA=true para dev sin credenciales
 uvicorn main:app --reload
 # Swagger: http://localhost:8000/docs · Contrato: docs/ENDPOINTS.md
 
-# 3. Frontend (en otra terminal)
+# 3. Frontend (en otra terminal — debe ser desde frontend/)
 cd frontend
 npm install
-npm run dev
+npm run dev    # http://localhost:5173
+# Opcional: frontend/.env.local → VITE_API_URL=http://localhost:8000/api
 
 # 4. Pipeline (en otra terminal)
 cd pipeline
@@ -66,8 +67,9 @@ python main.py
 
 | Nombre | Rol |
 |--------|-----|
-| krl0s | Backend — FastAPI, integración IA |
-| Migue | Frontend — React, Vite, Tailwind |
+| Carlos (krl0s) | Backend — FastAPI, integración IA |
+| Migue | Frontend — Sobre DulIA (`/sobre`), onboarding/API |
+| Compañero | Frontend — Landing, resultados, vacantes |
 | Jose | Data Pipeline — scrapers Python |
 | Jufra | IA + integración general, Pitch |
 
@@ -84,3 +86,4 @@ python main.py
 | [ENDPOINTS.md](docs/ENDPOINTS.md) | Contrato de endpoints de la API |
 | [DECISIONS.md](docs/DECISIONS.md) | Log de decisiones técnicas |
 | [PROMPTS.md](docs/PROMPTS.md) | System prompts de Gemini |
+| [frontend/COMPONENT_OWNERS.md](frontend/COMPONENT_OWNERS.md) | División de trabajo frontend |

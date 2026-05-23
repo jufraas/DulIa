@@ -1,18 +1,25 @@
 # Decisiones técnicas — DulIA
 
-Cada decisión importante del proyecto vive en **un archivo `.md` propio** dentro de esta carpeta.
+Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEMPLATE.md`](./_TEMPLATE.md).
 
 ## Cómo agregar una decisión
 
 1. Copia [`_TEMPLATE.md`](./_TEMPLATE.md).
-2. Nómbrala: `YYYY-MM-DD-[area]-[slug-corto].md`  
-   Ejemplo: `2026-05-23-frontend-mock-fallback.md`
+2. Nómbrala: `YYYY-MM-DD-[area]-[slug-corto].md`
 3. Completa contexto, decisión, por qué y alternativas.
 4. Añade una fila al índice de abajo y en [`../DECISIONS.md`](../DECISIONS.md).
 
 ## Índice
 
-### General / stack
+### General / full-stack
+
+| Fecha | Archivo | Resumen |
+|-------|---------|---------|
+| 2026-05-23 | [2026-05-23-sin-login-flujo-anonimo.md](./2026-05-23-sin-login-flujo-anonimo.md) | Sin registro; session_id anónimo |
+| 2026-05-23 | [2026-05-23-api-session-jobs-market.md](./2026-05-23-api-session-jobs-market.md) | API con endpoints separados |
+| 2026-05-23 | [2026-05-23-cv-pdf-markitdown.md](./2026-05-23-cv-pdf-markitdown.md) | CV PDF → MarkItDown (diferida) |
+
+### Stack
 
 | Fecha | Archivo | Resumen |
 |-------|---------|---------|
@@ -26,17 +33,13 @@ Cada decisión importante del proyecto vive en **un archivo `.md` propio** dentr
 |-------|---------|---------|
 | 2026-05-23 | [2026-05-23-frontend-landing-antes-onboarding.md](./2026-05-23-frontend-landing-antes-onboarding.md) | Landing antes del formulario |
 | 2026-05-23 | [2026-05-23-frontend-mock-fallback-api.md](./2026-05-23-frontend-mock-fallback-api.md) | Mock si el backend no responde |
-| 2026-05-23 | [2026-05-23-frontend-react-router-flujo-spa.md](./2026-05-23-frontend-react-router-flujo-spa.md) | Rutas `/`, `/comenzar`, `/resultados` |
+| 2026-05-23 | [2026-05-23-frontend-react-router-flujo-spa.md](./2026-05-23-frontend-react-router-flujo-spa.md) | Rutas SPA (5 pantallas) |
 | 2026-05-23 | [2026-05-23-frontend-zustand-estado-perfil.md](./2026-05-23-frontend-zustand-estado-perfil.md) | Zustand para perfil y resultados |
 
-### Backend
+Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_OWNERS.md).
+
+### Backend / Pipeline
 
 | Fecha | Archivo | Resumen |
 |-------|---------|---------|
-| — | _Pendiente_ | Agregar cuando backend tome decisiones |
-
-### Pipeline / IA
-
-| Fecha | Archivo | Resumen |
-|-------|---------|---------|
-| — | _Pendiente_ | Agregar cuando pipeline o prompts definan decisiones |
+| — | Ver [DECISIONS.md](../DECISIONS.md) | pydantic 3.14, slowapi, jobs en inglés, mock data |

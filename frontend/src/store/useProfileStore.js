@@ -1,0 +1,101 @@
+import { create } from 'zustand'
+
+/**
+ * @typedef {Object} OnboardingFormState
+ * @property {string} name
+ * @property {string} city
+ * @property {string} departamento
+ * @property {string} edad
+ * @property {string} age_range
+ * @property {string} current_situation
+ * @property {string} education_level
+ * @property {string} education
+ * @property {string} has_experience
+ * @property {string} experience_years
+ * @property {string} experience_summary
+ * @property {string} skills
+ * @property {string} soft_skills
+ * @property {string} interests
+ * @property {string} work_mode
+ * @property {string} opportunity_type
+ * @property {string} availability
+ * @property {string} salary_min
+ * @property {string} salary_max
+ * @property {string} tools
+ * @property {string} portfolio_url
+ */
+
+/**
+ * Perfil guardado — respuesta POST /api/profile
+ * @typedef {Object} SavedProfile
+ * @property {string} id
+ * @property {string} session_id
+ * @property {string} [nombre]
+ * @property {number} [edad]
+ * @property {string} [ciudad]
+ * @property {string} [departamento]
+ * @property {string} [nivel_educativo]
+ * @property {string} [carrera]
+ * @property {number} [experiencia_anios]
+ * @property {string[]} [habilidades]
+ * @property {string[]} [sectores_interes]
+ * @property {string} [modalidad]
+ * @property {string} [created_at]
+ */
+
+/**
+ * @typedef {Object} Job
+ * @property {string} id
+ * @property {string} titulo
+ * @property {string} empresa
+ * @property {string} ciudad
+ * @property {string} [departamento]
+ * @property {number} [salario_min]
+ * @property {number} [salario_max]
+ * @property {string[]} [habilidades_requeridas]
+ * @property {string} [sector]
+ * @property {number} [experiencia_requerida]
+ * @property {string} [nivel_educativo_req]
+ * @property {string} [modalidad]
+ * @property {'green'|'yellow'|'red'} [semaforo]
+ * @property {string} [descripcion]
+ * @property {string} [publicado_at]
+ * @property {number} score_compatibilidad
+ * @property {string[]} [habilidades_match]
+ * @property {string[]} [habilidades_faltantes]
+ */
+
+/**
+ * @typedef {Object} MarketDashboard
+ * @property {number} [total_vacantes_activas]
+ * @property {{ sector: string, count: number }[]} [top_sectores]
+ * @property {number|null} [salario_promedio]
+ * @property {string[]} [top_empresas_verdes]
+ * @property {number|null} [crecimiento_semanal_pct]
+ * @property {string|null} [ciudad_filtro]
+ * @property {string|null} [sector_filtro]
+ */
+
+export const useProfileStore = create((set) => ({
+  sessionId: null,
+  savedProfile: null,
+  formSnapshot: null,
+  jobs: [],
+  market: null,
+  apiUsesMock: true,
+
+  setSessionId: (sessionId) => set({ sessionId }),
+  setSavedProfile: (savedProfile) => set({ savedProfile }),
+  setFormSnapshot: (formSnapshot) => set({ formSnapshot }),
+  setJobs: (jobs) => set({ jobs }),
+  setMarket: (market) => set({ market }),
+  setApiUsesMock: (apiUsesMock) => set({ apiUsesMock }),
+
+  reset: () =>
+    set({
+      savedProfile: null,
+      formSnapshot: null,
+      jobs: [],
+      market: null,
+    }),
+}))

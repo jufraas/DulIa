@@ -1,0 +1,306 @@
+/* === DulIA UI kit — shared styles === */
+
+* { box-sizing: border-box; }
+
+#root { min-height: 100%; }
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ----- atmosphere ----- */
+.atmosphere {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 12% -10%, rgba(124,58,237,0.30) 0%, transparent 45%),
+    radial-gradient(circle at 90% 110%, rgba(236,72,153,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 95% 10%, rgba(168,85,247,0.12) 0%, transparent 40%);
+}
+
+.page { position: relative; z-index: 1; min-height: 100vh; }
+
+.container,
+.dl-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+}
+
+/* ----- header ----- */
+.dh {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(16px);
+  background: rgba(13,13,13,0.7);
+  border-bottom: 1px solid rgba(168,85,247,0.18);
+}
+.dh-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 72px;
+}
+.dh-logo { height: 28px; }
+.dh-nav { display: flex; gap: 28px; }
+.dh-nav a {
+  font-size: 14px; color: var(--fg-2); font-weight: 500;
+  transition: color 0.2s var(--ease-out);
+}
+.dh-nav a:hover { color: var(--fg-1); }
+
+/* ----- buttons ----- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 0; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700;
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary {
+  padding: 16px 28px;
+  font-size: 16px;
+  color: #fff;
+  border-radius: 999px;
+  background: var(--grad-cta);
+  box-shadow: var(--glow-cta);
+}
+.btn-primary:hover {
+  background: var(--grad-cta-hot);
+  box-shadow: 0 14px 36px rgba(236,72,153,0.50), 0 6px 16px rgba(168,85,247,0.40);
+  transform: translateY(-1px);
+}
+.btn-primary.lg { padding: 20px 36px; font-size: 18px; }
+.btn-primary.sm { padding: 11px 20px; font-size: 14px; }
+
+.btn-secondary {
+  padding: 14px 22px;
+  font-size: 15px;
+  color: var(--fg-1); font-weight: 600;
+  border-radius: 999px;
+  background: rgba(168,85,247,0.10);
+  border: 1px solid rgba(168,85,247,0.35);
+}
+.btn-secondary:hover {
+  background: rgba(168,85,247,0.18);
+  border-color: rgba(168,85,247,0.55);
+}
+
+.btn-ghost {
+  padding: 12px 18px;
+  font-size: 14px;
+  color: var(--fg-2);
+  background: transparent;
+  border-radius: 999px;
+}
+.btn-ghost:hover { color: var(--fg-1); }
+
+/* ----- cards ----- */
+.card-dl {
+  background: var(--bg-2);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--r-lg);
+  padding: var(--s-6);
+  box-shadow: var(--glow-violet);
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.card-dl.hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glow-violet-strong);
+}
+
+/* ----- chips ----- */
+.chip-dl {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(168,85,247,0.10);
+  border: 1px solid rgba(168,85,247,0.30);
+  color: var(--violet-200);
+  font-size: 13px; font-weight: 600;
+  transition: all var(--dur-base) var(--ease-out);
+  cursor: pointer;
+  user-select: none;
+}
+.chip-dl:hover { background: rgba(168,85,247,0.18); border-color: rgba(168,85,247,0.55); }
+.chip-dl.selected {
+  background: rgba(168,85,247,0.22);
+  border-color: rgba(168,85,247,0.65);
+  color: var(--fg-1);
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.12);
+}
+
+/* ----- icon box ----- */
+.iconbox {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--grad-brand);
+  box-shadow: 0 12px 32px rgba(124,58,237,0.40);
+  color: #fff;
+  flex-shrink: 0;
+}
+.iconbox.magenta {
+  background: var(--grad-cta);
+  box-shadow: 0 12px 32px rgba(236,72,153,0.40);
+}
+
+/* ----- inputs ----- */
+.field-dl {
+  width: 100%;
+  background: var(--bg-2);
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--fg-1);
+  outline: none;
+  transition: all var(--dur-base) var(--ease-out);
+}
+.field-dl::placeholder { color: var(--fg-4); }
+.field-dl:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(236,72,153,0.18);
+}
+
+.label-dl {
+  display: block;
+  font-size: 14px; font-weight: 600;
+  color: var(--fg-2);
+  margin-bottom: 8px;
+}
+
+/* ----- eyebrow ----- */
+.eyebrow-dl {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--violet-300);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+/* ----- helpers ----- */
+.gradient-text {
+  background: var(--grad-text);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.brand-text {
+  background: var(--grad-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* page transitions */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim-in { animation: slideUp 0.5s var(--ease-out) both; }
+.anim-in-delay-1 { animation: slideUp 0.5s var(--ease-out) 0.08s both; }
+.anim-in-delay-2 { animation: slideUp 0.5s var(--ease-out) 0.16s both; }
+.anim-in-delay-3 { animation: slideUp 0.5s var(--ease-out) 0.24s both; }
+.anim-in-delay-4 { animation: slideUp 0.5s var(--ease-out) 0.32s both; }
+
+/* ===== PDF card — kit ReBrand ===== */
+@keyframes pdfHalo {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+@keyframes pdfGradPan {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes pdfShine {
+  0% { transform: translateX(-160%) rotate(18deg); opacity: 0; }
+  20% { opacity: 0.55; }
+  80% { opacity: 0.55; }
+  100% { transform: translateX(260%) rotate(18deg); opacity: 0; }
+}
+@keyframes pdfBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-3deg); }
+}
+@keyframes pdfFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0; }
+  20% { opacity: 1; }
+  50% { transform: translate(8px, -14px) scale(1.2); opacity: 1; }
+  80% { opacity: 0.5; }
+}
+@keyframes pdfFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(0.9); opacity: 0; }
+  25% { opacity: 1; }
+  60% { transform: translate(-10px, -10px) scale(1.15); opacity: 1; }
+  90% { opacity: 0.4; }
+}
+@keyframes pdfBtnSweep {
+  0% { transform: translateX(-130%); }
+  100% { transform: translateX(130%); }
+}
+@keyframes pdfBtnPulse {
+  0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.40), 0 0 0 0 rgba(236,72,153,0); }
+  50% { box-shadow: 0 10px 28px rgba(0,0,0,0.45), 0 0 0 6px rgba(236,72,153,0.18); }
+}
+
+.pdf-card-anim {
+  animation: pdfGradPan 6s ease-in-out infinite;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.pdf-card-anim:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 32px 80px rgba(236,72,153,0.55), 0 12px 28px rgba(168,85,247,0.50);
+}
+.pdf-halo {
+  position: absolute;
+  inset: -22px;
+  border-radius: 38px;
+  background: radial-gradient(ellipse at center, rgba(236,72,153,0.55) 0%, rgba(168,85,247,0.30) 40%, transparent 70%);
+  filter: blur(28px);
+  z-index: -1;
+  pointer-events: none;
+  animation: pdfHalo 2.6s ease-in-out infinite;
+}
+.pdf-shine {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 35%;
+  height: 140%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  filter: blur(8px);
+  pointer-events: none;
+  animation: pdfShine 3.4s ease-in-out infinite;
+}
+.pdf-icon-bob { animation: pdfBob 3s ease-in-out infinite; }
+.pdf-spark {
+  position: absolute;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.8);
+  font-size: 16px;
+}
+.pdf-spark.s1 { top: 14%; right: 12%; animation: pdfFloat1 2.4s ease-in-out infinite; font-size: 14px; }
+.pdf-spark.s2 { top: 8%; right: 28%; animation: pdfFloat2 3s ease-in-out 0.4s infinite; font-size: 12px; }
+.pdf-spark.s3 { bottom: 30%; right: 8%; animation: pdfFloat1 2.8s ease-in-out 0.9s infinite; font-size: 18px; }
+.pdf-spark.s4 { top: 30%; left: 16%; animation: pdfFloat2 3.4s ease-in-out 1.4s infinite; font-size: 13px; }
+.pdf-btn {
+  position: relative;
+  animation: pdfBtnPulse 2.4s ease-in-out infinite;
+  transition: transform 0.2s var(--ease-out);
+}
+.pdf-btn:hover { transform: translateY(-2px) scale(1.01); }
+.pdf-btn-sweep {
+  position: absolute;
+  top: 0; left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  pointer-events: none;
+  animation: pdfBtnSweep 2.6s ease-in-out infinite;
+}
+
+@keyframes trafficPulse {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0; }
+}

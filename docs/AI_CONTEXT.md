@@ -4,82 +4,120 @@
 
 ## ¿Qué es DulIA?
 
-Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos. El usuario describe su perfil (estudios, habilidades, intereses) y DulIA:
-1. Sugiere rutas de carrera personalizadas con vacantes verificadas (🟢🟡🔴).
-2. Muestra un termómetro del mercado laboral del Caribe colombiano.
-3. Calcula un score de empleabilidad 0-100 por vacante con recomendaciones accionables.
-4. Ofrece un coach conversacional con contexto del perfil del usuario.
+Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin login:** el visitante completa un wizard, recibe vacantes con score de compatibilidad, explora un panel con semáforo y descarga un PDF con su plan. Incluye coach conversacional vía API.
+
+1. Captura perfil en wizard (**3 pasos**, campos en español).
+2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
+3. Backend calcula matching con vacantes y expone dashboard de mercado.
+4. Frontend muestra resultados y genera PDF (jsPDF).
+5. Coach: `POST /api/coach/chat` (backend Fase 8 ✅).
 
 ## Contexto del hackathon
 
 - **Evento:** Barranqui-IA 2026
 - **Duración:** 48 horas
-- **Fecha de inicio:** 2026-05-23
-- **Equipo:** 4-5 personas trabajando en paralelo
+- **Equipo:** 4-5 personas en paralelo
 
-## Stack en una línea
+## Stack
 
-`FastAPI` (backend) + `React/Vite/Tailwind` (frontend) + `Gemini API` (IA) + `PostgreSQL/Supabase` (BD)
+`FastAPI` + `React/Vite/Tailwind` + `PostgreSQL/Supabase` + `Gemini API` + pipeline (mock / Adzuna)
 
-## Estrategia de datos (actualizada)
+## Flujo frontend (SPA)
 
-- **MVP:** Mock data realista generada con Gemini (30-50 vacantes) cargada en Supabase.
-- **Siguiente nivel:** APIs públicas gratuitas — Adzuna (1000 llamadas/mes) y Jooble (LATAM).
-- **Scrapers propios:** pospuestos — demasiado riesgo en 48h (captchas, bloqueos, DOM frágil).
-- El pipeline escribe en la misma tabla `jobs` sin importar la fuente (mock, Adzuna, Jooble).
+```
+Landing (/) ──► Sobre DulIA (/sobre) [opcional]
+     │
+     ▼
+Onboarding (/comenzar, 3 pasos) ──► POST /profile
+     │
+     ├──► GET /jobs/recommended/{session_id}
+     └──► GET /market/dashboard
+     │
+     ▼
+Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
+```
+
+- `session_id` en `localStorage` (`dulia_session_id`).
+- Estado UI en Zustand; refresh sin perfil redirige a `/comenzar`.
+- UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
+
+## Rutas y dueños frontend
+
+| Ruta | Pantalla | Dueño |
+|------|----------|-------|
+| `/` | Landing | Compañero |
+| `/sobre` | Sobre DulIA | **Migue** |
+| `/comenzar` | Wizard | Compartido |
+| `/resultados` | Resultados | Compañero |
+| `/vacantes` | Vacantes | Compañero |
+
+Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
 ## Estado actual
 
-**Fase 10 completa.** Smoke test de 6 endpoints en mock mode — health, profile (POST+GET), jobs/recommended, market/dashboard, coach/chat. Validación 422, Swagger funcional, contrato final en ENDPOINTS.md. Siguiente: Fase 11 — deploy.
+| Módulo | Estado |
+|--------|--------|
+| Backend | ✅ Fases 0–10 (mock + real); falta deploy |
+| Frontend | 🚧 Kit ReBrand integrado; falta deploy |
+| Pipeline | 🚧 Datos en `jobs` pendientes |
+| Gemini | ✅ Profile extraction + coach |
 
-## Estructura del backend
+Ver [PROJECT_STATE.md](PROJECT_STATE.md).
+
+## Estructura backend
 
 ```
 backend/
 ├── main.py              → CORS + routers + startup
 └── app/
-    ├── routes/          → endpoints por dominio
+    ├── routes/          → health, profile, jobs, market, coach
     ├── services/        → lógica de negocio
     ├── models/          → schemas Pydantic
-    ├── db/supabase.py   → cliente singleton
-    ├── db/gemini.py     → cliente singleton
-    └── utils/logger.py  → logger centralizado
+    ├── db/supabase.py   → cliente Supabase
+    └── db/gemini.py     → cliente Gemini
 ```
 
-## Endpoints — contrato final (ver ENDPOINTS.md para detalle)
+## Endpoints (contrato en ENDPOINTS.md)
 
-| Método | Ruta | Fase | Testeado |
-|--------|------|------|----------|
-| GET | `/api/health` | ✅ Fase 1 | ✅ |
-| POST | `/api/profile` | ✅ Fase 4 | ✅ |
-| GET | `/api/profile/{session_id}` | ✅ Fase 4 | ✅ |
-| GET | `/api/jobs/recommended/{session_id}` | ✅ Fase 6 | ✅ |
-| GET | `/api/market/dashboard` | ✅ Fase 7 | ✅ |
-| POST | `/api/coach/chat` | ✅ Fase 8 | ✅ |
+| Método | Ruta | Estado |
+|--------|------|--------|
+| GET | `/api/health` | ✅ |
+| POST | `/api/profile` | ✅ |
+| GET | `/api/profile/{session_id}` | ✅ |
+| GET | `/api/jobs/recommended/{session_id}` | ✅ |
+| GET | `/api/market/dashboard` | ✅ |
+| POST | `/api/coach/chat` | ✅ |
 
 ## Archivos clave
 
 | Archivo | Para qué |
 |---------|----------|
-| **ENDPOINTS.md** | **Contrato API — fuente de verdad para el frontend** |
-| ARCHITECTURE.md | Cómo se conectan los módulos |
-| SCHEMA.md | Estructura de datos (tablas en Supabase) |
-| PIPELINE_JOBS.md | Contrato `jobs` en inglés para el pipeline |
-| PROJECT_STATE.md | Fases y estado por módulo |
-| DECISIONS.md | Por qué se tomó cada decisión |
-| PROMPTS.md | System prompts de Gemini |
+| [ENDPOINTS.md](ENDPOINTS.md) | **Contrato API — fuente de verdad** |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Módulos y flujo |
+| [SCHEMA.md](SCHEMA.md) | Tablas Supabase |
+| [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |
+| [PROMPTS.md](PROMPTS.md) | Prompts Gemini |
+| [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | División frontend |
 
-## Regla para cambios de API
+## Variables de entorno
 
-Al implementar o modificar un endpoint: actualizar `ENDPOINTS.md` en el mismo cambio. No anidar el onboarding en `respuestas_onboarding` — el body es plano (`OnboardingInput`).
+| Variable | Dónde | Valor dev |
+|----------|-------|-----------|
+| `VITE_API_URL` | frontend | `http://localhost:8000/api` |
+| `USE_MOCK_DATA` | backend | `true` (dev sin credenciales) |
 
-## Notas técnicas importantes
+## Desarrollo local
 
-- Python 3.14 + `pydantic>=2.14.0a1` (pre-release): estable en la práctica, funciona en el hackathon.
-- CORS abierto (`*`) en dev — restringir al dominio del frontend al deployar.
-- Sin autenticación: se usa `session_id` (UUID generado por el frontend) como identificador.
-- Supabase proyecto: el del hackathon DulIA (no GravityClaw — ese es personal).
-| SCHEMA.md | Estructura de datos |
-| ENDPOINTS.md | Contrato de la API |
-| DECISIONS.md | Índice de decisiones técnicas |
-| decisions/ | Un `.md` por decisión (contexto, por qué, alternativas) |
+```bash
+# Backend
+cd backend && uvicorn main:app --reload
+
+# Frontend (desde frontend/, no la raíz)
+cd frontend && npm run dev
+```
+
+## Notas técnicas
+
+- Python 3.14 + `pydantic>=2.14.0a1` en backend.
+- CORS abierto en dev; restringir con `CORS_ORIGINS` en producción.
+- `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock.

@@ -308,3 +308,19 @@ Para que el front vea datos reales (`USE_MOCK_DATA=false`):
 3. `GET /jobs/recommended/{session_id}` necesita ese perfil en `profiles`.
 
 Campos mínimos por vacante: ver `docs/SCHEMA.md` tabla `jobs`.
+
+---
+
+## Rutas frontend (SPA)
+
+Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
+
+| Ruta | Pantalla |
+|------|----------|
+| `/` | Landing |
+| `/sobre` | Sobre DulIA |
+| `/comenzar` | Wizard onboarding (3 pasos) |
+| `/resultados` | Score, perfil, top jobs, plan 30d, PDF |
+| `/vacantes` | Panel semáforo |
+
+Cliente Axios: `frontend/src/services/api.js`. Fallback local en `mockData.js` para jobs/market si el backend no responde.

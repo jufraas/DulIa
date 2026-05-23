@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DulIA — UI Kit (print)</title>
+  <link rel="icon" type="image/svg+xml" href="../../assets/dulia-mark.svg">
+  <link rel="stylesheet" href="kit.css">
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    /* --- print layout --- */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    html, body {
+      background: #0D0D0D !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .print-page {
+      width: 100%;
+      background: #0D0D0D;
+      position: relative;
+      overflow: hidden;
+      break-after: page;
+      page-break-after: always;
+    }
+    .print-page:last-child { break-after: auto; page-break-after: auto; }
+
+    /* atmosphere should NOT be fixed in print mode — it'd only show on page 1 */
+    .atmosphere { display: none; }
+    .print-page .local-atmo {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(circle at 12% -10%, rgba(124,58,237,0.30) 0%, transparent 45%),
+        radial-gradient(circle at 90% 110%, rgba(236,72,153,0.18) 0%, transparent 50%),
+        radial-gradient(circle at 95% 10%, rgba(168,85,247,0.12) 0%, transparent 40%);
+    }
+
+    /* sticky header → static header in print */
+    .dh { position: relative !important; backdrop-filter: none !important; }
+
+    /* disable all entry animations so layout is settled */
+    .anim-in, .anim-in-delay-1, .anim-in-delay-2, .anim-in-delay-3, .anim-in-delay-4 {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    @media print {
+      .print-page {
+        break-after: page;
+        page-break-after: always;
+      }
+      .print-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+    }
+
+    /* screen preview: stack pages with gap */
+    @media screen {
+      body { padding: 24px 0; }
+      .print-page {
+        max-width: 1280px;
+        margin: 0 auto 32px;
+        border: 1px solid rgba(168,85,247,0.20);
+        border-radius: 12px;
+      }
+    }
+
+    /* page label badge */
+    .page-label {
+      position: absolute;
+      top: 12px; left: 12px;
+      z-index: 100;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(13,13,13,0.85);
+      border: 1px solid rgba(168,85,247,0.45);
+      color: var(--violet-200);
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    @media print { .page-label { display: none; } }
+  </style>
+</head>
+<body>
+  <div id="page-landing" class="print-page">
+    <span class="page-label">01 · Landing</span>
+    <div class="local-atmo"></div>
+    <div id="mount-landing"></div>
+  </div>
+
+  <div id="page-wizard" class="print-page">
+    <span class="page-label">02 · Wizard</span>
+    <div class="local-atmo"></div>
+    <div id="mount-wizard"></div>
+  </div>
+
+  <div id="page-results" class="print-page">
+    <span class="page-label">03 · Results</span>
+    <div class="local-atmo"></div>
+    <div id="mount-results"></div>
+  </div>
+
+  <div id="page-vacancies" class="print-page">
+    <span class="page-label">04 · Vacancies</span>
+    <div class="local-atmo"></div>
+    <div id="mount-vacancies"></div>
+  </div>
+
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="Landing.jsx"></script>
+  <script type="text/babel" src="Wizard.jsx"></script>
+  <script type="text/babel" src="Results.jsx"></script>
+  <script type="text/babel" src="Vacancies.jsx"></script>
+
+  <script type="text/babel">
+    ReactDOM.createRoot(document.getElementById("mount-landing")).render(
+      <window.Landing onStart={() => {}}/>
+    );
+    ReactDOM.createRoot(document.getElementById("mount-wizard")).render(
+      <window.Wizard onDone={() => {}} onBack={() => {}}/>
+    );
+    ReactDOM.createRoot(document.getElementById("mount-results")).render(
+      <window.Results data={{}} onBack={() => {}}/>
+    );
+    ReactDOM.createRoot(document.getElementById("mount-vacancies")).render(
+      <window.Vacancies onBack={() => {}}/>
+    );
+
+    // Auto-print once fonts + babel are ready
+    (async () => {
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+      } catch (e) {}
+      // give React + score ring animation time to settle
+      setTimeout(() => { window.print(); }, 1800);
+    })();
+  </script>
+</body>
+</html>

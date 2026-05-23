@@ -5,8 +5,8 @@
 ```
 ┌─────────────┐     HTTP/REST      ┌─────────────────────┐
 │   Frontend  │ ◄────────────────► │      Backend        │
-│ React+Vite  │                    │  FastAPI + Uvicorn  │
-│  Tailwind   │                    │                     │
+│ React+Vite  │   JSON + session   │  FastAPI + Uvicorn  │
+│  Tailwind   │                    │  matching + Gemini  │
 └─────────────┘                    └────────┬────────────┘
                                             │
                               ┌─────────────┴──────────────┐
@@ -18,74 +18,112 @@
                               │
                     ┌─────────┴──────┐
                     │    Pipeline    │
-                    │ mock / APIs    │
+                    │ mock / Adzuna  │
                     └────────────────┘
 ```
 
 ## Módulos
 
-### `backend/`
-- Expone la API REST que consume el frontend (`docs/ENDPOINTS.md`).
-- Extrae perfiles con Gemini (`profile_service`) y calcula scoring (`jobs_service`).
-- Agrega estadísticas de mercado sobre `jobs` (`market_service`).
-- **Responsable:** Carlos
+### `frontend/`
 
-#### Estructura interna del backend
+SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
+
+| Ruta | Contenido |
+|------|-----------|
+| `/` | Landing — pitch, features, CTA |
+| `/sobre` | Sobre DulIA — problema, audiencia, modelo, equipo |
+| `/comenzar` | Wizard onboarding (3 pasos) |
+| `/resultados` | Score, resumen perfil, preview vacantes, plan 30d, PDF |
+| `/vacantes` | Panel de vacantes con semáforo de confianza |
+
+**Flujo de datos:**
+
+- Genera `session_id` (UUID) en `localStorage` (`dulia_session_id`).
+- Envía `POST /api/profile` (JSON, campos en español) al completar el wizard.
+- Consulta en paralelo jobs + market; estado en **Zustand** (`useProfileStore`).
+- Fallback a `mockData.js` si jobs/market no responden.
+- PDF (jsPDF) con perfil, vacantes y mercado.
+- **No** llama a Gemini directamente.
+- División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
+
+### `backend/`
+
+- API REST según [ENDPOINTS.md](ENDPOINTS.md).
+- Extrae perfiles con Gemini (`profile_service`); scoring en `jobs_service`.
+- Dashboard de mercado sobre tabla `jobs` (`market_service`).
+- Coach conversacional (`coach_service` + [PROMPTS.md](PROMPTS.md)).
+- **Responsable:** Carlos
 
 ```
 backend/
-├── main.py              → entrada: carga .env, registra routers, configura CORS
-├── requirements.txt
-├── .env                 → credenciales reales (NO en repo)
-├── .env.example         → plantilla pública
+├── main.py              → CORS + routers + startup
 └── app/
     ├── routes/          → health, profile, jobs, market, coach
-    ├── services/        → profile_service, jobs_service, market_service, coach_service
-    ├── models/          → schemas Pydantic (request/response)
-    ├── db/
-    │   ├── supabase.py  → cliente Supabase singleton
-    │   └── gemini.py    → cliente Gemini singleton
-    └── utils/
-        ├── logger.py    → logger centralizado
-        ├── limiter.py   → slowapi (10/min en rutas Gemini)
-        └── cors.py      → orígenes según APP_ENV
+    ├── services/        → profile, jobs, market, coach
+    ├── models/          → schemas Pydantic
+    ├── db/supabase.py   → cliente Supabase
+    ├── db/gemini.py     → cliente Gemini
+    └── utils/           → logger, limiter, cors, prompts
 ```
 
-### `frontend/`
-- SPA: onboarding → perfil → vacantes con score → termómetro de mercado → coach (pendiente).
-- Sin lógica de negocio; contrato en `docs/ENDPOINTS.md`.
-- **Responsable:** Migue
-
 ### `pipeline/`
+
 - Inserta vacantes en Supabase tabla `jobs` (mock Gemini, Adzuna, Jooble).
 - No depende del backend en runtime.
 - **Responsable:** Jose
 
-### `docs/`
-- Documentación compartida. **Actualizar `ENDPOINTS.md` al cambiar el contrato de la API.**
-
 ## Flujo principal (happy path)
 
-1. Frontend genera `session_id` (UUID en `localStorage`).
-2. Usuario completa onboarding → `POST /api/profile`.
+0. Usuario ve **landing** (`/`) o **Sobre DulIA** (`/sobre`).
+1. Completa **onboarding** (`/comenzar`, 3 pasos).
+2. Frontend envía `POST /api/profile` con `session_id`.
 3. Backend estructura perfil (Gemini) y guarda en `profiles`.
-4. Frontend pide vacantes → `GET /api/jobs/recommended/{session_id}`.
-5. Backend lee perfil + `jobs` activos, calcula score 0–100, devuelve top 20 (sin rojas).
-6. Frontend pide mercado → `GET /api/market/dashboard?city=...`.
-7. Coach → `POST /api/coach/chat` con contexto del perfil y prompt `CAREER_COACH_SYSTEM`.
+4. Frontend pide jobs + market en paralelo.
+5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d.
+6. **Vacantes** (`/vacantes`): listado completo con semáforo.
+7. Usuario descarga **PDF**.
+8. (Opcional) **Coach** → `POST /api/coach/chat`.
 
 ## Comunicación entre módulos
 
 | De | A | Protocolo |
 |----|---|-----------|
-| Frontend | Backend | HTTP REST (JSON) — ver `ENDPOINTS.md` |
+| Frontend | Backend | HTTP REST (JSON) — `ENDPOINTS.md` |
 | Backend | Gemini | HTTPS (google-generativeai) |
 | Backend | Supabase | supabase-py (PostgREST) |
 | Pipeline | Supabase | Inserción directa en `jobs` |
 
+## Responsabilidades: datos del usuario
+
+| Dato | Frontend | Backend |
+|------|----------|---------|
+| Formulario wizard | Captura + valida (3 pasos) | Recibe JSON (`nombre`, `ciudad`, …) |
+| session_id | Genera en localStorage | Clave de persistencia anónima |
+| Matching vacantes | Muestra scores y semáforo | Calcula `score_compatibilidad` |
+| Termómetro mercado | PDF (UI opcional) | Agrega sobre `jobs` |
+| Coach / chat | UI futura | Gemini + perfil en Supabase |
+| PDF plan de acción | Genera (jsPDF) | — |
+
+## Estructura frontend relevante
+
+```
+frontend/src/
+├── pages/           # WelcomePage, AboutPage, OnboardingPage, ResultsPage, VacanciesPage
+├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/
+├── hooks/           # useOnboardingForm, useResultsData, usePdfDownload
+├── services/        # api.js, mockData.js
+├── store/           # useProfileStore.js
+├── styles/          # dulia-tokens.css, dulia-kit.css
+└── utils/           # session, buildProfilePayload, generateAnalysisPdf
+```
+
 ## Modo desarrollo sin credenciales
 
-`USE_MOCK_DATA=true` en `.env` del backend:
-- Salta Supabase y Gemini en servicios que lo soportan.
-- Permite al frontend integrar contra respuestas estables.
-- `GET /profile` devuelve 404 en mock (el POST no persiste); el front puede guardar la respuesta del POST en estado local.
+`USE_MOCK_DATA=true` en backend `.env`:
+
+- Respuestas estables sin Supabase/Gemini real.
+- `GET /profile/{session_id}` devuelve 404 en mock; el front guarda respuesta del POST en Zustand.
+
+## Limitaciones conocidas
+
+- Refresh en `/resultados` sin perfil en Zustand → redirige a `/comenzar`. Pendiente: `GET /profile/{session_id}`.

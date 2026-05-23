@@ -4,19 +4,64 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Fase 10 completa: smoke test de 6 endpoints en mock mode, validación 422 verificada, Swagger funcional, contrato final en ENDPOINTS.md.
+2026-05-23 — Merge FRONT + main: backend Fase 10 completa; frontend kit ReBrand integrado.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| Repositorio | ✅ Listo | Rama `Backend` activa, docs actualizadas |
-| Backend (FastAPI) | 🚧 Fases 0-9 | API completa + seguridad mínima |
-| Frontend (React+Vite) | 🔲 No iniciado | Integrar contra `docs/ENDPOINTS.md` |
-| Pipeline | 🔁 Cambio de alcance | Insertar mock en `jobs` |
-| Integración Gemini | ✅ | Rate limit 10/min en profile y coach |
-| Base de datos | 🚧 Schema listo | Datos pendientes pipeline |
-| Deploy | 🔲 No iniciado | Configurar `CORS_ORIGINS` en Railway/Render |
+| Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
+| Backend (FastAPI) | 🚧 Fases 0–10 | API completa + seguridad mínima; falta deploy (Fase 11) |
+| Frontend (React+Vite) | 🚧 En progreso | UI kit ReBrand (5 rutas); falta deploy y pulido |
+| Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
+| Integración Gemini | ✅ | Profile, coach; rate limit 10/min |
+| Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |
+| Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
+
+## Frontend — avance detallado
+
+### Rutas (kit ReBrand)
+
+| Ruta | Pantalla | Dueño | Estado |
+|------|----------|-------|--------|
+| `/` | Landing (Hero + Features + footer) | Compañero | ✅ |
+| `/sobre` | Sobre DulIA | Migue | ✅ |
+| `/comenzar` | Wizard onboarding (3 pasos) | Compartido | ✅ |
+| `/resultados` | Score, perfil, top jobs, plan 30d, PDF | Compañero | ✅ |
+| `/vacantes` | Panel semáforo (verde/amarillo/rojo) | Compañero | ✅ |
+
+### Piezas transversales
+
+| Pieza | Estado | Notas |
+|-------|--------|-------|
+| Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
+| Integración Axios → API | ✅ | `services/api.js` + fallback `mockData.js` |
+| `session_id` en localStorage | ✅ | Clave `dulia_session_id` |
+| POST `/profile` al completar wizard | ✅ | Alineado a contrato JSON en `ENDPOINTS.md` |
+| GET jobs + market en paralelo | ✅ | Tras guardar perfil |
+| Descarga PDF (jsPDF) | ✅ | Incluye jobs + mercado si están en store |
+| Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
+
+### Deuda técnica frontend
+
+| Item | Prioridad | Detalle |
+|------|-----------|---------|
+| Refresh en `/resultados` pierde estado | Media | Implementar `GET /profile/{session_id}` |
+| Termómetro mercado no visible en UI | Baja | Datos van al PDF; `MarketThermometer.jsx` huérfano |
+| Plan 30 días estático | Baja | `ThirtyDayPlan.jsx` — copy fijo |
+| ESLint ruidoso | Baja | Excluir `.vite/**` y `ReBrand/**` |
+
+## Backend — fases
+
+| Fase | Descripción | Estado |
+|------|-------------|--------|
+| 0–1 | Entorno + estructura + CORS | ✅ |
+| 2 | Schema Supabase | 🚧 Tablas ✅, datos pendientes pipeline |
+| 3–5 | Modelos + perfil + Gemini | ✅ |
+| 6–7 | Jobs recomendados + mercado | ✅ |
+| 8 | Coach conversacional | ✅ |
+| 9–10 | Seguridad + smoke tests | ✅ |
+| 11 | Deploy | 🔲 |
 
 ## Leyenda
 
@@ -28,25 +73,17 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | 🔁 | Cambio de alcance |
 | ❌ | Bloqueado |
 
-## Fases del backend
-
-| Fase | Descripción | Estado |
-|------|-------------|--------|
-| -1 | Repo + docs + MCPs | ✅ |
-| 0 | Entorno + dependencias + Hello World | ✅ |
-| 1 | Estructura profesional + CORS + conexiones | ✅ |
-| 2 | Schema Supabase + mock data | 🚧 Tablas ✅, datos pendientes pipeline |
-| 3 | Modelos Pydantic | ✅ |
-| 4 | Endpoints de perfil + Gemini extracción | ✅ |
-| 5 | Integración real Gemini | ✅ |
-| 6 | Vacantes recomendadas + scoring | ✅ |
-| 7 | Termómetro del mercado | ✅ |
-| 8 | Coach conversacional | ✅ |
-| 9 | Seguridad y robustez | ✅ |
-| 10 | Testing + docs finales | ✅ |
-| 11 | Deploy | 🔲 |
-
 ## Próximos pasos inmediatos
 
-1. Fase 11 — deploy con `APP_ENV=production` y `CORS_ORIGINS=<url-front>`
-2. Pipeline — vacantes en `jobs`
+### Integración
+1. Levantar backend con `USE_MOCK_DATA=true` y probar flujo wizard → resultados
+2. Frontend: deploy Vercel (`VITE_API_URL` apuntando al backend)
+3. Backend Fase 11: deploy con `CORS_ORIGINS=<url-front>`
+
+### Frontend
+1. Migue: pulir `/sobre`
+2. Compañero: pulir landing, resultados, vacantes
+3. Implementar rehidratación con `GET /profile/{session_id}`
+
+### Pipeline
+1. Insertar vacantes en tabla `jobs` para modo real
