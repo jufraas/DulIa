@@ -38,4 +38,5 @@ Estructura del repositorio inicializada. Ningún módulo implementado aún. Ver 
 | ARCHITECTURE.md | Cómo se conectan los módulos |
 | SCHEMA.md | Estructura de datos |
 | ENDPOINTS.md | Contrato de la API |
-| DECISIONS.md | Por qué se tomó cada decisión importante |
+| DECISIONS.md | Índice de decisiones técnicas |
+| decisions/ | Un `.md` por decisión (contexto, por qué, alternativas) |
