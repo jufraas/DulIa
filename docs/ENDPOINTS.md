@@ -444,4 +444,6 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/resultados` | Score, perfil, top jobs, plan 30d, PDF |
 | `/vacantes` | Panel semáforo |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallback local en `mockData.js` (jobs/market), `mockCvPrefill.js` (parse-cv) y `mockProfileFromPayload.js` (createProfile). Persistencia de sesión: `sessionCache.js` + `sessionHydration.js`.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
+
+**Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)

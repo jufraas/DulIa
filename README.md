@@ -88,3 +88,6 @@ python main.py
 | [DECISIONS.md](docs/DECISIONS.md) | Log de decisiones técnicas |
 | [PROMPTS.md](docs/PROMPTS.md) | System prompts de Gemini |
 | [frontend/COMPONENT_OWNERS.md](frontend/COMPONENT_OWNERS.md) | División de trabajo frontend |
+| [EXTRA_IDEAS/README.md](docs/EXTRA_IDEAS/README.md) | Ideas post-MVP e índice |
+| [EXTRA_IDEAS/post-mvp-roadmap.md](docs/EXTRA_IDEAS/post-mvp-roadmap.md) | Roadmap fase 2 (login, timeline, pitch) |
+| [EXTRA_IDEAS/ideallamativamacondo.md](docs/EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer |

@@ -41,3 +41,7 @@
 3. Añádela al índice en [`decisions/README.md`](./decisions/README.md) y aquí.
 
 Ver índice completo: **[decisions/README.md](./decisions/README.md)**
+
+## Roadmap post-MVP
+
+Ideas fuera del MVP (login + timeline del plan, pulido pitch, spinoff emprendimiento): **[EXTRA_IDEAS/README.md](./EXTRA_IDEAS/README.md)**

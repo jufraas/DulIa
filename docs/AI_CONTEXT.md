@@ -9,8 +9,9 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 1. Captura perfil en wizard (**3 pasos**, campos en español).
 2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
 3. Backend calcula matching con vacantes y expone dashboard de mercado.
-4. Frontend muestra resultados y genera PDF (jsPDF).
-5. Coach: `POST /api/coach/chat` (backend Fase 8 ✅).
+4. Frontend muestra resultados, plan 30d (store) y genera PDF (jsPDF).
+5. Coach: `postCoachChat()` → `POST /api/coach/chat` (API ✅; UI burbuja pendiente Joufra).
+6. Plan: `getPlan()` → `GET /api/plan/{session_id}` (front ✅; backend Carlos pendiente).
 
 ## Contexto del hackathon
 
@@ -31,10 +32,12 @@ Landing (/) ──► Sobre DulIA (/sobre) [opcional]
 Onboarding (/comenzar, 3 pasos)
      │  paso 0: POST /profile/parse-cv (opcional)
      ▼
-POST /profile ──► GET jobs + market (paralelo)
+POST /profile ──► GET jobs + market + plan (paralelo)
      │
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
+     │                              │
+     └── Coach (UI Joufra) ─────────┘ postCoachChat()
      ▲
      └── refresh OK: rehidratación (cache + GET /profile)
 ```
@@ -103,6 +106,8 @@ backend/
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |
 | [PROMPTS.md](PROMPTS.md) | Prompts Gemini |
 | [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | División frontend |
+| [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Fase 2: login, timeline plan, pulido pitch |
+| [EXTRA_IDEAS/ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer (no MVP) |
 
 ## Variables de entorno
 
@@ -126,4 +131,6 @@ cd frontend && npm run dev
 - Python 3.14 + `pydantic>=2.14.0a1` en backend.
 - CORS abierto en dev; restringir con `CORS_ORIGINS` en producción.
 - `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock — el front usa cache local (`dulia_session_data`).
-- Persistencia: `frontend/src/utils/sessionCache.js`, `frontend/src/services/sessionHydration.js`.
+- Persistencia: `sessionCache.js`, `sessionHydration.js`.
+- API cliente: `postCoachChat`, `getPlan`, `createProfile`, `parseCvPdf`, jobs, market — fallbacks en `mock*.js`.
+- Post-MVP (login, timeline plan): ver [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).

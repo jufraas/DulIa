@@ -29,7 +29,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/LandingFooter.jsx` | Footer landing |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Pantalla 03 — Resultados (ScoreCard, PdfDownloadCard, …) |
+| `src/components/results/*` | Pantalla 03 — Resultados (ScoreCard, ThirtyDayPlan, PdfDownloadCard, …) |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 
@@ -60,6 +60,12 @@ Contenido movido al kit ReBrand o a `/sobre`; no importados en la app:
 | `/comenzar` | Wizard | Compartido |
 | `/resultados` | Resultados | Joufra |
 | `/vacantes` | Vacantes | Joufra |
+
+## Post-MVP y pitch
+
+Pulido pre-pitch, burbuja coach, termómetro, login + timeline del plan: [docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
+
+**Joufra — usar para chat:** `import { postCoachChat } from '../services/api'` (zona Migue, ya implementado).
 
 ## Flujo Git
 

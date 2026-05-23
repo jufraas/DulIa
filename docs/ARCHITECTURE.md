@@ -41,12 +41,12 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 - Genera `session_id` (UUID) en `localStorage` (`dulia_session_id`).
 - **Paso 0 wizard (opcional):** sube CV PDF → `POST /api/profile/parse-cv` → prellena formulario.
 - Envía `POST /api/profile` (JSON, campos en español) al completar el wizard.
-- Consulta en paralelo jobs + market; estado en **Zustand** (`useProfileStore`).
-- **Persistencia:** al guardar perfil, escribe cache en `dulia_session_data`; borrador wizard en `dulia_wizard_draft`.
-- **Rehidratación** al cargar app (`sessionHydration.js`): cache local → `GET /profile/{session_id}` → re-fetch jobs/market si faltan.
-- Fallback a `mockData.js` (jobs/market), `mockCvPrefill.js` (parse-cv) y `mockProfileFromPayload.js` (createProfile) si el backend no responde.
-- PDF (jsPDF) con perfil, vacantes y mercado.
-- **No** llama a Gemini directamente.
+- Consulta en paralelo jobs + market + **plan**; estado en **Zustand** (`useProfileStore`: `savedProfile`, `jobs`, `market`, `plan`).
+- **Persistencia:** cache en `dulia_session_data` (incluye `plan`); borrador wizard en `dulia_wizard_draft`.
+- **Rehidratación** al cargar app (`sessionHydration.js`): cache → `GET /profile` → re-fetch jobs/market/plan.
+- Fallbacks: `mockData`, `mockCvPrefill`, `mockProfileFromPayload`, `mockPlan`, `mockCoachChat`.
+- PDF (jsPDF): perfil + vacantes + mercado (plan en PDF pendiente).
+- **Coach UI** pendiente (Joufra); API `postCoachChat()` lista.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
 ### `backend/`
@@ -81,11 +81,13 @@ backend/
 1. Completa **onboarding** (`/comenzar`, 3 pasos).
 2. Frontend envía `POST /api/profile` con `session_id`.
 3. Backend estructura perfil (Gemini) y guarda en `profiles`.
-4. Frontend pide jobs + market en paralelo.
-5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d.
+4. Frontend pide jobs + market + plan en paralelo.
+5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d (store).
 6. **Vacantes** (`/vacantes`): listado completo con semáforo.
 7. Usuario descarga **PDF**.
-8. (Opcional) **Coach** → `POST /api/coach/chat`.
+8. (Opcional) **Coach** → `postCoachChat()` / `POST /api/coach/chat` (UI pendiente).
+
+Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
 
 ## Comunicación entre módulos
 
@@ -105,8 +107,9 @@ backend/
 | Cache sesión | `sessionCache.js` (localStorage) | — |
 | Rehidratación | `sessionHydration.js` al boot | `GET /profile/{session_id}` |
 | Matching vacantes | Muestra scores y semáforo | Calcula `score_compatibilidad` |
-| Termómetro mercado | PDF (UI opcional) | Agrega sobre `jobs` |
-| Coach / chat | UI futura | Gemini + perfil en Supabase |
+| Termómetro mercado | Datos en store; `MarketThermometer.jsx` no montado | Agrega sobre `jobs` |
+| Plan 30 días | `ThirtyDayPlan` lee store (`getPlan` + mock) | `GET /plan/{session_id}` pendiente |
+| Coach / chat | `postCoachChat()` en api.js; UI burbuja pendiente | Gemini + perfil |
 | PDF plan de acción | Genera (jsPDF) | — |
 
 ## Estructura frontend relevante
@@ -116,11 +119,16 @@ frontend/src/
 ├── pages/           # WelcomePage, AboutPage, OnboardingPage, ResultsPage, VacanciesPage
 ├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/
 ├── hooks/           # useOnboardingForm, useResultsData, useSessionHydration, usePdfDownload
-├── services/        # api.js, mockData.js, mockCvPrefill.js, sessionHydration.js
-├── store/           # useProfileStore.js
+├── services/        # api.js, mock*.js, sessionHydration.js
+├── store/           # useProfileStore.js (profile, jobs, market, plan)
 ├── styles/          # dulia-tokens.css, dulia-kit.css
-└── utils/           # session, sessionCache, buildProfilePayload, validateCvFile, generateAnalysisPdf
+└── utils/           # session, sessionCache, planDisplay, buildProfilePayload, generateAnalysisPdf
 ```
+
+## Roadmap post-MVP
+
+Login opcional, timeline del plan con progreso, deploy, pulido pitch: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).  
+Spinoff emprendimiento (no mezclar en MVP): [EXTRA_IDEAS/ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md).
 
 ## Modo desarrollo sin credenciales
 
@@ -129,7 +137,10 @@ frontend/src/
 - Respuestas estables sin Supabase/Gemini real.
 - `GET /profile/{session_id}` devuelve 404 en mock; el front persiste la respuesta del POST en `dulia_session_data`.
 
-## Limitaciones conocidas
+## Limitaciones conocidas (MVP)
 
-- Termómetro de mercado no visible en UI (solo PDF).
-- Plan 30 días con copy estático.
+- Termómetro de mercado no montado en `/resultados` (solo PDF).
+- Burbuja del coach sin UI (API lista).
+- `GET /plan` backend pendiente (front usa mock personalizado).
+- Plan 30d no incluido en PDF aún.
+- Deploy producción pendiente.
