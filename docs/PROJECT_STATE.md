@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Fase 9 completa: slowapi, CORS prod, `.env` verificado en `.gitignore`.
+2026-05-23 — Fase 10 completa: smoke test de 6 endpoints en mock mode, validación 422 verificada, Swagger funcional, contrato final en ENDPOINTS.md.
 
 ## Estado por módulo
 
@@ -43,11 +43,10 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | 7 | Termómetro del mercado | ✅ |
 | 8 | Coach conversacional | ✅ |
 | 9 | Seguridad y robustez | ✅ |
-| 10 | Testing + docs finales | 🔲 |
+| 10 | Testing + docs finales | ✅ |
 | 11 | Deploy | 🔲 |
 
 ## Próximos pasos inmediatos
 
-1. Fase 10 — smoke test de todos los endpoints en `/docs`
-2. Fase 11 — deploy con `APP_ENV=production` y `CORS_ORIGINS=<url-front>`
-3. Pipeline — vacantes en `jobs`
+1. Fase 11 — deploy con `APP_ENV=production` y `CORS_ORIGINS=<url-front>`
+2. Pipeline — vacantes en `jobs`

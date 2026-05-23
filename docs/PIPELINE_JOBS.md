@@ -6,6 +6,88 @@
 
 - DulIA hackathon: `ikyrbkbhxpoycverkdqh`
 - Migración SQL: `backend/migrations/002_jobs_english_schema.sql`
+- Trigger `unique_hash` + `active`: `backend/migrations/003_jobs_unique_hash_trigger.sql` (ya aplicado en DulIA)
+
+---
+
+## Guía rápida — pipeline de Jose (errores que viste)
+
+### 1. `Invalid API key` (401)
+
+- Usar el **mismo proyecto** DulIA (`ikyrbkbhxpoycverkdqh`).
+- En `.env` del pipeline: `SUPABASE_URL` + **`SUPABASE_KEY` = anon key** (Settings → API → `anon` `public`).
+- No mezclar URL de un proyecto y key de otro. `service_role` solo si el script lo pide explícitamente.
+
+### 2. `Could not find the 'skills_req' column` (PGRST204)
+
+En Supabase la columna se llama **`skills_required`**, no `skills_req`.
+
+```python
+# Antes (rompe)
+vacante["skills_req"] = [...]
+
+# Después
+vacante["skills_required"] = [...]
+# o renombrar al armar el dict:
+row = {**vacante, "skills_required": vacante.pop("skills_req")}
+```
+
+### 3. `null value in column "unique_hash"`
+
+DulIA exige `unique_hash` (dedup). Opciones:
+
+**A)** No mandarlo — el trigger en BD lo genera solo (recomendado).
+
+**B)** En Python antes del insert:
+
+```python
+import hashlib
+def unique_hash(title, company, url):
+    s = f"{title}|{company}|{url}".lower()
+    return hashlib.sha256(s.encode()).hexdigest()
+```
+
+### 4. `upsert(..., on_conflict="url")`
+
+En DulIA el UNIQUE fuerte es **`unique_hash`**, no `url`. Mejor:
+
+```python
+.upsert(vacantes, on_conflict="unique_hash")
+# o upsert por url solo si todas las filas tienen url única y rellenan unique_hash
+```
+
+### Mapeo: su tabla → Supabase DulIA
+
+| Jose (su script) | Columna en Supabase DulIA | Notas |
+|------------------|---------------------------|--------|
+| `title` | `title` | ✅ |
+| `company` | `company` | NOT NULL — no dejar null |
+| `location` | `location` | ✅ |
+| `salary_min` / `salary_max` | igual | ✅ |
+| `description` | `description` | ✅ |
+| **`skills_req`** | **`skills_required`** | ⚠️ renombrar |
+| `source` | `source` | ✅ |
+| `url` | `url` | ✅ |
+| `posted_at` / `scraped_at` | igual | ✅ |
+| `repost_count` | `repost_count` | ✅ |
+| `status` | `status` | green/yellow/red ✅ |
+| `hires_youth` | `hires_youth` | ✅ |
+| — | `unique_hash` | auto con trigger o SHA256 |
+| — | `active` | default `true` (puede omitir) |
+| — | `city` | opcional; parsear de `location` |
+| — | `department` | opcional |
+| — | `sector` | recomendado para mercado |
+| — | `experience_required` | default `0` |
+| — | `modality` | `presencial`/`remoto`/`hibrido` |
+| — | `education_level_req` | opcional |
+
+Si su IA ya extrae skills y calcula fantasmas, **no hace falta** `enrich_job.py` salvo para `city`/`sector` si aún no los tiene.
+
+### Por qué `detector.py` / `stats.py` ven 0 vacantes
+
+Porque **el insert falló** (`skills_req`). Arreglar el nombre → volver a `cargar_mock.py` → luego detector y stats.
+
+---
 
 ## Columnas obligatorias para el pipeline
 

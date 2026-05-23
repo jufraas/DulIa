@@ -1,8 +1,8 @@
 # ENDPOINTS — Contrato de la API
 
-> **Fuente de verdad para el frontend.** Si el código y este archivo difieren, corregir el código o actualizar este doc en el mismo PR.
+> **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-23 · Fases 1–9 implementadas.
+**Última actualización:** 2026-05-23 · Fases 1–10 completadas. Todos los endpoints probados vía Swagger + curl con `USE_MOCK_DATA=true`.
 
 ## Base URL
 

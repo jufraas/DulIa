@@ -30,7 +30,7 @@ Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos
 
 ## Estado actual
 
-**Fase 9 completa.** Rate limit Gemini (10/min), CORS por entorno, `.env` fuera del repo. Siguiente: Fase 10 — testing + deploy.
+**Fase 10 completa.** Smoke test de 6 endpoints en mock mode — health, profile (POST+GET), jobs/recommended, market/dashboard, coach/chat. Validación 422, Swagger funcional, contrato final en ENDPOINTS.md. Siguiente: Fase 11 — deploy.
 
 ## Estructura del backend
 
@@ -46,16 +46,16 @@ backend/
     └── utils/logger.py  → logger centralizado
 ```
 
-## Endpoints planeados (contrato con frontend)
+## Endpoints — contrato final (ver ENDPOINTS.md para detalle)
 
-| Método | Ruta | Fase |
-|--------|------|------|
-| GET | `/api/health` | ✅ Fase 1 |
-| POST | `/api/profile` | ✅ Fase 4 |
-| GET | `/api/profile/{session_id}` | ✅ Fase 4 |
-| GET | `/api/jobs/recommended/{session_id}` | ✅ Fase 6 |
-| GET | `/api/market/dashboard` | ✅ Fase 7 |
-| POST | `/api/coach/chat` | ✅ Fase 8 |
+| Método | Ruta | Fase | Testeado |
+|--------|------|------|----------|
+| GET | `/api/health` | ✅ Fase 1 | ✅ |
+| POST | `/api/profile` | ✅ Fase 4 | ✅ |
+| GET | `/api/profile/{session_id}` | ✅ Fase 4 | ✅ |
+| GET | `/api/jobs/recommended/{session_id}` | ✅ Fase 6 | ✅ |
+| GET | `/api/market/dashboard` | ✅ Fase 7 | ✅ |
+| POST | `/api/coach/chat` | ✅ Fase 8 | ✅ |
 
 ## Archivos clave
 
