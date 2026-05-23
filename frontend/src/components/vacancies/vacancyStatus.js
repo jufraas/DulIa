@@ -52,5 +52,6 @@ export function mapJobToVacancyRow(job) {
       ? new Date(job.publicado_at).toLocaleDateString('es-CO')
       : 'Reciente',
     flag,
+    url: job.url ?? null,
   }
 }

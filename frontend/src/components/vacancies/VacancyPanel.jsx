@@ -159,11 +159,15 @@ export function VacancyRow({ job }) {
             BLOQUEADA
           </span>
         ) : (
-          <span
+          <a
+            href={job.url ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
             className={`btn btn-${job.status === 'green' ? 'primary' : 'secondary'} sm`}
+            style={!job.url ? { pointerEvents: 'none', opacity: 0.5 } : {}}
           >
             {job.status === 'green' ? 'Aplicar' : 'Ver'}
-          </span>
+          </a>
         )}
       </div>
     </div>

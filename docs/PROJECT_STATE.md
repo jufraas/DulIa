@@ -4,15 +4,15 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — RadarMatch en resultados, footer copyright, ESLint limpio, tipos kit prototipo.
+2026-05-23 — FRONT: RadarMatch, splash/scroll, ESLint limpio. Main: Plan 2 F1–F3 (analyze, action-plan, radar/timeline API). Deploy pospuesto.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
-| Backend (FastAPI) | 🚧 Fases 0–10 | API + `parse-cv` + coach; falta `GET /plan` y deploy (Fase 11) |
-| Frontend (React+Vite) | 🚧 En progreso | MVP funcional con mocks; pulido UI Joufra pendiente |
+| Backend (FastAPI) | 🚧 Fases 0–10 + Plan 2 F3 | `parse-cv`, coach, analyze/action-plan, radar/timeline API; deploy pendiente |
+| Frontend (React+Vite) | 🚧 En progreso | Kit ReBrand (5 rutas), RadarMatch UI, rehidratación; pulido Joufra pendiente |
 | Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
 | Integración Gemini | ✅ | Profile, coach, CV parse; rate limit 10/min |
 | Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |
@@ -56,6 +56,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |-------|-----------|-------|
 | `MarketThermometer` en `/resultados` | Alta | Componente existe; no montado |
 | Burbuja chat coach | Alta | Usar `postCoachChat()` de `api.js` |
+| Conectar radar/timeline API Plan 2 | Media | Backend listo; front usa `RadarMatch` mock — ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) |
 | Copy con datos reales | Media | `total_vacantes_activas` vs “15.000” hardcode |
 | Plan 30d en PDF | Baja | `generateAnalysisPdf.js` |
 | RadarMatch en PDF | Baja | Gráfica solo en UI por ahora |
@@ -74,7 +75,10 @@ Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | 8 | Coach conversacional | ✅ |
 | 9–10 | Seguridad + smoke tests | ✅ |
 | 11 | Deploy | 🔲 |
-| — | `GET /api/plan/{session_id}` | 🔲 Contrato en ENDPOINTS; front listo |
+| — | `GET /api/plan/{session_id}` | 🔲 Contrato legacy; preferir Plan 2 `action-plan` |
+| P2-F3 | Gráficas radar + timeline (API) | ✅ Backend |
+| P2-F1 | Análisis + plan IA | ✅ Servicios, rutas y prompts |
+| P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
 
 ## Leyenda
 
@@ -89,10 +93,11 @@ Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 ## Próximos pasos inmediatos
 
 ### Pitch / demo
-1. Probar flujo wizard → resultados → refresh (mock o backend real)
+1. Probar flujo wizard → resultados → refresh (rehidratación + mock o backend real)
 2. Joufra: termómetro + burbuja coach en UI
-3. Carlos: `GET /plan/{session_id}` + deploy backend (si aplica)
+3. Integrar Plan 2 API en radar/timeline cuando convenga — [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md)
 4. Jose: vacantes reales en `jobs`
+5. Deploy (backend + front): **pospuesto** — `VITE_API_URL` + `CORS_ORIGINS`
 
 ### Post-MVP (no bloquean pitch)
 - Login opcional + timeline del plan con progreso → [post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md)
@@ -103,5 +108,6 @@ Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | Doc | Contenido |
 |-----|-----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | Contrato API |
+| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | Handoff Plan 2 (analyze, radar, timeline) |
 | [EXTRA_IDEAS/README.md](EXTRA_IDEAS/README.md) | Ideas fuera del MVP |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Roadmap fase 2 + guion pitch |

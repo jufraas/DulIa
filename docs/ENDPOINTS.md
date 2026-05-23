@@ -23,7 +23,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | Auth | Ninguna. `session_id` = UUID en `localStorage` (clave sugerida: `dulia_session_id`) |
 | Errores | `{ "detail": "mensaje" }` — 404, 422, 429, 500 según FastAPI |
 | CORS | Dev: `*` o `CORS_ORIGINS`; prod: solo `CORS_ORIGINS` (ver `.env.example`) |
-| Rate limit | `POST /profile`, `POST /profile/parse-cv` y `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
+| Rate limit | `POST /profile`, `POST /profile/parse-cv`, `POST /profile/.../analyze`, `POST /profile/.../action-plan`, `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
 | Mock | `USE_MOCK_DATA=true` en backend → respuestas de ejemplo sin Supabase/Gemini |
 
 ### Comportamiento con `USE_MOCK_DATA`
@@ -38,19 +38,35 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos |
 | `GET /plan/{id}` | Plan mock genérico (frontend fallback) | Gemini + perfil; **pendiente implementación backend** |
 | `POST /coach/chat` | Respuesta simulada | Gemini + perfil en Supabase; 404 sin perfil |
+| `POST /profile/.../analyze` | Análisis mock fijo | Gemini + tabla `profile_analysis` |
+| `POST /profile/.../action-plan` | Plan mock 30-60-90 | Gemini + tabla `action_plans`; requiere análisis previo |
+| `GET /profile/.../radar-data` | 5 dimensiones mock | Calculado desde perfil + análisis + mercado |
+| `GET /profile/.../timeline-data` | Timeline mock | Desde plan de acción; 404 en real sin plan |
+
+> Guía paso a paso para frontend: [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md)
 
 ---
 
 ## Flujo recomendado (frontend)
 
+### MVP actual (FRONT — implementado)
+
 1. Al iniciar la app: crear o leer `session_id` → `localStorage` (`dulia_session_id`).
-2. **Rehidratación** (`sessionHydration.js`): restaurar perfil/jobs/market desde cache local; si no hay cache, `GET /api/profile/{session_id}` (modo real); re-fetch jobs/market si faltan.
+2. **Rehidratación** (`sessionHydration.js`): restaurar perfil/jobs/market/plan desde cache; si no hay cache, `GET /api/profile/{session_id}` (modo real).
 3. Wizard paso 0 (opcional): subir CV → `POST /api/profile/parse-cv` → prellenar formulario.
 4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
-5. Pantalla resultados → jobs + market + plan ya en store; persistir en `dulia_session_data`.
-6. Pantalla vacantes → `GET /api/jobs/recommended/{session_id}` (si store vacío).
-7. Pantalla mercado → `GET /api/market/dashboard?city=...`.
-8. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
+5. Pantalla resultados → jobs + market + plan en store; `RadarMatch` con datos estimados (`radarMatchData.js`).
+6. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
+
+### Plan 2 (backend listo — integración pendiente en UI)
+
+Tras `POST /profile`, opcionalmente:
+
+1. `POST /api/profile/{session_id}/analyze`
+2. `POST /api/profile/{session_id}/action-plan`
+3. `GET /api/profile/{session_id}/radar-data` + `GET .../timeline-data`
+
+Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
 
 ### Claves `localStorage` (frontend)
 
@@ -58,7 +74,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 |-------|-----------|
 | `dulia_session_id` | UUID de sesión anónima |
 | `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `formSnapshot` |
-| `dulia_wizard_draft` | Borrador del wizard (paso + campos) si el usuario refresca en `/comenzar` |
+| `dulia_wizard_draft` | Borrador del wizard si refresca en `/comenzar` |
 
 > En mock, `GET /profile` devuelve 404 — el frontend confía en `dulia_session_data` tras completar el wizard.
 
@@ -381,6 +397,185 @@ Coach con contexto del perfil (`profiles`). System prompt en `docs/PROMPTS.md` (
 | `500` | Error interno Gemini/BD |
 
 > En mock responde siempre sin exigir perfil. En modo real: primero `POST /api/profile`, luego el chat.
+
+---
+
+### Plan 2 — Análisis, plan y gráficas
+
+Ver [PLAN2_BACKEND.md](PLAN2_BACKEND.md) y [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
+
+#### `POST /api/profile/{session_id}/analyze` ✅
+
+Genera análisis IA (fortalezas, gaps, nivel_preparacion). Prompt: `PROFILE_ANALYSIS` en `docs/PROMPTS.md`.
+
+**Query params:**
+
+| Param | Default | Descripción |
+|-------|---------|-------------|
+| `regenerate` | `false` | `true` → regenera aunque exista en BD |
+
+**Response 200:**
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "analisis": {
+    "fortalezas": [
+      { "area": "habilidades_tecnicas", "descripcion": "...", "nivel": "alto" }
+    ],
+    "debilidades": [
+      { "area": "experiencia", "descripcion": "...", "impacto": "medio" }
+    ],
+    "gaps_mercado": [
+      { "habilidad": "python", "demanda": "alta", "tu_nivel": "medio", "brecha": "..." }
+    ],
+    "oportunidades": [
+      { "sector": "tecnología", "razon": "...", "potencial": "alto", "accion_inmediata": "..." }
+    ],
+    "nivel_preparacion": {
+      "overall": 72,
+      "descripcion": "...",
+      "comparativa": "..."
+    },
+    "recomendaciones": ["...", "..."]
+  },
+  "generado_en": "2026-05-23T15:00:00Z"
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| `404` | Sin perfil previo (modo real) |
+| `429` | Rate limit (10/min) |
+| `500` | Error Gemini/BD |
+
+---
+
+#### `POST /api/profile/{session_id}/action-plan` ✅
+
+Plan 30-60-90 días. Prompt: `ACTION_PLAN_GENERATOR` en `docs/PROMPTS.md`. En modo real requiere análisis previo (`POST .../analyze`).
+
+**Query params:** `regenerate=true` (opcional)
+
+**Response 200:**
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "plan": {
+    "resumen_ejecutivo": "...",
+    "fase_30": {
+      "titulo": "Fundamentos y Preparación",
+      "objetivo": "...",
+      "acciones": [
+        {
+          "semana": 1,
+          "tarea": "Actualizar CV con proyectos recientes",
+          "duracion_estimada": "5 horas",
+          "recursos_necesarios": ["Plantilla CV"],
+          "como_verificar": "CV completo y profesional"
+        }
+      ],
+      "metricas": ["CV actualizado", "LinkedIn 100%"]
+    },
+    "fase_60": { "titulo": "...", "objetivo": "...", "acciones": [], "metricas": [] },
+    "fase_90": { "titulo": "...", "objetivo": "...", "acciones": [], "metricas": [] },
+    "recursos_recomendados": [
+      {
+        "tipo": "curso",
+        "nombre": "...",
+        "descripcion": "...",
+        "duracion": "40 horas",
+        "costo_aprox": "Gratis"
+      }
+    ],
+    "milestones": [
+      { "dia": 30, "logro": "CV actualizado con nuevas habilidades" },
+      { "dia": 60, "logro": "..." },
+      { "dia": 90, "logro": "..." }
+    ]
+  },
+  "generado_en": "2026-05-23T15:00:00Z"
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| `404` | Sin perfil o sin análisis previo (modo real) |
+| `429` | Rate limit |
+| `500` | Error Gemini/BD |
+
+---
+
+#### `GET /api/profile/{session_id}/radar-data` ✅ Fase 3
+
+Datos para gráfica radar (recharts): usuario vs mercado en 5 dimensiones 0-100.
+
+**Response 200:**
+```json
+{
+  "session_id": "...",
+  "radar": {
+    "usuario": {
+      "habilidades_tecnicas": 75,
+      "experiencia": 60,
+      "educacion": 80,
+      "ubicacion_modalidad": 90,
+      "preparacion": 72
+    },
+    "mercado_promedio": {
+      "habilidades_tecnicas": 70,
+      "experiencia": 60,
+      "educacion": 75,
+      "ubicacion_modalidad": 80,
+      "preparacion": 65
+    },
+    "descripcion_dimensiones": { "...": "..." }
+  }
+}
+```
+
+#### `GET /api/profile/{session_id}/timeline-data` ✅ Fase 3
+
+Timeline del plan de acción (días 0, 30, 60, 90).
+
+**Response 200:**
+```json
+{
+  "session_id": "...",
+  "timeline": {
+    "inicio": "2026-05-23",
+    "fases": [
+      {
+        "dia": 0,
+        "tipo": "inicio",
+        "titulo": "Hoy",
+        "descripcion": "...",
+        "metricas": { "score_promedio": 72, "vacantes_match": 2, "habilidades": 3 }
+      },
+      {
+        "dia": 30,
+        "tipo": "milestone",
+        "titulo": "Día 30: Fundamentos y Preparación",
+        "descripcion": "...",
+        "metricas_esperadas": { "score_promedio": 82, "vacantes_match": 7, "habilidades": 5 },
+        "acciones_completadas": ["Actualizar CV...", "..."]
+      }
+    ],
+    "proyeccion": {
+      "descripcion": "Con este plan, esperamos aumentar tu score...",
+      "tasa_crecimiento_semanal": 1.7
+    }
+  }
+}
+```
+
+**404** si no hay plan (`POST .../action-plan` primero en modo real). En mock devuelve plan simulado.
+
+**Flujo front sugerido:**
+```
+POST /profile → POST /analyze → POST /action-plan → GET /radar-data + GET /timeline-data
+```
+
+Ver mapeo recharts y ejemplo Axios en [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
 
 ---
 

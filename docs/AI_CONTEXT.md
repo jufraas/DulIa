@@ -34,6 +34,10 @@ Onboarding (/comenzar, 3 pasos)
      ▼
 POST /profile ──► GET jobs + market + plan (paralelo)
      │
+     │  Plan 2 (backend, UI pendiente):
+     │  POST .../analyze → POST .../action-plan → GET .../radar-data + timeline-data
+     ▼
+     │
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
      │  (score, plan 30d, Match Radar)
@@ -97,13 +101,18 @@ backend/
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
 | GET | `/api/market/dashboard` | ✅ |
 | POST | `/api/coach/chat` | ✅ |
-| GET | `/api/plan/{session_id}` | 🚧 contrato listo; backend pendiente |
+| GET | `/api/plan/{session_id}` | 🚧 contrato legacy; front con mock |
+| GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |
+| GET | `/api/profile/{session_id}/timeline-data` | ✅ Plan 2 F3 |
+| POST | `/api/profile/{session_id}/analyze` | ✅ Plan 2 F1 |
+| POST | `/api/profile/{session_id}/action-plan` | ✅ Plan 2 F1 |
 
 ## Archivos clave
 
 | Archivo | Para qué |
 |---------|----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | **Contrato API — fuente de verdad** |
+| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | **Handoff frontend — flujo Plan 2 + recharts** |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Módulos y flujo |
 | [SCHEMA.md](SCHEMA.md) | Tablas Supabase |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |
