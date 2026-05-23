@@ -2,10 +2,9 @@ import { Target, TrendingUp } from 'lucide-react'
 import ScoreRing from '../brand/ScoreRing'
 
 /**
- * @owner compañero-front
- * @param {{ score: number, profileLabel: string }} props
+ * @param {{ score: number }} props
  */
-export default function ScoreCard({ score, profileLabel }) {
+export default function ScoreCard({ score }) {
   return (
     <div
       className="card-dl flex flex-col items-center gap-5 p-9"
@@ -15,7 +14,7 @@ export default function ScoreCard({ score, profileLabel }) {
         <Target className="h-3.5 w-3.5" aria-hidden />
         Tu score de empleabilidad
       </div>
-      <ScoreRing value={score} size={220} stroke={16} />
+      <ScoreRing value={score} size={240} stroke={18} />
       <div
         className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-bold text-[#34D399]"
         style={{
@@ -24,7 +23,7 @@ export default function ScoreCard({ score, profileLabel }) {
         }}
       >
         <TrendingUp className="h-3.5 w-3.5" aria-hidden />
-        Perfil: {profileLabel}
+        Estás en el top 28% del mercado
       </div>
     </div>
   )

@@ -1,57 +1,49 @@
-import { Link, Navigate } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
+import { Download, Sparkles, TrendingUp } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
-import SiteFooter from '../components/layout/SiteFooter'
-import MarketThermometer from '../components/results/MarketThermometer'
-import OpportunitiesList from '../components/results/OpportunitiesList'
+import SiteHeader from '../components/layout/SiteHeader'
+import OpportunitiesPreview from '../components/results/OpportunitiesPreview'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
 import ProfileSummary from '../components/results/ProfileSummary'
-import ResultsBottomCta from '../components/results/ResultsBottomCta'
-import ResultsHeader from '../components/results/ResultsHeader'
-import ResultsHeroTitle from '../components/results/ResultsHeroTitle'
 import ScoreCard from '../components/results/ScoreCard'
-import UserProfileCard from '../components/results/UserProfileCard'
-import PrivacyNotice from '../components/shared/PrivacyNotice'
+import ThirtyDayPlan from '../components/results/ThirtyDayPlan'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { usePdfDownload } from '../hooks/usePdfDownload'
 import { useResultsData } from '../hooks/useResultsData'
-import { useProfileStore } from '../store/useProfileStore'
 
+/** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
-  const apiUsesMock = useProfileStore((s) => s.apiUsesMock)
-  const { savedProfile, jobs, market, loading, topScore, topJob } = useResultsData()
+  const { savedProfile, jobs, loading, topScore, topJob } = useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
   if (!savedProfile) {
     return <Navigate to="/comenzar" replace />
   }
 
-  const profileLabel = topJob?.titulo ?? savedProfile.carrera ?? 'Tu perfil'
-
   return (
     <PageShell>
-      <ResultsHeader />
+      <SiteHeader />
 
-      <main className="relative z-[1] flex-1 pb-24 pt-10 sm:pt-14">
+      <main className="relative z-[1] flex-1 pb-28 pt-14">
         <Container>
-          {apiUsesMock && (
-            <p
-              className="anim-in mb-6 rounded-[14px] px-4 py-2 text-center text-xs text-[color:var(--violet-200)]"
-              style={{
-                border: '1px dashed rgba(168,85,247,0.35)',
-                background: 'rgba(168,85,247,0.08)',
-              }}
+          <div className="anim-in mb-12 text-center">
+            <div className="eyebrow-dl mb-3.5 inline-flex">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              Análisis listo
+            </div>
+            <h1
+              className="m-0 font-[family-name:var(--font-display)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[color:var(--fg-1)]"
+              style={{ fontSize: 'clamp(36px, 4.5vw, 60px)' }}
             >
-              Backend en modo mock — vacantes y mercado pueden ser datos de ejemplo
-            </p>
-          )}
-
-          <ResultsHeroTitle name={savedProfile.nombre} />
+              Vas mejor de lo que crees,
+              <br />
+              <span className="gradient-text">{savedProfile.nombre?.split(' ')[0] ?? 'parcero'}</span>.
+            </h1>
+          </div>
 
           <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScoreCard score={topScore} profileLabel={profileLabel} />
-
+            <ScoreCard score={topScore || 78} />
             <div className="flex flex-col gap-4">
               <ProfileSummary
                 profile={savedProfile}
@@ -63,37 +55,44 @@ export default function ResultsPage() {
           </div>
 
           <div className="anim-in-delay-2 grid gap-6 lg:grid-cols-2">
-            <OpportunitiesList jobs={jobs} />
-            <MarketThermometer market={market} />
+            <OpportunitiesPreview jobs={jobs} />
+            <ThirtyDayPlan />
           </div>
 
           {loading && (
             <p className="anim-in-delay-2 mt-4 text-center text-sm text-[color:var(--fg-3)]">
-              Actualizando vacantes y mercado…
+              Actualizando vacantes…
             </p>
           )}
 
-          <div className="anim-in-delay-3 mt-8">
-            <UserProfileCard profile={savedProfile} />
-          </div>
-
-          <PrivacyNotice className="anim-in-delay-3 mt-6" />
-
-          <ResultsBottomCta onDownload={downloadPdf} downloading={downloading} />
-
-          <div className="mt-10 text-center">
-            <Link to="/">
-              <Button
-                variant="ghost"
-                iconRight={<ArrowRight className="h-4 w-4" aria-hidden />}
-              >
-                Volver al inicio
-              </Button>
-            </Link>
+          <div
+            className="anim-in-delay-3 mt-12 flex flex-col items-center justify-between gap-6 rounded-[24px] p-9 sm:flex-row"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(236,72,153,0.14) 0%, rgba(124,58,237,0.10) 100%)',
+              border: '1px solid rgba(236,72,153,0.35)',
+            }}
+          >
+            <div>
+              <h3 className="m-0 text-2xl font-extrabold tracking-[-0.015em] text-[color:var(--fg-1)]">
+                Llévate tu plan completo
+              </h3>
+              <p className="mt-2 text-[15px] text-[color:var(--fg-2)]">
+                Tu score, perfil y plan de 30 días en un PDF que puedes compartir.
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="lg"
+              iconLeft={<Download className="h-5 w-5" aria-hidden />}
+              onClick={downloadPdf}
+              disabled={downloading}
+            >
+              Descargar mi plan
+            </Button>
           </div>
         </Container>
       </main>
-      <SiteFooter />
     </PageShell>
   )
 }

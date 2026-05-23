@@ -40,6 +40,23 @@ export const mockJobs = [
     habilidades_match: ['excel', 'python'],
     habilidades_faltantes: ['power bi'],
   },
+  {
+    id: 'mock-job-3',
+    titulo: 'Trainee inversiones',
+    empresa: 'OportunidadXM',
+    ciudad: 'Remoto',
+    salario_min: 5000000,
+    salario_max: 5000000,
+    habilidades_requeridas: [],
+    sector: 'finanzas',
+    modalidad: 'remoto',
+    semaforo: 'red',
+    descripcion: 'Pide pago por capacitación inicial. Vacante bloqueada por DulIA.',
+    publicado_at: '2026-05-23T08:00:00Z',
+    score_compatibilidad: 0,
+    habilidades_match: [],
+    habilidades_faltantes: [],
+  },
 ]
 
 /** @type {import('../store/useProfileStore').MarketDashboard} */

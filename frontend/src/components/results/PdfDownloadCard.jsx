@@ -1,24 +1,26 @@
 import { Download } from 'lucide-react'
-import Button from '../ui/Button'
 
 /**
+ * PDF card con animaciones del kit ReBrand
  * @param {{ onDownload: () => void, downloading?: boolean }} props
  */
 export default function PdfDownloadCard({ onDownload, downloading = false }) {
   return (
     <div
-      className="relative overflow-hidden rounded-[24px] p-7"
+      className="pdf-card-anim relative overflow-hidden rounded-[24px] p-7"
       style={{
         background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 60%, #7C3AED 100%)',
+        backgroundSize: '200% 200%',
         boxShadow:
           '0 24px 60px rgba(236,72,153,0.45), 0 8px 20px rgba(168,85,247,0.40)',
       }}
     >
+      <div className="pdf-halo" aria-hidden />
       <div
         className="pointer-events-none absolute -right-10 -top-10 h-[200px] w-[200px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 70%)',
+            'radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 70%)',
         }}
         aria-hidden
       />
@@ -30,10 +32,22 @@ export default function PdfDownloadCard({ onDownload, downloading = false }) {
         }}
         aria-hidden
       />
+      <div className="pdf-shine" aria-hidden />
+      <span className="pdf-spark s1" aria-hidden>
+        ✦
+      </span>
+      <span className="pdf-spark s2" aria-hidden>
+        ✧
+      </span>
+      <span className="pdf-spark s3" aria-hidden>
+        ★
+      </span>
+      <span className="pdf-spark s4" aria-hidden>
+        ✦
+      </span>
 
       <div className="relative flex items-center gap-5">
-        <div
-          className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[18px] border border-white/20 text-white"
+        <div className="pdf-icon-bob flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[18px] border border-white/20 text-white"
           style={{ background: 'rgba(13,13,13,0.30)', backdropFilter: 'blur(8px)' }}
         >
           <Download className="h-8 w-8" strokeWidth={2.2} aria-hidden />
@@ -50,18 +64,21 @@ export default function PdfDownloadCard({ onDownload, downloading = false }) {
         </div>
       </div>
 
-      <Button
+      <button
         type="button"
-        variant="secondary"
-        className="relative mt-6 w-full justify-center border-white/20 bg-[rgba(13,13,13,0.85)] !text-white hover:!bg-[rgba(13,13,13,0.95)]"
+        className="pdf-btn relative mt-6 flex w-full items-center justify-center gap-2.5 rounded-2xl border-0 px-6 py-[18px] font-[family-name:var(--font-display)] text-[17px] font-bold text-white"
+        style={{ background: 'rgba(13,13,13,0.88)' }}
         onClick={onDownload}
         disabled={downloading}
-        iconLeft={<Download className="h-5 w-5" aria-hidden />}
       >
-        {downloading ? 'Generando PDF…' : 'Descargar PDF'}
-      </Button>
+        <span className="pdf-btn-sweep" aria-hidden />
+        <Download className="relative h-5 w-5" strokeWidth={2.2} aria-hidden />
+        <span className="relative">
+          {downloading ? 'Generando PDF…' : 'Descargar PDF · 2 MB'}
+        </span>
+      </button>
 
-      <div className="relative mt-3.5 flex flex-wrap justify-center gap-4 text-xs font-medium text-white/85">
+      <div className="relative z-[1] mt-3.5 flex flex-wrap justify-center gap-4 text-xs font-medium text-white/85">
         <span>✓ Sin marca de agua</span>
         <span>✓ Compártelo</span>
         <span>✓ 100% gratis</span>

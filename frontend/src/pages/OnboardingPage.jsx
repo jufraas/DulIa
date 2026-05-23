@@ -7,7 +7,6 @@ import WizardActions from '../components/onboarding/WizardActions'
 import WizardHeader from '../components/onboarding/WizardHeader'
 import WizardStepper from '../components/onboarding/WizardStepper'
 import PageShell from '../components/layout/PageShell'
-import SiteFooter from '../components/layout/SiteFooter'
 import PrivacyNotice from '../components/shared/PrivacyNotice'
 import Container from '../components/ui/Container'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
@@ -77,7 +76,6 @@ export default function OnboardingPage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
     </PageShell>
   )
 }

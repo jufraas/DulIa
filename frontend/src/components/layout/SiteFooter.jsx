@@ -8,9 +8,10 @@ const CONTACT_PHONE = '3009752198'
 
 const quickLinks = [
   { href: '/', label: 'Inicio', router: true },
+  { href: '/sobre', label: 'Sobre DulIA', router: true },
   { href: '/comenzar', label: 'Comenzar', router: true },
   { href: '/#features', label: 'Cómo funciona', router: false },
-  { href: '/#modelo', label: 'Modelo de negocio', router: false },
+  { href: '/sobre#modelo', label: 'Modelo de negocio', router: false },
 ]
 
 export default function SiteFooter() {

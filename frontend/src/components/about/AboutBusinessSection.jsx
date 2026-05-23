@@ -29,7 +29,7 @@ const pillars = [
   },
 ]
 
-export default function BusinessModelSection() {
+export default function AboutBusinessSection() {
   return (
     <Section
       id="modelo"
@@ -51,15 +51,6 @@ export default function BusinessModelSection() {
           </li>
         ))}
       </ul>
-      <p
-        className="mt-8 rounded-[14px] px-4 py-3 text-center text-sm text-[color:var(--violet-200)]"
-        style={{
-          border: '1px dashed rgba(168,85,247,0.35)',
-          background: 'rgba(168,85,247,0.08)',
-        }}
-      >
-        MVP del hackathon: onboarding + análisis con IA + resultados y PDF descargable.
-      </p>
     </Section>
   )
 }

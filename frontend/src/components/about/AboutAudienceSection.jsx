@@ -23,7 +23,7 @@ const audiences = [
   },
 ]
 
-export default function AudienceSection() {
+export default function AboutAudienceSection() {
   return (
     <Section
       id="para-quien"

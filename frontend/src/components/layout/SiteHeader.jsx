@@ -1,18 +1,14 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import DuliaLogo from '../brand/DuliaLogo'
 import Button from '../ui/Button'
 
-const navLinks = [
-  { href: '#problema', label: 'Problema' },
-  { href: '#features', label: 'Cómo funciona' },
-  { href: '#para-quien', label: 'Para quién' },
-  { href: '#modelo', label: 'Modelo' },
-]
-
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const location = useLocation()
+
+  const featuresHref = location.pathname === '/' ? '#features' : '/#features'
 
   return (
     <header className="dh">
@@ -22,11 +18,9 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="dh-nav hidden md:flex" aria-label="Principal">
-          {navLinks.map((link) => (
-            <a key={link.href} href={link.href}>
-              {link.label}
-            </a>
-          ))}
+          <a href={featuresHref}>Cómo funciona</a>
+          <Link to="/vacantes">Oportunidades</Link>
+          <Link to="/sobre">Sobre DulIA</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -55,17 +49,33 @@ export default function SiteHeader() {
           style={{ background: 'rgba(13,13,13,0.95)' }}
         >
           <ul className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            <li>
+              <a
+                href={featuresHref}
+                className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
+                onClick={() => setOpen(false)}
+              >
+                Cómo funciona
+              </a>
+            </li>
+            <li>
+              <Link
+                to="/vacantes"
+                className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
+                onClick={() => setOpen(false)}
+              >
+                Oportunidades
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/sobre"
+                className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
+                onClick={() => setOpen(false)}
+              >
+                Sobre DulIA
+              </Link>
+            </li>
             <li className="pt-2">
               <Link to="/comenzar" onClick={() => setOpen(false)}>
                 <Button variant="primary" className="w-full justify-center">

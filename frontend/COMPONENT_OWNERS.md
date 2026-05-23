@@ -3,59 +3,50 @@
 Estructura para trabajar en paralelo sin conflictos.  
 **Regla:** edita solo los archivos de tu zona. Las pages solo orquestan imports.
 
-## Migue — onboarding, formulario, API
+## Migue — Sobre DulIA (+ onboarding/API si aplica)
 
 | Archivo | Descripción |
 |---------|-------------|
-| `src/components/onboarding/*` | Wizard completo (4 pasos) |
-| `src/hooks/useOnboardingForm.js` | Estado, validación y POST profile |
-| `src/utils/buildProfilePayload.js` | Payload JSON → POST /api/profile |
-| `src/utils/session.js` | session_id en localStorage |
-| `src/utils/validateOnboardingStep.js` | Validación por paso |
-| `src/utils/formatProfileLabels.js` | Labels legibles del perfil |
-| `src/constants/onboardingOptions.js` | Opciones de selects |
-| `src/constants/emptyForm.js` | Estado inicial del form |
-| `src/services/api.js` | Cliente Axios (`VITE_API_URL`) |
-| `src/services/mockData.js` | Fallback cuando backend usa mock |
-| `src/components/shared/PrivacyNotice.jsx` | Aviso sin sesión |
+| `src/pages/AboutPage.jsx` | Orquestador fino — **tu pantalla principal** |
+| `src/components/about/*` | Secciones de Sobre DulIA (hero, problema, audiencia, modelo, equipo, CTA) |
+| `src/components/onboarding/*` | Wizard (si sigues en API) |
+| `src/hooks/useOnboardingForm.js` | POST profile + jobs |
+| `src/services/api.js` | Cliente Axios |
 | `src/store/useProfileStore.js` | Estado global (coordinar cambios) |
 
-## Compañero — resultados, PDF, landing
+## Compañero — landing, wizard UI, resultados, vacantes
 
 | Archivo | Descripción |
 |---------|-------------|
-| `src/components/results/*` | Pantalla de resultados |
-| `src/hooks/usePdfDownload.js` | Descarga PDF |
-| `src/hooks/useResultsData.js` | Carga jobs + market |
-| `src/utils/generateAnalysisPdf.js` | Generación jsPDF |
-| `src/components/welcome/*` | Landing: kit ReBrand + secciones pitch (problema, audiencia, modelo) |
-| `src/components/layout/SiteHeader.jsx` | Header landing |
+| `src/components/welcome/*` | Pantalla 01 — Landing (kit ReBrand) |
+| `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
+| `src/components/results/*` | Pantalla 03 — Resultados |
+| `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer |
 
 ## Compartido (avisar antes de tocar)
 
 | Archivo | Notas |
 |---------|-------|
-| `src/pages/OnboardingPage.jsx` | Solo imports |
-| `src/pages/ResultsPage.jsx` | Solo imports |
-| `src/pages/WelcomePage.jsx` | Solo imports |
-| `src/App.jsx` | Rutas |
+| `src/pages/WelcomePage.jsx` | Landing — compañero |
+| `src/pages/OnboardingPage.jsx` | Wizard |
+| `src/pages/ResultsPage.jsx` | Resultados |
+| `src/App.jsx` | Rutas (`/sobre` = Migue) |
 | `src/index.css` / `src/styles/*` | Design system |
+
+## Rutas del kit
+
+| Ruta | Pantalla | Dueño |
+|------|----------|-------|
+| `/` | Landing | Compañero |
+| `/sobre` | **Sobre DulIA** | **Migue** |
+| `/comenzar` | Wizard | Compartido |
+| `/resultados` | Resultados | Compañero |
+| `/vacantes` | Vacantes | Compañero |
 
 ## Flujo Git
 
 1. `git checkout FRONT && git pull`
-2. Implementar en **tus** archivos
+2. Implementar en **tus** archivos (`components/about/*`)
 3. `npm run build` antes de push
 4. Merge a `FRONT` → luego `main`
-
-## Hecho vs pendiente
-
-| Pieza | Estado |
-|-------|--------|
-| POST /api/profile (JSON) + session_id | ✅ |
-| GET jobs + market dashboard | ✅ |
-| UserProfileCard + OpportunitiesList + MarketThermometer | ✅ |
-| PDF con jobs y termómetro | ✅ |
-| Deploy Vercel | 🔲 — root `frontend`, env `VITE_API_URL` |
-| Coach / chat (Fase 8) | 🔲 pendiente backend |

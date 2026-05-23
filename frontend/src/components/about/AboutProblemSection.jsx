@@ -23,7 +23,7 @@ const problems = [
   },
 ]
 
-export default function ProblemSection() {
+export default function AboutProblemSection() {
   return (
     <Section
       id="problema"
