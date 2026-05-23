@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 
 /**
- * @owner compañero-front
+ * @owner joufra
  * @param {{ skills: string[], limit?: number }} props
  */
 export default function SkillsChips({ skills, limit = 4 }) {

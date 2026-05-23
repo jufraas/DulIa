@@ -23,4 +23,6 @@ export const EMPTY_ONBOARDING_FORM = {
   salary_max: '',
   tools: '',
   portfolio_url: '',
+  cv_file_name: '',
+  cv_parsed: '',
 }

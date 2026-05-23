@@ -5,6 +5,7 @@ import AboutAudienceSection from '../components/about/AboutAudienceSection'
 import AboutBusinessSection from '../components/about/AboutBusinessSection'
 import AboutCta from '../components/about/AboutCta'
 import AboutHero from '../components/about/AboutHero'
+import AboutHowSection from '../components/about/AboutHowSection'
 import AboutProblemSection from '../components/about/AboutProblemSection'
 import AboutTeamSection from '../components/about/AboutTeamSection'
 
@@ -20,6 +21,7 @@ export default function AboutPage() {
         <AboutHero />
         <AboutProblemSection />
         <AboutAudienceSection />
+        <AboutHowSection />
         <AboutBusinessSection />
         <AboutTeamSection />
         <AboutCta />

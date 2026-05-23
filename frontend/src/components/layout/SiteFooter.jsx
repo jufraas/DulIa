@@ -96,7 +96,7 @@ export default function SiteFooter() {
           <p className="caption">
             Hecho con{' '}
             <span style={{ color: 'var(--magenta-400)' }}>♥</span> en Barranquilla
-            · krl0s · Migue · Jose · Jufra
+            · krl0s · Migue · Jose · Joufra
           </p>
         </div>
       </Container>

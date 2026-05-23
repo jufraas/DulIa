@@ -9,18 +9,24 @@ import ScoreCard from '../components/results/ScoreCard'
 import ThirtyDayPlan from '../components/results/ThirtyDayPlan'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import SessionLoading from '../components/shared/SessionLoading'
 import { usePdfDownload } from '../hooks/usePdfDownload'
 import { useResultsData } from '../hooks/useResultsData'
-import RadarMatch from '../components/results/RadarMatch'
+import { useSessionHydration } from '../hooks/useSessionHydration'
 
 /** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
+  const { ready } = useSessionHydration()
   const { savedProfile, jobs, loading, topScore, topJob } = useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
-if (!savedProfile) {
-  return <Navigate to="/comenzar" replace />
-}
+  if (!ready) {
+    return <SessionLoading />
+  }
+
+  if (!savedProfile) {
+    return <Navigate to="/comenzar" replace />
+  }
 
   return (
     <PageShell>
@@ -59,7 +65,6 @@ if (!savedProfile) {
             <OpportunitiesPreview jobs={jobs} />
             <ThirtyDayPlan />
           </div>
-          <RadarMatch />
 
           {loading && (
             <p className="anim-in-delay-2 mt-4 text-center text-sm text-[color:var(--fg-3)]">

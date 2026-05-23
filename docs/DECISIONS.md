@@ -8,7 +8,7 @@
 |-------|------|----------|---------|
 | 2026-05-23 | general | Sin login — session_id anónimo | [decisions/2026-05-23-sin-login-flujo-anonimo.md](./decisions/2026-05-23-sin-login-flujo-anonimo.md) |
 | 2026-05-23 | full-stack | API session_id + jobs + market | [decisions/2026-05-23-api-session-jobs-market.md](./decisions/2026-05-23-api-session-jobs-market.md) |
-| 2026-05-23 | full-stack | CV PDF + MarkItDown (diferida) | [decisions/2026-05-23-cv-pdf-markitdown.md](./decisions/2026-05-23-cv-pdf-markitdown.md) |
+| 2026-05-23 | full-stack | CV PDF + MarkItDown (`parse-cv`) | [decisions/2026-05-23-cv-pdf-markitdown.md](./decisions/2026-05-23-cv-pdf-markitdown.md) |
 | 2026-05-23 | backend | FastAPI | [decisions/2026-05-23-backend-fastapi.md](./decisions/2026-05-23-backend-fastapi.md) |
 | 2026-05-23 | frontend | React + Vite + Tailwind | [decisions/2026-05-23-frontend-react-vite-tailwind.md](./decisions/2026-05-23-frontend-react-vite-tailwind.md) |
 | 2026-05-23 | ia | Google Gemini | [decisions/2026-05-23-ia-gemini.md](./decisions/2026-05-23-ia-gemini.md) |
@@ -16,6 +16,7 @@
 | 2026-05-23 | frontend | Mock fallback API | [decisions/2026-05-23-frontend-mock-fallback-api.md](./decisions/2026-05-23-frontend-mock-fallback-api.md) |
 | 2026-05-23 | frontend | React Router (SPA) | [decisions/2026-05-23-frontend-react-router-flujo-spa.md](./decisions/2026-05-23-frontend-react-router-flujo-spa.md) |
 | 2026-05-23 | frontend | Zustand estado perfil | [decisions/2026-05-23-frontend-zustand-estado-perfil.md](./decisions/2026-05-23-frontend-zustand-estado-perfil.md) |
+| 2026-05-23 | frontend | Rehidratación sesión (refresh) | [decisions/2026-05-23-frontend-session-rehydration.md](./decisions/2026-05-23-frontend-session-rehydration.md) |
 
 ## Decisiones stack (resumen)
 
@@ -40,3 +41,7 @@
 3. Añádela al índice en [`decisions/README.md`](./decisions/README.md) y aquí.
 
 Ver índice completo: **[decisions/README.md](./decisions/README.md)**
+
+## Roadmap post-MVP
+
+Ideas fuera del MVP (login + timeline del plan, pulido pitch, spinoff emprendimiento): **[EXTRA_IDEAS/README.md](./EXTRA_IDEAS/README.md)**

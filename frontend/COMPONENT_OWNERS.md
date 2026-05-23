@@ -9,12 +9,19 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------------|
 | `src/pages/AboutPage.jsx` | Orquestador fino — **tu pantalla principal** |
 | `src/components/about/*` | Secciones de Sobre DulIA (hero, problema, audiencia, modelo, equipo, CTA) |
-| `src/components/onboarding/*` | Wizard (si sigues en API) |
-| `src/hooks/useOnboardingForm.js` | POST profile + jobs |
+| `src/components/onboarding/*` | Wizard + subida CV (`CvUploadZone`) |
+| `src/hooks/useOnboardingForm.js` | POST profile + jobs + borrador wizard |
+| `src/hooks/useSessionHydration.js` | Rehidratación de sesión |
 | `src/services/api.js` | Cliente Axios |
-| `src/store/useProfileStore.js` | Estado global (coordinar cambios) |
+| `src/services/sessionHydration.js` | Lógica rehidratación (cache + GET profile) |
+| `src/services/mockCvPrefill.js` | Fallback parse-cv offline |
+| `src/services/mockCoachChat.js` | Fallback coach offline |
+| `src/services/mockPlan.js` | Fallback plan 30d offline |
+| `src/utils/planDisplay.js` | Normaliza plan API → UI |
+| `src/store/useProfileStore.js` | Estado global + persistencia cache |
+| `src/utils/sessionCache.js` | Lectura/escritura localStorage sesión |
 
-## Compañero — landing, resultados, vacantes
+## Joufra — landing, resultados, vacantes
 
 | Archivo | Descripción |
 |---------|-------------|
@@ -22,7 +29,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/LandingFooter.jsx` | Footer landing |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Pantalla 03 — Resultados (ScoreCard, PdfDownloadCard, …) |
+| `src/components/results/*` | Pantalla 03 — Resultados (ScoreCard, ThirtyDayPlan, PdfDownloadCard, …) |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 
@@ -30,7 +37,7 @@ Estructura para trabajar en paralelo sin conflictos.
 
 | Archivo | Notas |
 |---------|-------|
-| `src/pages/WelcomePage.jsx` | Landing — compañero |
+| `src/pages/WelcomePage.jsx` | Landing — Joufra |
 | `src/pages/OnboardingPage.jsx` | Wizard |
 | `src/pages/ResultsPage.jsx` | Resultados |
 | `src/App.jsx` | Rutas (`/sobre` = Migue) |
@@ -48,11 +55,17 @@ Contenido movido al kit ReBrand o a `/sobre`; no importados en la app:
 
 | Ruta | Pantalla | Dueño |
 |------|----------|-------|
-| `/` | Landing | Compañero |
+| `/` | Landing | Joufra |
 | `/sobre` | **Sobre DulIA** | **Migue** |
 | `/comenzar` | Wizard | Compartido |
-| `/resultados` | Resultados | Compañero |
-| `/vacantes` | Vacantes | Compañero |
+| `/resultados` | Resultados | Joufra |
+| `/vacantes` | Vacantes | Joufra |
+
+## Post-MVP y pitch
+
+Pulido pre-pitch, burbuja coach, termómetro, login + timeline del plan: [docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
+
+**Joufra — usar para chat:** `import { postCoachChat } from '../services/api'` (zona Migue, ya implementado).
 
 ## Flujo Git
 

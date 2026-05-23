@@ -4,6 +4,8 @@
 
 DulIA es una plataforma web que usa inteligencia artificial para orientar a jóvenes colombianos en su desarrollo profesional: sugiere rutas de carrera, conecta con oportunidades laborales reales y entrega feedback personalizado sobre su perfil.
 
+**Flujo MVP:** landing → wizard (con subida opcional de CV PDF) → resultados con score y vacantes → panel semáforo → PDF descargable. Sesión anónima por `session_id` con persistencia al refresh.
+
 ---
 
 ## Stack tecnológico
@@ -69,9 +71,8 @@ python main.py
 |--------|-----|
 | Carlos (krl0s) | Backend — FastAPI, integración IA |
 | Migue | Frontend — Sobre DulIA (`/sobre`), onboarding/API |
-| Compañero | Frontend — Landing, resultados, vacantes |
+| Joufra | Frontend — Landing, resultados, vacantes · IA + pitch |
 | Jose | Data Pipeline — scrapers Python |
-| Jufra | IA + integración general, Pitch |
 
 ---
 
@@ -87,3 +88,6 @@ python main.py
 | [DECISIONS.md](docs/DECISIONS.md) | Log de decisiones técnicas |
 | [PROMPTS.md](docs/PROMPTS.md) | System prompts de Gemini |
 | [frontend/COMPONENT_OWNERS.md](frontend/COMPONENT_OWNERS.md) | División de trabajo frontend |
+| [EXTRA_IDEAS/README.md](docs/EXTRA_IDEAS/README.md) | Ideas post-MVP e índice |
+| [EXTRA_IDEAS/post-mvp-roadmap.md](docs/EXTRA_IDEAS/post-mvp-roadmap.md) | Roadmap fase 2 (login, timeline, pitch) |
+| [EXTRA_IDEAS/ideallamativamacondo.md](docs/EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer |
