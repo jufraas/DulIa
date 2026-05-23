@@ -1,17 +1,20 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import RevealOnScroll from '../motion/RevealOnScroll'
 import Button from '../ui/Button'
 
 /** CTA final — card embebida dentro de FeaturesSection (kit ReBrand) */
 export default function CTABanner() {
   return (
-    <div
+    <RevealOnScroll
       className="card-dl mt-16 px-6 py-12 text-center sm:px-14 sm:py-14"
       style={{
         background:
           'linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(236,72,153,0.10) 100%)',
         borderColor: 'rgba(168,85,247,0.45)',
       }}
+      delay={0.12}
+      y={28}
     >
       <h2
         className="m-0 font-[family-name:var(--font-display)] font-extrabold leading-[1.15] tracking-[-0.02em] text-[color:var(--fg-1)]"
@@ -32,6 +35,6 @@ export default function CTABanner() {
           </Button>
         </Link>
       </div>
-    </div>
+    </RevealOnScroll>
   )
 }

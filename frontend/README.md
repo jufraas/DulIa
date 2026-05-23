@@ -2,6 +2,8 @@
 
 SPA React + Vite para el coach de carrera DulIA (Barranqui-IA 2026). UI alineada al kit **ReBrand** con pantallas separadas.
 
+**Animaciones landing:** splash inicial + Framer Motion (`RevealOnScroll`) — ver [decisión](../docs/decisions/2026-05-23-frontend-landing-animations.md).
+
 ## Arrancar
 
 ```bash
@@ -28,7 +30,7 @@ VITE_API_URL=http://localhost:8000/api
 
 | Ruta | Pantalla | Descripción |
 |------|----------|-------------|
-| `/` | Landing | Hero + splash + footer |
+| `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF opcional |
 | `/resultados` | Resultados | Score, perfil, top jobs, plan 30d, PDF |
@@ -62,7 +64,9 @@ Si el backend no responde, fallbacks en `src/services/mock*.js`.
 ```
 src/
 ├── pages/
-├── components/         # about/, welcome/, onboarding/, results/, vacancies/, …
+├── components/         # about/, welcome/, onboarding/, results/, vacancies/, motion/, …
+├── components/motion/
+│   └── RevealOnScroll.jsx   # Framer Motion: mount (hero) | scroll (secciones)
 ├── hooks/              # useOnboardingForm, useResultsData, useSessionHydration, …
 ├── services/
 │   ├── api.js
@@ -74,6 +78,17 @@ src/
 ```
 
 Referencia de diseño (no producción): `ReBrand/DulIA Design System (1)/`.
+
+## Animaciones (`/`)
+
+| Capa | Implementación |
+|------|------------------|
+| Splash | `LandingSplash.jsx` + CSS (`dulia-kit.css`) — fases en `WelcomePage.jsx` |
+| Hero al cargar | `RevealOnScroll` con `trigger="mount"`; entra cuando termina el splash |
+| Features / CTA | `RevealOnScroll` con `trigger="scroll"` (`whileInView`) |
+| Dependencia | `framer-motion` — respeta `prefers-reduced-motion` |
+
+Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../docs/decisions/2026-05-23-frontend-landing-animations.md).
 
 ## División de trabajo
 

@@ -36,6 +36,7 @@ Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEM
 | 2026-05-23 | [2026-05-23-frontend-react-router-flujo-spa.md](./2026-05-23-frontend-react-router-flujo-spa.md) | Rutas SPA (5 pantallas) |
 | 2026-05-23 | [2026-05-23-frontend-zustand-estado-perfil.md](./2026-05-23-frontend-zustand-estado-perfil.md) | Zustand para perfil y resultados |
 | 2026-05-23 | [2026-05-23-frontend-session-rehydration.md](./2026-05-23-frontend-session-rehydration.md) | Cache local + GET profile al refresh |
+| 2026-05-23 | [2026-05-23-frontend-landing-animations.md](./2026-05-23-frontend-landing-animations.md) | Splash + Framer Motion (`RevealOnScroll`) |
 
 Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_OWNERS.md).
 

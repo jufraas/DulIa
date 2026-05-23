@@ -46,6 +46,7 @@ Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
 - Estado UI en Zustand; cache en `dulia_session_data` para sobrevivir refresh.
 - Borrador del wizard en `dulia_wizard_draft` si refresca en `/comenzar`.
 - UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
+- **Landing motion:** `framer-motion` + `RevealOnScroll` (splash en `WelcomePage`, hero `trigger="mount"`, secciones `trigger="scroll"`).
 
 ## Rutas y dueños frontend
 
@@ -106,6 +107,7 @@ backend/
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |
 | [PROMPTS.md](PROMPTS.md) | Prompts Gemini |
 | [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | División frontend |
+| [decisions/2026-05-23-frontend-landing-animations.md](decisions/2026-05-23-frontend-landing-animations.md) | Splash + scroll animations landing |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Fase 2: login, timeline plan, pulido pitch |
 | [EXTRA_IDEAS/ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer (no MVP) |
 

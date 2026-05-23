@@ -216,8 +216,8 @@ button { font-family: inherit; cursor: pointer; }
   to { opacity: 0; visibility: hidden; }
 }
 @keyframes splashHaloPulse {
-  0%, 100% { opacity: 0.45; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.1); }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.88; }
 }
 
 .landing-splash {
@@ -229,9 +229,11 @@ button { font-family: inherit; cursor: pointer; }
   justify-content: center;
   background: var(--bg-1, #0d0d0d);
   cursor: pointer;
+  contain: layout style paint;
+  will-change: opacity;
 }
 .landing-splash--out {
-  animation: splashFadeOut 0.5s var(--ease-out) forwards;
+  animation: splashFadeOut 0.4s var(--ease-out) forwards;
   pointer-events: none;
 }
 .landing-splash__atmosphere {
@@ -251,6 +253,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   text-align: center;
   padding: 24px;
+  transform: translateZ(0);
 }
 .landing-splash__halo {
   position: absolute;
@@ -264,10 +267,12 @@ button { font-family: inherit; cursor: pointer; }
   filter: blur(24px);
   pointer-events: none;
   animation: splashHaloPulse 2.2s ease-in-out infinite;
+  will-change: opacity;
 }
 .landing-splash__logo {
   position: relative;
-  animation: splashLogoIn 0.75s var(--ease-out) both;
+  animation: splashLogoIn 0.55s var(--ease-out) both;
+  will-change: transform, opacity;
 }
 .landing-splash__tagline {
   position: relative;
@@ -277,7 +282,7 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--fg-2);
-  animation: splashTaglineIn 0.6s var(--ease-out) 0.2s both;
+  animation: splashTaglineIn 0.45s var(--ease-out) 0.12s both;
 }
 .landing-splash__hint {
   position: relative;
@@ -287,8 +292,9 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--fg-3);
-  animation: splashTaglineIn 0.6s var(--ease-out) 0.35s both;
+  animation: splashTaglineIn 0.45s var(--ease-out) 0.22s both;
 }
+
 .landing-splash-hidden {
   visibility: hidden;
   overflow: hidden;

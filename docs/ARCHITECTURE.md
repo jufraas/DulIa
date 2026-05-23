@@ -30,7 +30,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 
 | Ruta | Contenido |
 |------|-----------|
-| `/` | Landing — pitch, features, CTA |
+| `/` | Landing — splash, pitch, features con scroll reveal, CTA |
 | `/sobre` | Sobre DulIA — problema, audiencia, modelo, equipo |
 | `/comenzar` | Wizard onboarding (3 pasos) |
 | `/resultados` | Score, resumen perfil, preview vacantes, plan 30d, PDF |
@@ -48,6 +48,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 - PDF (jsPDF): perfil + vacantes + mercado (plan en PDF pendiente).
 - **Coach UI** pendiente (Joufra); API `postCoachChat()` lista.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
+- **Motion landing:** `framer-motion` vía `components/motion/RevealOnScroll.jsx`; splash orquestado en `WelcomePage` (ver [decisión landing animations](decisions/2026-05-23-frontend-landing-animations.md)).
 
 ### `backend/`
 
@@ -77,7 +78,7 @@ backend/
 
 ## Flujo principal (happy path)
 
-0. Usuario ve **landing** (`/`) o **Sobre DulIA** (`/sobre`).
+0. Usuario ve **landing** (`/`): splash logo → hero en cascada → scroll con reveal en features/CTA; o **Sobre DulIA** (`/sobre`).
 1. Completa **onboarding** (`/comenzar`, 3 pasos).
 2. Frontend envía `POST /api/profile` con `session_id`.
 3. Backend estructura perfil (Gemini) y guarda en `profiles`.
@@ -117,7 +118,8 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 ```
 frontend/src/
 ├── pages/           # WelcomePage, AboutPage, OnboardingPage, ResultsPage, VacanciesPage
-├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/
+├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/, motion/
+│   └── motion/RevealOnScroll.jsx   # whileInView (scroll) | animate (mount)
 ├── hooks/           # useOnboardingForm, useResultsData, useSessionHydration, usePdfDownload
 ├── services/        # api.js, mock*.js, sessionHydration.js
 ├── store/           # useProfileStore.js (profile, jobs, market, plan)

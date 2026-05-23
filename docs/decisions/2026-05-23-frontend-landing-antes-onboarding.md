@@ -31,3 +31,4 @@ Implementar una **página de bienvenida** (`WelcomePage`) como paso 0 del flujo,
 - Rutas: `/` = landing, `/comenzar` = formulario.
 - Componentes en `frontend/src/components/welcome/`.
 - Header de landing usa anclas internas; onboarding tiene header propio con “Volver”.
+- Animaciones (splash + Framer Motion): [2026-05-23-frontend-landing-animations.md](./2026-05-23-frontend-landing-animations.md).

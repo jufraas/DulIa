@@ -17,6 +17,7 @@
 | 2026-05-23 | frontend | React Router (SPA) | [decisions/2026-05-23-frontend-react-router-flujo-spa.md](./decisions/2026-05-23-frontend-react-router-flujo-spa.md) |
 | 2026-05-23 | frontend | Zustand estado perfil | [decisions/2026-05-23-frontend-zustand-estado-perfil.md](./decisions/2026-05-23-frontend-zustand-estado-perfil.md) |
 | 2026-05-23 | frontend | Rehidratación sesión (refresh) | [decisions/2026-05-23-frontend-session-rehydration.md](./decisions/2026-05-23-frontend-session-rehydration.md) |
+| 2026-05-23 | frontend | Animaciones landing (splash + Framer Motion) | [decisions/2026-05-23-frontend-landing-animations.md](./decisions/2026-05-23-frontend-landing-animations.md) |
 
 ## Decisiones stack (resumen)
 
@@ -33,6 +34,7 @@
 | 2026-05-23 | Landing antes del onboarding | Pitch para jurado | Ir directo al formulario |
 | 2026-05-23 | Mock local en frontend | Demo sin backend | Hardcode en componentes |
 | 2026-05-23 | UI kit ReBrand — 5 rutas | Pantallas separadas alineadas al diseño | Monolito landing+about |
+| 2026-05-23 | Framer Motion en landing | Splash + scroll reveal sin scroll-jacking | Solo CSS anim-in |
 
 ## Cómo agregar una decisión
 

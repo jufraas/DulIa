@@ -25,7 +25,8 @@ Estructura para trabajar en paralelo sin conflictos.
 
 | Archivo | Descripción |
 |---------|-------------|
-| `src/components/welcome/*` | Pantalla 01 — Landing (kit ReBrand) |
+| `src/components/welcome/*` | Pantalla 01 — Landing (kit ReBrand): splash, hero, features |
+| `src/components/motion/RevealOnScroll.jsx` | Framer Motion — scroll reveal y entrada al montar |
 | `src/components/layout/LandingFooter.jsx` | Footer landing |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
@@ -37,7 +38,7 @@ Estructura para trabajar en paralelo sin conflictos.
 
 | Archivo | Notas |
 |---------|-------|
-| `src/pages/WelcomePage.jsx` | Landing — Joufra |
+| `src/pages/WelcomePage.jsx` | Landing — splash + fases (`splash`/`exit`/`done`) |
 | `src/pages/OnboardingPage.jsx` | Wizard |
 | `src/pages/ResultsPage.jsx` | Resultados |
 | `src/App.jsx` | Rutas (`/sobre` = Migue) |

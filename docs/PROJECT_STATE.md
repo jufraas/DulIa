@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Coach API, plan 30d (front), mocks unificados, ESLint, roadmap post-MVP documentado.
+2026-05-23 — Landing con splash + scroll animations (Framer Motion), coach API, plan 30d, ESLint, roadmap post-MVP.
 
 ## Estado por módulo
 
@@ -24,7 +24,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 | Ruta | Pantalla | Dueño | Estado |
 |------|----------|-------|--------|
-| `/` | Landing (Hero + splash + footer) | Joufra | ✅ |
+| `/` | Landing (splash + hero + features scroll reveal) | Joufra / Migue | ✅ |
 | `/sobre` | Sobre DulIA | Migue | ✅ |
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
 | `/resultados` | Score, perfil, top jobs, plan 30d, PDF | Joufra | 🚧 falta termómetro + chat UI |
@@ -35,6 +35,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Pieza | Estado | Notas |
 |-------|--------|-------|
 | Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
+| Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Integración Axios → API | ✅ | `services/api.js` + fallbacks mock |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
