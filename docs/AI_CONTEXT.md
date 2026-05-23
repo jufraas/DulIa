@@ -30,7 +30,7 @@ Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos
 
 ## Estado actual
 
-**Fase 1 completa.** Backend con estructura profesional lista. Fase 2 en curso: crear tablas en Supabase (proyecto DulIA) e insertar mock data con Gemini.
+**Fase 2 parcial completa.** 4 tablas creadas en Supabase proyecto DulIA (`ikyrbkbhxpoycverkdqh`): `profiles`, `jobs`, `companies`, `scoring_history`. Mock data queda a cargo del pipeline. Siguiente: Fase 3 — modelos Pydantic.
 
 ## Estructura del backend
 

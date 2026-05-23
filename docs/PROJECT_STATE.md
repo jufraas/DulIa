@@ -15,7 +15,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Frontend (React+Vite) | 🔲 No iniciado | Esperando contrato de endpoints (ver ENDPOINTS.md) |
 | Pipeline | 🔁 Cambio de alcance | Scrapers pospuestos → mock data + APIs públicas (Adzuna/Jooble) |
 | Integración Gemini | 🔲 No iniciado | Cliente listo en `app/db/gemini.py`, faltan prompts |
-| Base de datos | 🚧 Fase 2 en curso | Schema diseñado en SCHEMA.md, tablas pendientes de crear |
+| Base de datos | 🚧 Fase 2 parcial | 4 tablas creadas en Supabase (profiles, jobs, companies, scoring_history). Mock data pendiente — a cargo del pipeline |
 | Deploy | 🔲 No iniciado | Espera MVP funcional |
 
 ## Leyenda
@@ -48,7 +48,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Próximos pasos inmediatos
 
-1. Confirmar proyecto Supabase correcto (DulIA, no GravityClaw)
-2. Crear tablas en Supabase vía MCP
-3. Generar 30-50 vacantes mock con Gemini e insertar
+1. ✅ Proyecto Supabase DulIA confirmado (id: ikyrbkbhxpoycverkdqh)
+2. ✅ Tablas creadas: profiles, jobs, companies, scoring_history
+3. Mock data → a cargo del equipo de pipeline (insertar en tabla `jobs`)
 4. Continuar Fase 3 (modelos Pydantic)

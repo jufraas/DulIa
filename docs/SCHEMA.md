@@ -1,7 +1,7 @@
 # SCHEMA — Base de datos DulIA
 
-> **Estado:** Propuesta lista para revisión del equipo — pendiente de aprobación antes de ejecutar en Supabase.
-> **BD:** PostgreSQL 17 vía Supabase (proyecto GravityClaw)
+> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Mock data pendiente, a cargo del pipeline.
+> **BD:** PostgreSQL 17 vía Supabase (proyecto DulIA)
 > **Última actualización:** 2026-05-23
 
 ---
@@ -142,9 +142,4 @@ El score 0-100 se calcula así:
 
 ---
 
-## Preguntas abiertas para el equipo
 
-1. **Jose (pipeline):** ¿Los portales que vas a scrapear (Computrabajo, El Empleo) publican salario? ¿Qué campos sí vas a poder extraer siempre?
-2. **Jose (pipeline):** ¿Cómo vas a calcular el `status` green/yellow/red? ¿Qué heurísticas usas?
-3. **Migue (frontend):** ¿El `session_id` lo genera el frontend o se lo pasamos nosotros? ¿`localStorage`?
-4. **Todos:** ¿Creamos la tabla `companies` o la saltamos para ganar tiempo y calculamos todo con queries sobre `jobs`?
