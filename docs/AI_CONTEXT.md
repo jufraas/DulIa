@@ -22,14 +22,15 @@ Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos
 
 ## Estado actual
 
-Estructura del repositorio inicializada. Ningún módulo implementado aún. Ver [PROJECT_STATE.md](PROJECT_STATE.md).
+Frontend en progreso: **landing page responsive** implementada (`frontend/src/pages/WelcomePage.jsx`). Mock de respuesta IA en `frontend/src/Mock_Response.js`. Backend, pipeline y BD aún no iniciados. Ver [PROJECT_STATE.md](PROJECT_STATE.md).
 
 ## Principios de diseño
 
 - API REST simple, sin over-engineering dado el tiempo del hackathon.
-- Frontend en SPA, una sola página con flujo lineal (onboarding → resultados).
+- Frontend en SPA con flujo lineal: **bienvenida → onboarding → resultados** (mobile first).
 - Pipeline desacoplado: corre independiente y alimenta la BD.
 - Prompts de Gemini centralizados en [PROMPTS.md](PROMPTS.md).
+- Prioridad demo: lo visual y demostrable antes que arquitectura compleja.
 
 ## Archivos clave para entender el proyecto
 

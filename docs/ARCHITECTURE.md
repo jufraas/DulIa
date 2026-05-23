@@ -31,8 +31,10 @@
 - **Responsable:** Carlos
 
 ### `frontend/`
-- SPA con flujo: onboarding del usuario → llamada a la API → visualización de resultados.
+- SPA con flujo: **landing (bienvenida)** → onboarding del usuario → llamada a la API → visualización de resultados (+ PDF).
+- Mobile first, Tailwind 4, componentes reutilizables en `src/components/`.
 - No contiene lógica de negocio; todo va al backend.
+- Mock local: `src/Mock_Response.js` (fallback si backend no está listo).
 - **Responsable:** Compa 1
 
 ### `pipeline/`
@@ -47,12 +49,13 @@
 
 ## Flujo principal (happy path)
 
-1. Usuario llena formulario de perfil en el **frontend**.
+0. Usuario ve **landing** con propuesta de valor y modelo de negocio.
+1. Usuario llena formulario de perfil en el **frontend** (onboarding).
 2. Frontend hace `POST /api/profile` al **backend**.
 3. Backend construye prompt con el perfil + ofertas de la **BD**.
 4. Backend llama a **Gemini** y recibe recomendaciones.
 5. Backend responde con JSON de recomendaciones.
-6. Frontend muestra resultados al usuario.
+6. Frontend muestra resultados al usuario (score, oportunidades, roadmap, PDF).
 
 ## Comunicación entre módulos
 
