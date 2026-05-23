@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createProfile, getMarketDashboard, getRecommendedJobs } from '../services/api'
+import { createProfile, getMarketDashboard } from '../services/api'
 import { EMPTY_ONBOARDING_FORM } from '../constants/emptyForm'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
 import { buildProfilePayload } from '../utils/buildProfilePayload'
@@ -12,7 +12,6 @@ export function useOnboardingForm() {
   const navigate = useNavigate()
   const setSavedProfile = useProfileStore((s) => s.setSavedProfile)
   const setFormSnapshot = useProfileStore((s) => s.setFormSnapshot)
-  const setJobs = useProfileStore((s) => s.setJobs)
   const setMarket = useProfileStore((s) => s.setMarket)
   const setSessionId = useProfileStore((s) => s.setSessionId)
 
@@ -66,14 +65,10 @@ export function useOnboardingForm() {
         const payload = buildProfilePayload(form)
         const savedProfile = await createProfile(payload)
 
-        const [jobs, market] = await Promise.all([
-          getRecommendedJobs(sessionId),
-          getMarketDashboard({ city: savedProfile.ciudad || form.city.trim() }),
-        ])
+        const market = await getMarketDashboard({ city: savedProfile.ciudad || form.city.trim() })
 
         setSavedProfile(savedProfile)
         setFormSnapshot(form)
-        setJobs(jobs)
         setMarket(market)
         navigate('/resultados')
       } catch (err) {
@@ -87,7 +82,6 @@ export function useOnboardingForm() {
       form,
       setSavedProfile,
       setFormSnapshot,
-      setJobs,
       setMarket,
       setSessionId,
       navigate,

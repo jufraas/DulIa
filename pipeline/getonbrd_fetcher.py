@@ -42,7 +42,7 @@ def _strip_html(html: str) -> str:
     return text.strip()
 
 
-def _to_cop(value) -> int | None:
+def _to_cop(value):
     if value is None:
         return None
     v = int(value)
@@ -178,7 +178,7 @@ def run():
         return
 
     print(f"\nUpserting {len(collected)} jobs into Supabase ...")
-    res = sb.table("jobs").upsert(collected, on_conflict="unique_hash").execute()
+    res = sb.table("jobs").upsert(collected, on_conflict="url").execute()
     print(f"Done — {len(res.data)} rows upserted.\n")
     for v in res.data:
         flag = "[REMOTO]" if v.get("modality") == "remoto" else "[LOCAL] "

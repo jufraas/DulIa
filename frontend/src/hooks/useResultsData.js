@@ -12,7 +12,7 @@ export function useResultsData() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!savedProfile || (jobs.length > 0 && market)) return
+    if (!savedProfile) return
 
     let cancelled = false
     setLoading(true)
@@ -21,12 +21,12 @@ export function useResultsData() {
     const city = savedProfile.ciudad
 
     Promise.all([
-      jobs.length ? Promise.resolve(jobs) : getRecommendedJobs(sessionId),
+      getRecommendedJobs(sessionId),
       market ? Promise.resolve(market) : getMarketDashboard({ city }),
     ])
       .then(([nextJobs, nextMarket]) => {
         if (cancelled) return
-        if (!jobs.length) setJobs(nextJobs)
+        setJobs(nextJobs)
         if (!market) setMarket(nextMarket)
       })
       .finally(() => {
@@ -36,7 +36,8 @@ export function useResultsData() {
     return () => {
       cancelled = true
     }
-  }, [savedProfile, jobs, market, setJobs, setMarket])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedProfile])
 
   const topScore =
     jobs.length > 0
