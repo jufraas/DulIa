@@ -18,7 +18,7 @@ export default function LandingFooter() {
             </span>
           </div>
           <div className="text-[13px] text-[color:var(--fg-3)]">
-            krl0s · Migue · Jose · Jufra
+            Carlos · Migue · Jose · Jufra
           </div>
         </div>
       </Container>

@@ -2,10 +2,10 @@ import { Heart, MapPin } from 'lucide-react'
 import Section from '../ui/Section'
 
 const team = [
-  { name: 'Carlos (krl0s)', role: 'Backend · IA' },
+  { name: 'Carlos', role: 'Backend · IA' },
   { name: 'Migue', role: 'Frontend · Sobre DulIA' },
-  { name: 'Jose', role: 'Pipeline · datos' },
-  { name: 'Jufra', role: 'Integración' },
+  { name: 'Jose', role: 'Backend · IA' },
+  { name: 'Jufra', role: 'Integración · Frontend' },
 ]
 
 export default function AboutTeamSection() {

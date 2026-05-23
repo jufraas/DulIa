@@ -11,15 +11,16 @@ import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { usePdfDownload } from '../hooks/usePdfDownload'
 import { useResultsData } from '../hooks/useResultsData'
+import RadarMatch from '../components/results/RadarMatch'
 
 /** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
   const { savedProfile, jobs, loading, topScore, topJob } = useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
-  if (!savedProfile) {
-    return <Navigate to="/comenzar" replace />
-  }
+if (!savedProfile) {
+  return <Navigate to="/comenzar" replace />
+}
 
   return (
     <PageShell>
@@ -58,6 +59,7 @@ export default function ResultsPage() {
             <OpportunitiesPreview jobs={jobs} />
             <ThirtyDayPlan />
           </div>
+          <RadarMatch />
 
           {loading && (
             <p className="anim-in-delay-2 mt-4 text-center text-sm text-[color:var(--fg-3)]">

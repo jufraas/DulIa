@@ -1,8 +1,9 @@
 /* === DulIA UI kit — shared styles === */
+@import url("../../colors_and_type.css");
 
 * { box-sizing: border-box; }
-
-#root { min-height: 100%; }
+html, body, #app { margin: 0; padding: 0; min-height: 100%; background: var(--bg-0); }
+body { font-family: var(--font-body); color: var(--fg-1); }
 
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
@@ -18,8 +19,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .page { position: relative; z-index: 1; min-height: 100vh; }
 
-.container,
-.dl-container {
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--s-6);
@@ -59,11 +59,11 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 16px;
   color: #fff;
   border-radius: 999px;
-  background: #EC4899;
-  box-shadow: 0 10px 28px rgba(236,72,153,0.40);
+  background: var(--grad-cta);
+  box-shadow: var(--glow-cta);
 }
 .btn-primary:hover {
-  background: #DB2777;
+  background: var(--grad-cta-hot);
   box-shadow: 0 14px 36px rgba(236,72,153,0.50), 0 6px 16px rgba(168,85,247,0.40);
   transform: translateY(-1px);
 }
@@ -203,44 +203,44 @@ button { font-family: inherit; cursor: pointer; }
 .anim-in-delay-3 { animation: slideUp 0.5s var(--ease-out) 0.24s both; }
 .anim-in-delay-4 { animation: slideUp 0.5s var(--ease-out) 0.32s both; }
 
-/* ===== PDF card — kit ReBrand ===== */
+/* ===== PDF card — heavy juice ===== */
 @keyframes pdfHalo {
-  0%, 100% { transform: scale(1); opacity: 0.55; }
-  50% { transform: scale(1.08); opacity: 0.85; }
+  0%, 100% { transform: scale(1);   opacity: 0.55; }
+  50%      { transform: scale(1.08); opacity: 0.85; }
 }
 @keyframes pdfGradPan {
   0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 @keyframes pdfShine {
-  0% { transform: translateX(-160%) rotate(18deg); opacity: 0; }
-  20% { opacity: 0.55; }
-  80% { opacity: 0.55; }
-  100% { transform: translateX(260%) rotate(18deg); opacity: 0; }
+  0%   { transform: translateX(-160%) rotate(18deg); opacity: 0; }
+  20%  { opacity: 0.55; }
+  80%  { opacity: 0.55; }
+  100% { transform: translateX(260%) rotate(18deg);  opacity: 0; }
 }
 @keyframes pdfBob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-4px) rotate(-3deg); }
+  0%, 100% { transform: translateY(0)   rotate(0deg); }
+  50%      { transform: translateY(-4px) rotate(-3deg); }
 }
 @keyframes pdfFloat1 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0; }
-  20% { opacity: 1; }
-  50% { transform: translate(8px, -14px) scale(1.2); opacity: 1; }
-  80% { opacity: 0.5; }
+  0%, 100% { transform: translate(0, 0)   scale(1);    opacity: 0.0; }
+  20%      { opacity: 1; }
+  50%      { transform: translate(8px, -14px) scale(1.2); opacity: 1; }
+  80%      { opacity: 0.5; }
 }
 @keyframes pdfFloat2 {
-  0%, 100% { transform: translate(0, 0) scale(0.9); opacity: 0; }
-  25% { opacity: 1; }
-  60% { transform: translate(-10px, -10px) scale(1.15); opacity: 1; }
-  90% { opacity: 0.4; }
+  0%, 100% { transform: translate(0, 0)   scale(0.9);  opacity: 0.0; }
+  25%      { opacity: 1; }
+  60%      { transform: translate(-10px, -10px) scale(1.15); opacity: 1; }
+  90%      { opacity: 0.4; }
 }
 @keyframes pdfBtnSweep {
-  0% { transform: translateX(-130%); }
+  0%   { transform: translateX(-130%); }
   100% { transform: translateX(130%); }
 }
 @keyframes pdfBtnPulse {
-  0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.40), 0 0 0 0 rgba(236,72,153,0); }
-  50% { box-shadow: 0 10px 28px rgba(0,0,0,0.45), 0 0 0 6px rgba(236,72,153,0.18); }
+  0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.40), 0 0 0 0 rgba(236,72,153,0.0); }
+  50%      { box-shadow: 0 10px 28px rgba(0,0,0,0.45), 0 0 0 6px rgba(236,72,153,0.18); }
 }
 
 .pdf-card-anim {
@@ -272,7 +272,9 @@ button { font-family: inherit; cursor: pointer; }
   pointer-events: none;
   animation: pdfShine 3.4s ease-in-out infinite;
 }
-.pdf-icon-bob { animation: pdfBob 3s ease-in-out infinite; }
+.pdf-icon-bob {
+  animation: pdfBob 3s ease-in-out infinite;
+}
 .pdf-spark {
   position: absolute;
   color: #fff;
@@ -280,16 +282,19 @@ button { font-family: inherit; cursor: pointer; }
   text-shadow: 0 0 12px rgba(255,255,255,0.8);
   font-size: 16px;
 }
-.pdf-spark.s1 { top: 14%; right: 12%; animation: pdfFloat1 2.4s ease-in-out infinite; font-size: 14px; }
-.pdf-spark.s2 { top: 8%; right: 28%; animation: pdfFloat2 3s ease-in-out 0.4s infinite; font-size: 12px; }
+.pdf-spark.s1 { top: 14%;  right: 12%; animation: pdfFloat1 2.4s ease-in-out infinite; font-size: 14px; }
+.pdf-spark.s2 { top: 8%;   right: 28%; animation: pdfFloat2 3.0s ease-in-out 0.4s infinite; font-size: 12px; }
 .pdf-spark.s3 { bottom: 30%; right: 8%; animation: pdfFloat1 2.8s ease-in-out 0.9s infinite; font-size: 18px; }
-.pdf-spark.s4 { top: 30%; left: 16%; animation: pdfFloat2 3.4s ease-in-out 1.4s infinite; font-size: 13px; }
+.pdf-spark.s4 { top: 30%;  left: 16%; animation: pdfFloat2 3.4s ease-in-out 1.4s infinite; font-size: 13px; }
+
 .pdf-btn {
   position: relative;
   animation: pdfBtnPulse 2.4s ease-in-out infinite;
   transition: transform 0.2s var(--ease-out);
 }
-.pdf-btn:hover { transform: translateY(-2px) scale(1.01); }
+.pdf-btn:hover {
+  transform: translateY(-2px) scale(1.01);
+}
 .pdf-btn-sweep {
   position: absolute;
   top: 0; left: 0;
@@ -300,7 +305,8 @@ button { font-family: inherit; cursor: pointer; }
   animation: pdfBtnSweep 2.6s ease-in-out infinite;
 }
 
+/* ===== Traffic-light dot pulse ===== */
 @keyframes trafficPulse {
-  0% { transform: scale(0.8); opacity: 0.6; }
-  100% { transform: scale(2.6); opacity: 0; }
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0;   }
 }
