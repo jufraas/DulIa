@@ -85,7 +85,7 @@ backend/
 3. Backend estructura perfil (Gemini) y guarda en `profiles`.
 4. Frontend pide jobs + market + plan en paralelo.
 5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d, **Match Radar** (store).
-6. **Vacantes** (`/vacantes`): listado completo con semáforo.
+6. **Vacantes** (`/vacantes`): listado completo con semáforo; **Volver** regresa a `/resultados` (store conserva perfil y análisis).
 7. Usuario descarga **PDF**.
 8. (Opcional) **Coach** → `postCoachChat()` / `POST /api/coach/chat` (UI pendiente).
 
@@ -110,7 +110,7 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | Rehidratación | `sessionHydration.js` al boot | `GET /profile/{session_id}` |
 | Matching vacantes | Scores, semáforo y **RadarMatch** (5 ejes vía API) | Calcula `score_compatibilidad` |
 | Termómetro mercado | `MarketThermometer` en `/resultados` y `/vacantes` | Agrega sobre `jobs` |
-| Plan 30 días | `ThirtyDayPlan` ← `POST .../action-plan` (`fase_30`) | Plan 2 + Gemini |
+| Plan 30 días | `ThirtyDayPlan` ← `POST .../action-plan` o mock por perfil (1 curso por habilidad) | Plan 2 + Gemini |
 | Coach / chat | `postCoachChat()` en api.js; UI burbuja pendiente | Gemini + perfil |
 | PDF plan de acción | Genera (jsPDF) | — |
 

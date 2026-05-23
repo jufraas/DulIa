@@ -31,7 +31,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/motion/RevealOnScroll.jsx` | Framer Motion — scroll reveal y entrada al montar |
 | `src/components/layout/LandingFooter.jsx` | Footer landing (copyright) |
 | `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
-| `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
+| `src/pages/VacanciesPage.jsx` | Pantalla 04 — semáforo; **Volver a mi análisis** → `/resultados` |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
 | `src/components/results/*` | Pantalla 03 — Resultados (`RadarMatch`, `ThirtyDayPlan`, …) |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |

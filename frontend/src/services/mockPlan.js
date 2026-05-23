@@ -32,19 +32,33 @@ export const mockPlan = {
 export function buildMockPlanFromProfile(profile) {
   if (!profile?.nombre) return mockPlan
 
-  const skills = (profile.habilidades ?? []).slice(0, 2).join(', ') || 'tu stack'
+  const skillList = (profile.habilidades ?? [])
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 3)
   const city = profile.ciudad ?? 'tu ciudad'
   const firstName = profile.nombre.split(' ')[0]
+  const skillsSummary = skillList.length ? skillList.join(', ') : 'tu stack'
+  const skillsTitle =
+    skillList.length >= 2
+      ? `Refuerza ${skillList.slice(0, 2).join(' y ')}`
+      : skillList.length === 1
+        ? `Refuerza ${skillList[0]}`
+        : 'Sube tu nivel técnico'
+  const courseTasks =
+    skillList.length > 0
+      ? skillList.map((skill) => `Curso corto en ${skill}`)
+      : ['Curso corto en tu stack principal']
 
   return {
     session_id: profile.session_id,
-    resumen_ejecutivo: `Plan personalizado para ${firstName} en ${city}: refuerza ${skills}, actualiza tu perfil y postula con intención durante los próximos 30 días.`,
+    resumen_ejecutivo: `Plan personalizado para ${firstName} en ${city}: refuerza ${skillsSummary}, actualiza tu perfil y postula con intención durante los próximos 30 días.`,
     semanas: [
       {
         numero: 1,
         titulo: 'Afina tu perfil',
         tareas: [
-          `Actualiza tu CV con logros concretos, ${profile.nombre.split(' ')[0]}`,
+          `Actualiza tu CV con logros concretos, ${firstName}`,
           profile.ciudad ? `Busca vacantes en ${profile.ciudad}` : 'Define tu ciudad objetivo',
           'Completa LinkedIn con tu carrera y habilidades',
         ],
@@ -60,9 +74,9 @@ export function buildMockPlanFromProfile(profile) {
       },
       {
         numero: 3,
-        titulo: `Refuerza ${skills}`,
+        titulo: skillsTitle,
         tareas: [
-          `Curso corto en ${skills}`,
+          ...courseTasks,
           'Arma un mini proyecto para tu portafolio',
           'Pide feedback a un mentor o par',
         ],

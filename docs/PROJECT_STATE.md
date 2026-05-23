@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — FRONT: Plan 2 integrado (action-plan, radar API), termómetro en UI, ubicaciones DANE (1.119 municipios), mocks personalizados offline.
+2026-05-23 — FRONT: Plan 2, termómetro, ubicaciones DANE, mocks offline, navegación vacantes→resultados, plan mock por habilidad.
 
 ## Estado por módulo
 
@@ -28,7 +28,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/sobre` | Sobre DulIA | Migue | ✅ |
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
 | `/resultados` | Score, perfil, **termómetro**, jobs, plan 30d, **RadarMatch** (API), PDF | Joufra / Migue | 🚧 falta chat UI + timeline UI |
-| `/vacantes` | **Termómetro** + panel semáforo | Joufra | ✅ |
+| `/vacantes` | **Termómetro** + semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -40,6 +40,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
 | `MarketThermometer` | ✅ | Montado en `/resultados` y `/vacantes` |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
+| Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
+| Navegación resultados ↔ vacantes | ✅ | `OpportunitiesPreview` → `/vacantes`; botón **Volver a mi análisis** → `/resultados` |
 | Footers — copyright | ✅ | `© {year} DulIA` en `LandingFooter` y `SiteFooter` |
 | Integración Axios → API | ✅ | `services/api.js` + `mockResultsBundle.js` |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |

@@ -19,6 +19,7 @@
 | `GET market/dashboard` | ✅ | `MarketThermometer` en `/resultados` y `/vacantes` |
 | Fallbacks offline | ✅ | `mockResultsBundle.js` — rellena huecos al perfil |
 | Wizard ubicación | ✅ | 32 deptos / 1.119 municipios (DANE) |
+| Navegación vacantes | ✅ | `returnTo: '/resultados'`; botón **Volver a mi análisis** |
 
 Ver decisión: [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](decisions/2026-05-23-frontend-plan2-locations-thermometer.md).
 

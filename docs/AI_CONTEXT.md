@@ -35,7 +35,7 @@ Onboarding (/comenzar, 3 pasos)
 POST /profile ──► loadResultsBundle()
      │  analyze → action-plan → jobs + market + radar + timeline
      ▼
-Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
+Resultados (/resultados) ──► Vacantes (/vacantes) ──► Volver a análisis (/resultados) ──► PDF
      │  score, termómetro, plan 30d, Match Radar (API)
      │                              │
      └── Coach (UI Joufra) ─────────┘ postCoachChat()

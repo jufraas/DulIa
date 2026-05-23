@@ -34,7 +34,7 @@ VITE_API_URL=http://localhost:8000/api
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF opcional |
 | `/resultados` | Resultados | Score, termómetro, plan 30d, Match Radar, PDF |
-| `/vacantes` | Vacantes | Termómetro + semáforo verde/amarillo/rojo |
+| `/vacantes` | Vacantes | Termómetro + semáforo; **Volver a mi análisis** → `/resultados` |
 
 ## Flujo de datos
 
@@ -43,9 +43,10 @@ VITE_API_URL=http://localhost:8000/api
 3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
-6. `/resultados` y `/vacantes` consumen el store; PDF con jsPDF.
+6. `/resultados` → enlace al panel semáforo en `/vacantes`; **Volver a mi análisis** regresa con datos intactos.
+7. PDF con jsPDF.
 
-Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil.
+Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
 
 ### API cliente (`services/api.js`)
 
@@ -98,8 +99,9 @@ Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../
 | Sección | Componente |
 |---------|------------|
 | Score + resumen | `ScoreCard`, `ProfileSummary` |
+| Termómetro mercado | `MarketThermometer.jsx` — `GET .../market/dashboard` o store |
 | Vacantes + plan | `OpportunitiesPreview`, `ThirtyDayPlan` |
-| Match radar | `RadarMatch.jsx` — perfil vs top 3 vacantes (4 ejes); datos vía `utils/radarMatchData.js` |
+| Match radar | `RadarMatch.jsx` — 5 ejes usuario vs mercado vía `GET .../radar-data` + `utils/radarApi.js` |
 | PDF | `generateAnalysisPdf.js` (sin radar ni plan 30d aún) |
 
 ## División de trabajo

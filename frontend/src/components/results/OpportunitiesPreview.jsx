@@ -112,6 +112,7 @@ export default function OpportunitiesPreview({ jobs }) {
 
       <Link
         to="/vacantes"
+        state={{ returnTo: '/resultados' }}
         className="btn btn-secondary mt-3.5 w-full justify-center"
       >
         Ver el panel completo con semáforo

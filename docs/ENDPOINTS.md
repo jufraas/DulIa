@@ -56,24 +56,26 @@ https://<dominio>/api       ← producción (por definir al deployar)
 3. Wizard paso 0 (opcional): subir CV → `POST /api/profile/parse-cv` → prellenar formulario.
 4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
 5. Pantalla resultados → `loadResultsBundle` → store (`jobs`, `market`, `plan`, `radar`, `timeline`); `RadarMatch` + `MarketThermometer`.
-6. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
+6. `/vacantes` → semáforo; **Volver** → `/resultados` (perfil en store).
+7. Refresh en `/resultados` o `/vacantes` → rehidratación conserva sesión.
 
-### Plan 2 (backend listo — integración pendiente en UI)
+### Plan 2 — integrado en frontend (`loadResultsBundle`)
 
-Tras `POST /profile`, opcionalmente:
+Tras `POST /profile`, el front ejecuta en secuencia:
 
 1. `POST /api/profile/{session_id}/analyze`
 2. `POST /api/profile/{session_id}/action-plan`
 3. `GET /api/profile/{session_id}/radar-data` + `GET .../timeline-data`
+4. `GET /api/jobs/recommended/{session_id}` + `GET /api/market/dashboard/{session_id}`
 
-Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
+Fallbacks offline: `mockResultsBundle.js` (personalizado al perfil). Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
 
 ### Claves `localStorage` (frontend)
 
 | Clave | Contenido |
 |-------|-----------|
 | `dulia_session_id` | UUID de sesión anónima |
-| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `formSnapshot` |
+| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `formSnapshot` |
 | `dulia_wizard_draft` | Borrador del wizard si refresca en `/comenzar` |
 
 > En mock, `GET /profile` devuelve 404 — el frontend confía en `dulia_session_data` tras completar el wizard.
@@ -362,7 +364,7 @@ Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil pre
 
 **Errores:** `404` sin perfil · `500` error interno.
 
-**Frontend:** `loadResultsBundle()` → `postActionPlan()` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockResultsBundle.js` / `mockPlan.js` (personalizado con nombre/ciudad/skills).
+**Frontend:** `loadResultsBundle()` → `postActionPlan()` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockPlan.js` — plantilla con nombre, ciudad y **una tarea de curso por habilidad** (no plan IA completo).
 
 ---
 
@@ -637,8 +639,8 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/sobre` | Sobre DulIA |
 | `/comenzar` | Wizard onboarding (3 pasos) |
 | `/resultados` | Score, perfil, top jobs, plan 30d, PDF |
-| `/vacantes` | Panel semáforo |
+| `/vacantes` | Panel semáforo; volver a `/resultados` |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
 
 **Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)

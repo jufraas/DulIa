@@ -37,7 +37,7 @@ Parser en `utils/radarApi.js`. Vacantes reales arriba del gráfico (score del ba
 |------|----------------|
 | Jobs | `buildMockJobsFromProfile` — ciudad, match skills, score |
 | Market | `buildMockMarketFromProfile` — ciudad/sector |
-| Plan | `buildMockPlanFromProfile` — nombre, ciudad, skills |
+| Plan | `buildMockPlanFromProfile` — nombre, ciudad, **1 tarea por habilidad** (semana 3) |
 | Radar | `buildMockRadarFromProfile` |
 | Timeline | `buildMockTimelineFromProfile` |
 | Análisis | `buildMockAnalysisFromProfile` |
@@ -59,6 +59,12 @@ Parser en `utils/radarApi.js`. Vacantes reales arriba del gráfico (score del ba
 - `/vacantes` — debajo del título, antes del semáforo
 
 Datos: store `market` o `getMarketDashboard()` al entrar si faltaba.
+
+### 6. Navegación resultados ↔ vacantes
+
+- Desde `/resultados`, **Ver panel completo con semáforo** → `/vacantes` con `state.returnTo = '/resultados'`.
+- Botón **Volver a mi análisis** en `VacanciesPage` (no regresa al landing `/`).
+- Sin perfil en store → redirect a `/comenzar`; rehidratación vía `useSessionHydration`.
 
 ## Archivos clave
 
