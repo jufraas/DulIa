@@ -9,9 +9,16 @@ class ChatMessage(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """Respuesta del coach con sugerencias de acción rápida."""
+    """Respuesta del coach con sugerencias de acción rápida.
+    
+    Plan 2: Incluye campos para function calling.
+    """
     respuesta: str
     sugerencias_rapidas: list[str] = []
+    # Plan 2: Function calling
+    acciones_disponibles: list[str] = []  # Botones que puede mostrar el frontend
+    funcion_ejecutada: Optional[str] = None  # Nombre de la función que usó
+    datos_funcion: Optional[dict] = None  # Datos devueltos por la función
 
 
 class ErrorResponse(BaseModel):

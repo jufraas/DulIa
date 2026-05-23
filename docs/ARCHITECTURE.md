@@ -48,7 +48,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 
 ### `backend/`
 
-- API REST según [ENDPOINTS.md](ENDPOINTS.md).
+- API REST según [ENDPOINTS.md](ENDPOINTS.md). Handoff frontend: [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
 - Extrae perfiles con Gemini (`profile_service`); scoring en `jobs_service`.
 - Dashboard de mercado sobre tabla `jobs` (`market_service`).
 - Coach conversacional (`coach_service` + [PROMPTS.md](PROMPTS.md)).

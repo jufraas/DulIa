@@ -30,8 +30,12 @@ Landing (/) ──► Sobre DulIA (/sobre) [opcional]
      ▼
 Onboarding (/comenzar, 3 pasos) ──► POST /profile
      │
+     ├──► POST /profile/{id}/analyze
+     ├──► POST /profile/{id}/action-plan
      ├──► GET /jobs/recommended/{session_id}
-     └──► GET /market/dashboard
+     ├──► GET /market/dashboard
+     ├──► GET /profile/{id}/radar-data
+     └──► GET /profile/{id}/timeline-data
      │
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
@@ -87,12 +91,17 @@ backend/
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
 | GET | `/api/market/dashboard` | ✅ |
 | POST | `/api/coach/chat` | ✅ |
+| GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |
+| GET | `/api/profile/{session_id}/timeline-data` | ✅ Plan 2 F3 |
+| POST | `/api/profile/{session_id}/analyze` | ✅ Plan 2 F1 |
+| POST | `/api/profile/{session_id}/action-plan` | ✅ Plan 2 F1 |
 
 ## Archivos clave
 
 | Archivo | Para qué |
 |---------|----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | **Contrato API — fuente de verdad** |
+| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | **Handoff frontend — flujo Plan 2 + recharts** |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Módulos y flujo |
 | [SCHEMA.md](SCHEMA.md) | Tablas Supabase |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |

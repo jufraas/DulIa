@@ -6,7 +6,7 @@ logger = get_logger(__name__)
 
 _configured = False
 
-def get_gemini_model(model_name: str = "gemini-1.5-flash"):
+def get_gemini_model(model_name: str = "gemini-3.1-flash-lite"):
     global _configured
     if not _configured:
         api_key = os.getenv("GEMINI_API_KEY")

@@ -4,14 +4,14 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Merge FRONT + main: backend Fase 10 completa; frontend kit ReBrand integrado.
+2026-05-23 — Plan 2 F1–F3 documentado; prompts en PROMPTS.md; guía frontend en FRONTEND_INTEGRATION.md. Deploy pospuesto.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
-| Backend (FastAPI) | 🚧 Fases 0–10 | API completa + seguridad mínima; falta deploy (Fase 11) |
+| Backend (FastAPI) | 🚧 Fases 0–10 + Plan 2 F3 | Gráficas radar/timeline listas; deploy pendiente |
 | Frontend (React+Vite) | 🚧 En progreso | UI kit ReBrand (5 rutas); falta deploy y pulido |
 | Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
 | Integración Gemini | ✅ | Profile, coach; rate limit 10/min |
@@ -48,7 +48,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |------|-----------|---------|
 | Refresh en `/resultados` pierde estado | Media | Implementar `GET /profile/{session_id}` |
 | Termómetro mercado no visible en UI | Baja | Datos van al PDF; `MarketThermometer.jsx` huérfano |
-| Plan 30 días estático | Baja | `ThirtyDayPlan.jsx` — copy fijo |
+| Plan 30 días estático | Media | Consumir `POST .../action-plan` + `GET .../timeline-data` (ver FRONTEND_INTEGRATION.md) |
+| Gráficas radar/timeline | Media | Consumir `GET .../radar-data` y `timeline-data` (recharts) |
 | ESLint ruidoso | Baja | Excluir `.vite/**` y `ReBrand/**` |
 
 ## Backend — fases
@@ -62,6 +63,9 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | 8 | Coach conversacional | ✅ |
 | 9–10 | Seguridad + smoke tests | ✅ |
 | 11 | Deploy | 🔲 |
+| P2-F3 | Gráficas radar + timeline | ✅ |
+| P2-F1 | Análisis + plan IA | ✅ Servicios, rutas y prompts (`PROFILE_ANALYSIS`, `ACTION_PLAN_GENERATOR`) |
+| P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
 
 ## Leyenda
 
@@ -76,9 +80,9 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 ## Próximos pasos inmediatos
 
 ### Integración
-1. Levantar backend con `USE_MOCK_DATA=true` y probar flujo wizard → resultados
-2. Frontend: deploy Vercel (`VITE_API_URL` apuntando al backend)
-3. Backend Fase 11: deploy con `CORS_ORIGINS=<url-front>`
+1. Frontend: seguir [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) — flujo Plan 2 en `/resultados`
+2. Levantar backend con `USE_MOCK_DATA=true` y probar en Swagger (`/docs`)
+3. Deploy (backend + front): **pospuesto** — cuando toque, `VITE_API_URL` + `CORS_ORIGINS`
 
 ### Frontend
 1. Migue: pulir `/sobre`
