@@ -19,7 +19,7 @@ def calcular_stats():
     # ─── Skills trending ───────────────────────────────────────
     todas_skills = []
     for v in vacantes:
-        todas_skills.extend(v.get("skills_req") or [])
+        todas_skills.extend(v.get("skills_required") or [])
     skills_trending = Counter(todas_skills).most_common(10)
 
     # ─── Por status ────────────────────────────────────────────
@@ -28,11 +28,11 @@ def calcular_stats():
     # ─── Por ciudad ────────────────────────────────────────────
     por_ciudad = Counter()
     for v in vacantes:
-        loc = v.get("location") or ""
-        if "Barranquilla" in loc: por_ciudad["Barranquilla"] += 1
-        elif "Bogotá" in loc:     por_ciudad["Bogotá"] += 1
-        elif "Medellín" in loc:   por_ciudad["Medellín"] += 1
-        else:                     por_ciudad["Otra"] += 1
+        city = v.get("city") or ""
+        if "Barranquilla" in city: por_ciudad["Barranquilla"] += 1
+        elif "Bogotá" in city:     por_ciudad["Bogotá"] += 1
+        elif "Medellín" in city:   por_ciudad["Medellín"] += 1
+        else:                      por_ciudad["Otra"] += 1
 
     # ─── Resultado ─────────────────────────────────────────────
     stats = {

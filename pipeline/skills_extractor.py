@@ -40,7 +40,7 @@ def run():
             continue
         skills = extraer_skills(desc)
         print(f"  Skills: {skills}")
-        sb.table("jobs").update({"skills_req": skills}).eq("id", v["id"]).execute()
+        sb.table("jobs").update({"skills_required": skills}).eq("id", v["id"]).execute()
         time.sleep(3)
     print("\nExtracción completa.")
 
