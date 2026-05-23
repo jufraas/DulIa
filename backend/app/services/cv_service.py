@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from app.db.gemini import get_gemini_model
 from app.models.cv import CvParseOut, CvWizardPrefill
 from app.utils.logger import get_logger
-from markitdown import CvConversionError, CvValidationError, cv_file_to_markdown
+from cv_parser import CvConversionError, CvValidationError, cv_file_to_markdown
 
 logger = get_logger(__name__)
 

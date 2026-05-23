@@ -402,7 +402,7 @@ Coach con contexto del perfil (`profiles`). System prompt en `docs/PROMPTS.md` (
 
 ### Plan 2 — Análisis, plan y gráficas
 
-Ver [PLAN2_BACKEND.md](PLAN2_BACKEND.md) y [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
+Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
 
 #### `POST /api/profile/{session_id}/analyze` ✅
 

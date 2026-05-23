@@ -21,7 +21,7 @@ cv: archivo PDF                 →     validate_cv_pdf()
 Integrado en `backend/main.py` (stub multipart legacy):
 
 ```python
-from markitdown import cv_file_to_markdown, build_gemini_prompt_vars
+from cv_parser import cv_file_to_markdown, build_gemini_prompt_vars
 
 file_bytes = await cv.read()
 cv_result = cv_file_to_markdown(file_bytes, filename=cv.filename, content_type=cv.content_type)
