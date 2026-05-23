@@ -1,12 +1,11 @@
 """
-Fetches up to LIMIT jobs from Get on Board (getonbrd.com) and upserts them
-into the Supabase `jobs` table.
+Fetches junior and entry-level jobs from Get on Board (getonbrd.com) across all
+18 categories, keeping only Colombia + remote jobs with seniority 1 (Sin
+experiencia) or 2 (Junior), plus any with explicit junior keywords in the title.
 
-Includes: jobs based in Colombia + remote jobs (open to Colombian applicants).
-Salary: values < 50 000 are assumed USD and converted to COP at USD_TO_COP rate;
-        values >= 50 000 are assumed already in COP.
+Upserts into Supabase `jobs` table.
 
-Run:  python getonbrd_fetcher.py
+Run:  python junior_fetcher.py
 """
 
 import os
@@ -21,10 +20,11 @@ load_dotenv()
 sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 API_BASE = "https://www.getonbrd.com/api/v0"
-LIMIT = 100
-USD_TO_COP = 4_200  # approximate fixed rate
+USD_TO_COP = 4_200
 
-# Seniority ID → approximate years of experience required
+# Seniority IDs on Get on Board
+JUNIOR_SENIORITY_IDS = {1, 2}  # 1 = Sin experiencia, 2 = Junior
+
 SENIORITY_TO_EXP = {
     1: 0,   # Sin experiencia
     2: 1,   # Junior
@@ -33,8 +33,13 @@ SENIORITY_TO_EXP = {
     5: 8,   # Expert
 }
 
-# Categories to pull from (tech-focused, relevant for young Colombian talent)
-CATEGORIES = [
+# Title keywords that also signal entry-level (case-insensitive)
+JUNIOR_TITLE_KW = {
+    "junior", "jr", "trainee", "aprendiz", "practicante",
+    "auxiliar", "asistente", "entry level", "sin experiencia",
+}
+
+ALL_CATEGORIES = [
     "programming",
     "sysadmin-devops-qa",
     "data-science-analytics",
@@ -42,6 +47,17 @@ CATEGORIES = [
     "machine-learning-ai",
     "design-ux",
     "technical-support",
+    "customer-support",
+    "innovation-agile",
+    "operations-management",
+    "sales",
+    "digital-marketing",
+    "cybersecurity",
+    "advertising-media",
+    "hr",
+    "education-coaching",
+    "hardware-electronics",
+    "other",
 ]
 
 
@@ -58,7 +74,7 @@ def _to_cop(value):
     return v * USD_TO_COP if v < 50_000 else v
 
 
-def _fetch_category_page(category: str, page: int = 1) -> list[dict]:
+def _fetch_category_page(category: str, page: int = 1) -> list:
     resp = requests.get(
         f"{API_BASE}/categories/{category}/jobs",
         params={
@@ -73,11 +89,21 @@ def _fetch_category_page(category: str, page: int = 1) -> list[dict]:
 
 
 def _is_relevant(job: dict) -> bool:
-    """Include remote jobs and jobs explicitly in Colombia."""
+    """Remote jobs or explicitly Colombia-based."""
     attrs = job["attributes"]
     if attrs.get("remote"):
         return True
     return "Colombia" in (attrs.get("countries") or [])
+
+
+def _is_junior(job: dict) -> bool:
+    """Seniority 1-2 OR junior keyword in title."""
+    attrs = job["attributes"]
+    seniority_id = (attrs.get("seniority") or {}).get("data", {}).get("id")
+    if seniority_id in JUNIOR_SENIORITY_IDS:
+        return True
+    title = (attrs.get("title") or "").lower()
+    return any(kw in title for kw in JUNIOR_TITLE_KW)
 
 
 def _map_row(job: dict) -> dict:
@@ -98,6 +124,8 @@ def _map_row(job: dict) -> dict:
         if t.get("attributes", {}).get("name")
     ]
 
+    seniority_id = (attrs.get("seniority") or {}).get("data", {}).get("id")
+
     if attrs.get("remote"):
         modality = "remoto"
         city = None
@@ -117,8 +145,7 @@ def _map_row(job: dict) -> dict:
 
     description = _strip_html(attrs.get("description") or "")
 
-    seniority_id = (attrs.get("seniority") or {}).get("data", {}).get("id")
-    experience_required = SENIORITY_TO_EXP.get(seniority_id, 2)
+    experience_required = SENIORITY_TO_EXP.get(seniority_id, 1)
 
     return {
         "title": (attrs.get("title") or "").strip(),
@@ -127,7 +154,7 @@ def _map_row(job: dict) -> dict:
         "department": department,
         "salary_min": _to_cop(attrs.get("min_salary")),
         "salary_max": _to_cop(attrs.get("max_salary")),
-        "description": description[:2000],  # cap to avoid DB limits
+        "description": description[:2000],
         "skills_required": skills,
         "sector": attrs.get("category_name"),
         "experience_required": experience_required,
@@ -145,16 +172,15 @@ def _map_row(job: dict) -> dict:
 
 
 def run():
-    collected: list[dict] = []
-    seen_ids: set[str] = set()
+    collected: list = []
+    seen_ids: set = set()
 
-    for category in CATEGORIES:
-        if len(collected) >= LIMIT:
-            break
-
+    for category in ALL_CATEGORIES:
         print(f"\nFetching [{category}] ...")
         page = 1
-        while len(collected) < LIMIT:
+        cat_count = 0
+
+        while True:
             try:
                 jobs = _fetch_category_page(category, page)
             except Exception as exc:
@@ -164,39 +190,39 @@ def run():
             if not jobs:
                 break
 
-            new_this_page = 0
             for job in jobs:
-                if len(collected) >= LIMIT:
-                    break
                 job_id = job["id"]
-                if job_id in seen_ids or not _is_relevant(job):
+                if job_id in seen_ids:
+                    continue
+                if not _is_relevant(job):
+                    continue
+                if not _is_junior(job):
                     continue
                 seen_ids.add(job_id)
                 collected.append(_map_row(job))
-                new_this_page += 1
+                cat_count += 1
 
-            print(f"  page {page}: +{new_this_page} relevant  (total: {len(collected)})")
-
-            # Stop paging if we got fewer than 100 — no more pages
             if len(jobs) < 100:
                 break
             page += 1
             time.sleep(0.5)
 
+        print(f"  +{cat_count} junior jobs  (total: {len(collected)})")
         time.sleep(1)
 
     if not collected:
-        print("\nNo jobs fetched. Check API connectivity and credentials.")
+        print("\nNo junior jobs found.")
         return
 
-    print(f"\nUpserting {len(collected)} jobs into Supabase ...")
+    print(f"\nUpserting {len(collected)} junior jobs into Supabase ...")
     res = sb.table("jobs").upsert(collected, on_conflict="url").execute()
     print(f"Done — {len(res.data)} rows upserted.\n")
     for v in res.data:
         flag = "[REMOTO]" if v.get("modality") == "remoto" else "[LOCAL] "
-        print(f"  {flag} {v.get('title','?')[:50]:50} — {v.get('company','?')}")
+        exp = v.get("experience_required", "?")
+        print(f"  {flag} exp={exp} {v.get('title','?')[:50]:50} — {v.get('company','?')}")
 
 
 if __name__ == "__main__":
-    print("=== Get on Board fetcher ===")
+    print("=== Get on Board Junior Fetcher ===")
     run()

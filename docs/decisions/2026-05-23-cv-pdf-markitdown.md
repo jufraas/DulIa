@@ -19,7 +19,7 @@ El wizard captura perfil manualmente, pero muchos jóvenes ya tienen hoja de vid
 
 El **frontend MVP** migró a contrato JSON-only con endpoints separados (perfil, jobs, market). La subida de CV **no está en el flujo actual** del frontend.
 
-El módulo `backend/markitdown/` **sigue implementado** y puede integrarse cuando:
+El módulo `backend/cv_parser/` **sigue implementado** y puede integrarse cuando:
 - Backend exponga multipart o endpoint dedicado de CV, y
 - El equipo decida priorizarlo sobre el wizard solo.
 
