@@ -9,9 +9,9 @@ import ProblemSection from '../components/welcome/ProblemSection'
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="flex min-h-screen flex-col bg-slate-950 text-white">
       <SiteHeader />
-      <main>
+      <main className="flex-1">
         <HeroSection />
         <ProblemSection />
         <HowItWorksSection />

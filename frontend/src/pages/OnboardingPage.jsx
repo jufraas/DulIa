@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Sparkles } from 'lucide-react'
+import SiteFooter from '../components/layout/SiteFooter'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import Input from '../components/ui/Input'
@@ -138,7 +139,7 @@ export default function OnboardingPage() {
   const progress = ((step + 1) / STEPS.length) * 100
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="flex min-h-screen flex-col bg-slate-950 text-white">
       <header className="border-b border-white/10 bg-slate-900/80 backdrop-blur-md">
         <Container className="flex h-14 items-center gap-3 sm:h-16">
           <Link
@@ -157,7 +158,7 @@ export default function OnboardingPage() {
         </Container>
       </header>
 
-      <main className="py-10 sm:py-14">
+      <main className="flex-1 py-10 sm:py-14">
         <Container className="max-w-xl">
           <div className="mb-8">
             <p className="text-sm font-medium text-cyan-400">
@@ -392,6 +393,7 @@ export default function OnboardingPage() {
           </form>
         </Container>
       </main>
+      <SiteFooter />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, Briefcase, Download, Map, Sparkles } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import SiteFooter from '../components/layout/SiteFooter'
 import { useProfileStore } from '../store/useProfileStore'
 
 export default function ResultsPage() {
@@ -25,7 +26,7 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="flex min-h-screen flex-col bg-slate-950 text-white">
       <header className="border-b border-white/10 bg-slate-900/80 backdrop-blur-md">
         <Container className="flex h-14 items-center gap-3 sm:h-16">
           <Link
@@ -44,7 +45,7 @@ export default function ResultsPage() {
         </Container>
       </header>
 
-      <main className="py-10 sm:py-14">
+      <main className="flex-1 py-10 sm:py-14">
         <Container className="max-w-2xl">
           <p className="text-sm font-medium text-cyan-400">Paso 2 de 2</p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -135,6 +136,7 @@ export default function ResultsPage() {
           </div>
         </Container>
       </main>
+      <SiteFooter />
     </div>
   )
 }

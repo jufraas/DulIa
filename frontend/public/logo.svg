@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40" fill="none" role="img" aria-label="DulIA">
+  <rect width="36" height="36" x="2" y="2" rx="10" fill="#06B6D4" fill-opacity="0.15"/>
+  <path
+    d="M20 10l2.5 5 5.5.8-4 3.9.9 5.5L20 22.5l-4.9 2.7.9-5.5-4-3.9 5.5-.8L20 10z"
+    fill="#22D3EE"
+  />
+  <text
+    x="44"
+    y="26"
+    fill="#F8FAFC"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="20"
+    font-weight="700"
+  >
+    DulIA
+  </text>
+</svg>
