@@ -65,7 +65,7 @@ Content-Type: application/json
 }
 ```
 
-> Implementado en frontend: `frontend/src/pages/OnboardingPage.jsx` (wizard 3 pasos).
+> Implementado en frontend: wizard 3 pasos en `frontend/src/pages/OnboardingPage.jsx` + componentes en `frontend/src/components/onboarding/`.
 
 ### Modo B — Formulario + CV (multipart)
 

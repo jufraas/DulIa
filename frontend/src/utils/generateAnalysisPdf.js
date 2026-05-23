@@ -1,9 +1,16 @@
 import { jsPDF } from 'jspdf'
+import { profileToDisplayFields } from './formatProfileLabels'
 
 const MARGIN = 20
 const PAGE_WIDTH = 210
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2
 const LINE_HEIGHT = 7
+
+const BRAND_DARK = [13, 13, 13]
+const BRAND_VIOLET = [124, 58, 237]
+const BRAND_MAGENTA = [236, 72, 153]
+const TEXT_PRIMARY = [250, 250, 252]
+const TEXT_SECONDARY = [100, 100, 120]
 
 /**
  * @param {string} text
@@ -23,9 +30,9 @@ function splitLines(text, maxWidth, doc) {
 function sectionTitle(doc, y, title) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
-  doc.setTextColor(15, 23, 42)
+  doc.setTextColor(...BRAND_DARK)
   doc.text(title, MARGIN, y)
-  doc.setDrawColor(6, 182, 212)
+  doc.setDrawColor(...BRAND_VIOLET)
   doc.setLineWidth(0.4)
   doc.line(MARGIN, y + 2, PAGE_WIDTH - MARGIN, y + 2)
   return y + 10
@@ -33,26 +40,27 @@ function sectionTitle(doc, y, title) {
 
 /**
  * @param {{
- *   profile?: { name?: string, city?: string, education?: string, skills?: string, interests?: string } | null,
- *   result: { profile: string, score: number, opportunities: string[], roadmap: string[] },
+ *   profile?: import('../store/useProfileStore').ProfileForm | null,
+ *   result: import('../store/useProfileStore').AnalysisResult,
+ *   cvFileName?: string | null,
  * }} data
  */
-export function generateAnalysisPdf({ profile, result }) {
+export function generateAnalysisPdf({ profile, result, cvFileName = null }) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   let y = MARGIN
 
-  doc.setFillColor(15, 23, 42)
+  doc.setFillColor(...BRAND_DARK)
   doc.rect(0, 0, PAGE_WIDTH, 36, 'F')
 
-  doc.setTextColor(255, 255, 255)
+  doc.setTextColor(...TEXT_PRIMARY)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
   doc.text('DulIA', MARGIN, 16)
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.setTextColor(148, 163, 184)
-  doc.text('Coach de carrera con IA · Barranqui-IA 2026', MARGIN, 24)
+  doc.setTextColor(...TEXT_SECONDARY)
+  doc.text('Coach de carrera con IA · Barranqui-IA 2026 · Colombia', MARGIN, 24)
 
   y = 48
   doc.setTextColor(51, 65, 85)
@@ -68,19 +76,33 @@ export function generateAnalysisPdf({ profile, result }) {
   if (profile?.name) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(14)
-    doc.setTextColor(15, 23, 42)
+    doc.setTextColor(...BRAND_DARK)
     doc.text(`Plan de acción — ${profile.name}`, MARGIN, y)
     y += 8
     if (profile.city) {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
-      doc.setTextColor(100, 116, 139)
+      doc.setTextColor(...TEXT_SECONDARY)
       doc.text(profile.city, MARGIN, y)
       y += 8
     }
   }
 
-  y = sectionTitle(doc, y, 'Perfil sugerido')
+  if (cvFileName || result.cv_parsed) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...BRAND_MAGENTA)
+    doc.text(
+      result.cv_parsed
+        ? `CV analizado: ${cvFileName || 'archivo adjunto'}`
+        : `CV adjunto: ${cvFileName}`,
+      MARGIN,
+      y,
+    )
+    y += 8
+  }
+
+  y = sectionTitle(doc, y, 'Perfil sugerido por IA')
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   doc.setTextColor(30, 41, 59)
@@ -89,11 +111,15 @@ export function generateAnalysisPdf({ profile, result }) {
   y += profileLines.length * LINE_HEIGHT + 2
 
   doc.setFont('helvetica', 'bold')
-  doc.setTextColor(6, 182, 212)
-  doc.text(`Encaje: ${result.score}%`, PAGE_WIDTH - MARGIN - 35, y - profileLines.length * LINE_HEIGHT)
+  doc.setTextColor(...BRAND_MAGENTA)
+  doc.text(
+    `Score: ${result.score}/100`,
+    PAGE_WIDTH - MARGIN - 35,
+    y - profileLines.length * LINE_HEIGHT,
+  )
   y += 6
 
-  y = sectionTitle(doc, y, 'Oportunidades para ti')
+  y = sectionTitle(doc, y, 'Oportunidades laborales reales')
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(51, 65, 85)
@@ -108,7 +134,7 @@ export function generateAnalysisPdf({ profile, result }) {
   })
   y += 4
 
-  y = sectionTitle(doc, y, 'Tu roadmap')
+  y = sectionTitle(doc, y, 'Tu plan de 30 días')
   result.roadmap.forEach((step, i) => {
     const lines = splitLines(`${i + 1}. ${step}`, CONTENT_WIDTH - 8, doc)
     if (y + lines.length * LINE_HEIGHT > 270) {
@@ -120,32 +146,17 @@ export function generateAnalysisPdf({ profile, result }) {
   })
 
   if (profile) {
-    if (y > 230) {
+    if (y > 220) {
       doc.addPage()
       y = MARGIN
     }
-    y = sectionTitle(doc, y + 4, 'Tu perfil (resumen)')
+    y = sectionTitle(doc, y + 4, 'Tu perfil (datos enviados)')
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
     doc.setTextColor(71, 85, 105)
-    /** @type {[string, string | boolean | undefined][]} */
-    const fields = [
-      ['Situación', profile.current_situation],
-      ['Estudios', profile.education],
-      ['Nivel', profile.education_level],
-      ['Experiencia', profile.has_experience ? profile.experience_summary || 'Sí' : 'Primera experiencia'],
-      ['Habilidades', profile.skills],
-      ['Habilidades blandas', profile.soft_skills],
-      ['Intereses', profile.interests],
-      ['Modalidad', profile.work_mode],
-      ['Busca', profile.opportunity_type],
-      ['Disponibilidad', profile.availability],
-      ['Herramientas', profile.tools],
-    ]
-    fields.forEach(([label, value]) => {
-      if (!value) return
-      const text = typeof value === 'boolean' ? String(value) : value
-      const lines = splitLines(`${label}: ${text}`, CONTENT_WIDTH, doc)
+
+    profileToDisplayFields(profile).forEach(({ label, value }) => {
+      const lines = splitLines(`${label}: ${value}`, CONTENT_WIDTH, doc)
       if (y + lines.length * LINE_HEIGHT > 280) {
         doc.addPage()
         y = MARGIN
@@ -159,9 +170,10 @@ export function generateAnalysisPdf({ profile, result }) {
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i)
     doc.setFontSize(8)
-    doc.setTextColor(148, 163, 184)
+    doc.setTextColor(...TEXT_SECONDARY)
     doc.text(
-      `DulIA — oportunidades laborales reales para jóvenes colombianos · Pág. ${i}/${pageCount}`,
+      'DulIA — coach de carrera con IA para jóvenes colombianos · Sin sesión · Pág. ' +
+        `${i}/${pageCount}`,
       MARGIN,
       290,
     )

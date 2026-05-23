@@ -32,7 +32,7 @@ No hay registro ni cuentas. Estado en memoria (Zustand) en frontend.
 
 ## Estado actual
 
-Frontend: landing, wizard, resultados, PDF, mock API. **Pendiente:** upload CV, deploy.
+Frontend: landing, wizard, resultados, PDF, mock API, upload CV, multipart, resumen perfil, rebrand. **Pendiente:** deploy.
 
 Backend: no iniciado. Ver [PROJECT_STATE.md](PROJECT_STATE.md).
 

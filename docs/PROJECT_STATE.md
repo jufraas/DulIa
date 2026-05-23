@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Documentación actualizada: sin login, importación CV PDF + MarkItDown.
+2026-05-23 — Frontend: rebrand, scaffolding por componentes, CV upload, multipart, resumen perfil.
 
 ## Estado por módulo
 
@@ -12,25 +12,27 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Estructura creada |
 | Backend (FastAPI) | 🔲 No iniciado | Pendiente: `/profile`, MarkItDown, Gemini |
-| Frontend (React+Vite) | 🚧 En progreso | Flujo demo con mock; falta upload CV + deploy |
+| Frontend (React+Vite) | 🚧 En progreso | Flujo demo completo; falta deploy |
 | Pipeline (scrapers) | 🔲 No iniciado | — |
 | Integración Gemini | 🔲 No iniciado | Ver PROMPTS.md |
 | Base de datos | 🔲 No definida | Ver SCHEMA.md |
-| Deploy | 🔲 No iniciado | — |
+| Deploy | 🔲 No iniciado | Vercel listo (`vercel.json`) |
 
 ## Frontend — avance detallado
 
 | Pantalla / pieza | Estado |
 |------------------|--------|
-| Landing (bienvenida) | ✅ |
+| Landing (bienvenida) + rebrand DulIA | ✅ |
 | Footer (contacto, copyright) | ✅ |
 | Wizard formulario (3 pasos) | ✅ |
-| Pantalla de resultados | ✅ |
-| Descarga PDF (jsPDF) | ✅ |
+| Scaffolding por componentes (`COMPONENT_OWNERS.md`) | ✅ |
+| Pantalla de resultados + score ring | ✅ |
+| Descarga PDF (jsPDF, colores marca) | ✅ |
 | Integración Axios → backend (fallback mock) | ✅ |
-| **Importar CV (PDF) — UI upload** | 🔲 |
-| **Envío multipart (profile + cv)** | 🔲 |
-| Resumen perfil del usuario en resultados | 🔲 |
+| Importar CV (PDF) — UI upload | ✅ |
+| Envío multipart (profile + cv) | ✅ |
+| Resumen perfil del usuario en resultados | ✅ |
+| Aviso flujo sin sesión | ✅ |
 | Deploy producción (Vercel) | 🔲 |
 
 ## Backend — pendiente (referencia para coordinación)
@@ -56,10 +58,9 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 ## Próximos pasos inmediatos
 
 ### Frontend
-1. UI importar CV (PDF) en onboarding
-2. `submitProfile` con FormData cuando hay archivo
-3. Sección “Tu perfil” en resultados
-4. Commit rama `FRONT` + deploy Vercel
+1. Deploy Vercel (root: `frontend`, env `VITE_API_URL`)
+2. Commit rama `FRONT`
+3. Compañero: pulir landing/resultados en sus archivos asignados
 
 ### Backend (Carlos)
 1. `POST /profile` según ENDPOINTS.md
