@@ -67,11 +67,13 @@ def normalize_job_row(row: dict[str, Any]) -> dict[str, Any]:
         canonical = _LEGACY_ALIASES.get(key, key)
         out[canonical] = value
 
-    # Normalizar modality/status a valores que usa el scoring
+    # Normalizar modality/status/education a valores que usa el scoring
     if out.get("modality"):
         out["modality"] = _normalize_modality(str(out["modality"]))
     if out.get("status"):
         out["status"] = str(out["status"]).lower()
+    if out.get("education_level_req"):
+        out["education_level_req"] = _normalize_education_level(str(out["education_level_req"]))
 
     return out
 
@@ -90,6 +92,22 @@ def _normalize_modality(value: str) -> str:
         "in-person": "presencial",
     }
     return mapping.get(v, v)
+
+
+def _normalize_education_level(value: str) -> str:
+    """Normaliza education_level_req a las claves de NIVEL_ORDEN (sin acento, minúsculas)."""
+    mapping = {
+        "bachiller": "bachiller",
+        "técnico": "tecnico",
+        "tecnico": "tecnico",
+        "técnologo": "tecnologo",
+        "tecnólogo": "tecnologo",
+        "tecnologo": "tecnologo",
+        "universitario": "universitario",
+        "posgrado": "posgrado",
+        "postgrado": "posgrado",
+    }
+    return mapping.get(value.lower().strip(), value.lower().strip())
 
 
 def job_city(job: dict[str, Any]) -> str:

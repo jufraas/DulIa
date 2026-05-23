@@ -69,7 +69,8 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     if skills_req:
         match_ratio = len(set(skills_perfil) & set(skills_req)) / len(skills_req)
     else:
-        match_ratio = 1.0
+        # No skills specified → neutral score (can't assess fit)
+        match_ratio = 0.5
 
     pts_skills = round(match_ratio * 40)
 
