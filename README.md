@@ -4,6 +4,8 @@
 
 DulIA es una plataforma web que usa inteligencia artificial para orientar a jóvenes colombianos en su desarrollo profesional: sugiere rutas de carrera, conecta con oportunidades laborales reales y entrega feedback personalizado sobre su perfil.
 
+**Flujo MVP:** landing → wizard (con subida opcional de CV PDF) → resultados con score y vacantes → panel semáforo → PDF descargable. Sesión anónima por `session_id` con persistencia al refresh.
+
 ---
 
 ## Stack tecnológico
@@ -69,9 +71,8 @@ python main.py
 |--------|-----|
 | Carlos (krl0s) | Backend — FastAPI, integración IA |
 | Migue | Frontend — Sobre DulIA (`/sobre`), onboarding/API |
-| Compañero | Frontend — Landing, resultados, vacantes |
+| Joufra | Frontend — Landing, resultados, vacantes · IA + pitch |
 | Jose | Data Pipeline — scrapers Python |
-| Jufra | IA + integración general, Pitch |
 
 ---
 

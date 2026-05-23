@@ -4,7 +4,7 @@ import Button from '../ui/Button'
 import Container from '../ui/Container'
 
 /**
- * @owner compañero-front
+ * @owner joufra
  */
 export default function ResultsHeader() {
   return (

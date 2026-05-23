@@ -4,17 +4,17 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Merge FRONT + main: backend Fase 10 completa; frontend kit ReBrand integrado.
+2026-05-23 — Rehidratación de sesión, subida CV PDF, splash landing, pulido `/sobre`.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
-| Backend (FastAPI) | 🚧 Fases 0–10 | API completa + seguridad mínima; falta deploy (Fase 11) |
-| Frontend (React+Vite) | 🚧 En progreso | UI kit ReBrand (5 rutas); falta deploy y pulido |
+| Backend (FastAPI) | 🚧 Fases 0–10 | API completa + `parse-cv`; falta deploy (Fase 11) |
+| Frontend (React+Vite) | 🚧 En progreso | UI kit ReBrand (5 rutas); sesión persistente; falta deploy |
 | Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
-| Integración Gemini | ✅ | Profile, coach; rate limit 10/min |
+| Integración Gemini | ✅ | Profile, coach, CV parse; rate limit 10/min |
 | Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
@@ -24,11 +24,11 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 | Ruta | Pantalla | Dueño | Estado |
 |------|----------|-------|--------|
-| `/` | Landing (Hero + Features + footer) | Compañero | ✅ |
+| `/` | Landing (Hero + splash + footer) | Joufra | ✅ |
 | `/sobre` | Sobre DulIA | Migue | ✅ |
-| `/comenzar` | Wizard onboarding (3 pasos) | Compartido | ✅ |
-| `/resultados` | Score, perfil, top jobs, plan 30d, PDF | Compañero | ✅ |
-| `/vacantes` | Panel semáforo (verde/amarillo/rojo) | Compañero | ✅ |
+| `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
+| `/resultados` | Score, perfil, top jobs, plan 30d, PDF | Joufra | ✅ |
+| `/vacantes` | Panel semáforo (verde/amarillo/rojo) | Joufra | ✅ |
 
 ### Piezas transversales
 
@@ -37,6 +37,9 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
 | Integración Axios → API | ✅ | `services/api.js` + fallback `mockData.js` |
 | `session_id` en localStorage | ✅ | Clave `dulia_session_id` |
+| Rehidratación de sesión al refresh | ✅ | `sessionCache.js` + `sessionHydration.js` + `GET /profile` |
+| Borrador wizard al refresh | ✅ | Clave `dulia_wizard_draft` |
+| Subida CV PDF (paso 0 wizard) | ✅ | `POST /profile/parse-cv` + fallback mock |
 | POST `/profile` al completar wizard | ✅ | Alineado a contrato JSON en `ENDPOINTS.md` |
 | GET jobs + market en paralelo | ✅ | Tras guardar perfil |
 | Descarga PDF (jsPDF) | ✅ | Incluye jobs + mercado si están en store |
@@ -46,7 +49,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 | Item | Prioridad | Detalle |
 |------|-----------|---------|
-| Refresh en `/resultados` pierde estado | Media | Implementar `GET /profile/{session_id}` |
+| Fallback mock en `createProfile` | — | ✅ `mockProfileFromPayload.js` |
 | Termómetro mercado no visible en UI | Baja | Datos van al PDF; `MarketThermometer.jsx` huérfano |
 | Plan 30 días estático | Baja | `ThirtyDayPlan.jsx` — copy fijo |
 | ESLint ruidoso | Baja | Excluir `.vite/**` y `ReBrand/**` |
@@ -76,14 +79,13 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 ## Próximos pasos inmediatos
 
 ### Integración
-1. Levantar backend con `USE_MOCK_DATA=true` y probar flujo wizard → resultados
+1. Levantar backend con `USE_MOCK_DATA=true` y probar flujo wizard → resultados → refresh
 2. Frontend: deploy Vercel (`VITE_API_URL` apuntando al backend)
 3. Backend Fase 11: deploy con `CORS_ORIGINS=<url-front>`
 
 ### Frontend
-1. Migue: pulir `/sobre`
-2. Compañero: pulir landing, resultados, vacantes
-3. Implementar rehidratación con `GET /profile/{session_id}`
+1. Migue: commit + push a rama `FRONT`
+2. Joufra: pulir landing, resultados, vacantes; termómetro en UI; plan 30d dinámico
 
 ### Pipeline
 1. Insertar vacantes en tabla `jobs` para modo real

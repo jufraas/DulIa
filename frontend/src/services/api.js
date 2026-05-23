@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { mockJobs, mockMarket } from './mockData'
+import { buildMockProfileFromPayload } from './mockProfileFromPayload'
 import { getOrCreateSessionId } from '../utils/session'
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
@@ -29,20 +30,46 @@ export async function createProfile(payload) {
     const { data } = await api.post('/profile', payload)
     return data
   } catch (err) {
-    if (axios.isAxiosError(err) && err.response?.data?.detail) {
-      throw new Error(String(err.response.data.detail))
+    if (import.meta.env.DEV) {
+      console.warn('[DulIA] createProfile: usando perfil mock local', err)
     }
-    throw new Error('No pudimos guardar tu perfil. Intenta de nuevo.')
+    return buildMockProfileFromPayload(payload)
   }
 }
 
 /**
  * @param {string} [sessionId]
- * @returns {Promise<import('../store/useProfileStore').SavedProfile>}
+ * @returns {Promise<import('../store/useProfileStore').SavedProfile | null>}
  */
 export async function getProfile(sessionId = getOrCreateSessionId()) {
-  const { data } = await api.get(`/profile/${sessionId}`)
-  return data
+  try {
+    const { data } = await api.get(`/profile/${sessionId}`)
+    return data
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) return null
+    throw err
+  }
+}
+
+/**
+ * @param {File} file
+ * @returns {Promise<import('../services/mockCvPrefill').MOCK_CV_PREFILL extends infer T ? T : never>}
+ */
+export async function parseCvPdf(file) {
+  const formData = new FormData()
+  formData.append('cv', file)
+  try {
+    const { data } = await api.post('/profile/parse-cv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000,
+    })
+    return data
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.data?.detail) {
+      throw new Error(String(err.response.data.detail))
+    }
+    throw err
+  }
 }
 
 /**

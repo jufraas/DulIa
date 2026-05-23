@@ -1,4 +1,4 @@
-import { Compass, Layers, MapPinOff } from 'lucide-react'
+import { Compass, Layers, ShieldAlert } from 'lucide-react'
 import IconBox from '../brand/IconBox'
 import Section from '../ui/Section'
 
@@ -7,19 +7,19 @@ const problems = [
     icon: Compass,
     title: 'Sin rumbo claro',
     description:
-      'Muchos jóvenes terminan estudios o cursos sin saber qué camino laboral seguir primero.',
+      'Terminas estudios o cursos y no sabes si buscar práctica, primer empleo o freelance — ni por dónde empezar en tu ciudad.',
   },
   {
     icon: Layers,
-    title: 'Ofertas impersonales',
+    title: 'Demasiado ruido',
     description:
-      'Las bolsas de empleo muestran miles de vacantes, pero pocas alineadas con tu perfil real.',
+      'Portales con miles de vacantes, pero casi ninguna alineada con tu perfil, tu nivel o lo que realmente sabes hacer.',
   },
   {
-    icon: MapPinOff,
-    title: 'Sin plan de acción',
+    icon: ShieldAlert,
+    title: 'Ofertas que no conviene',
     description:
-      'Falta un roadmap concreto: portafolio, red profesional y primeros pasos locales.',
+      'Vacantes sospechosas, salarios irreales o reclutadores dudosos. Aplicar sin filtro te cuesta tiempo y a veces dinero.',
   },
 ]
 
@@ -28,7 +28,7 @@ export default function AboutProblemSection() {
     <Section
       id="problema"
       title="El problema que resolvemos"
-      subtitle="En Colombia, millones de jóvenes buscan empleo sin orientación personalizada ni datos locales accionables."
+      subtitle="En Colombia, millones de jóvenes buscan empleo con poca orientación personalizada y sin señales claras sobre qué oportunidades valen la pena."
     >
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {problems.map(({ icon: Icon, title, description }, i) => (

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import ApiErrorBanner from '../components/onboarding/ApiErrorBanner'
+import CvUploadZone from '../components/onboarding/CvUploadZone'
 import StepPersonalInfo from '../components/onboarding/StepPersonalInfo'
 import StepPreferences from '../components/onboarding/StepPreferences'
 import StepWorkProfile from '../components/onboarding/StepWorkProfile'
@@ -21,10 +22,17 @@ export default function OnboardingPage() {
     loading,
     apiError,
     progress,
+    cvParsing,
+    cvFileName,
+    cvFieldsCount,
+    cvError,
+    cvSuccessMessage,
     update,
     goNext,
     goBack,
     handleSubmit,
+    handleCvFile,
+    clearCv,
   } = useOnboardingForm()
 
   return (
@@ -54,13 +62,49 @@ export default function OnboardingPage() {
               noValidate
             >
               {step === 0 && (
-                <StepPersonalInfo form={form} errors={errors} update={update} />
+                <>
+                  <CvUploadZone
+                    onFileSelect={handleCvFile}
+                    parsing={cvParsing}
+                    fileName={cvFileName}
+                    fieldsCount={cvFieldsCount}
+                    error={cvError}
+                    onClear={clearCv}
+                  />
+                  {cvSuccessMessage && !cvError && (
+                    <p
+                      className="rounded-[14px] px-4 py-3 text-sm"
+                      style={{
+                        border: '1px solid rgba(52,211,153,0.35)',
+                        background: 'rgba(52,211,153,0.08)',
+                        color: 'var(--success, #34d399)',
+                      }}
+                    >
+                      {cvSuccessMessage}
+                    </p>
+                  )}
+                  <StepPersonalInfo form={form} errors={errors} update={update} />
+                </>
               )}
               {step === 1 && (
-                <StepWorkProfile form={form} errors={errors} update={update} />
+                <>
+                  {form.cv_parsed === 'true' && (
+                    <p className="text-sm text-[color:var(--fg-3)]">
+                      Campos sugeridos desde tu CV — confirma o edita lo que necesites.
+                    </p>
+                  )}
+                  <StepWorkProfile form={form} errors={errors} update={update} />
+                </>
               )}
               {step === 2 && (
-                <StepPreferences form={form} errors={errors} update={update} />
+                <>
+                  {form.cv_parsed === 'true' && (
+                    <p className="text-sm text-[color:var(--fg-3)]">
+                      Preferencias iniciales desde tu CV — ajusta salario o modalidad si quieres.
+                    </p>
+                  )}
+                  <StepPreferences form={form} errors={errors} update={update} />
+                </>
               )}
 
               <ApiErrorBanner message={apiError} />

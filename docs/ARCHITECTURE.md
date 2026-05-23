@@ -39,9 +39,12 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 **Flujo de datos:**
 
 - Genera `session_id` (UUID) en `localStorage` (`dulia_session_id`).
+- **Paso 0 wizard (opcional):** sube CV PDF → `POST /api/profile/parse-cv` → prellena formulario.
 - Envía `POST /api/profile` (JSON, campos en español) al completar el wizard.
 - Consulta en paralelo jobs + market; estado en **Zustand** (`useProfileStore`).
-- Fallback a `mockData.js` si jobs/market no responden.
+- **Persistencia:** al guardar perfil, escribe cache en `dulia_session_data`; borrador wizard en `dulia_wizard_draft`.
+- **Rehidratación** al cargar app (`sessionHydration.js`): cache local → `GET /profile/{session_id}` → re-fetch jobs/market si faltan.
+- Fallback a `mockData.js` (jobs/market), `mockCvPrefill.js` (parse-cv) y `mockProfileFromPayload.js` (createProfile) si el backend no responde.
 - PDF (jsPDF) con perfil, vacantes y mercado.
 - **No** llama a Gemini directamente.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
@@ -99,6 +102,8 @@ backend/
 |------|----------|---------|
 | Formulario wizard | Captura + valida (3 pasos) | Recibe JSON (`nombre`, `ciudad`, …) |
 | session_id | Genera en localStorage | Clave de persistencia anónima |
+| Cache sesión | `sessionCache.js` (localStorage) | — |
+| Rehidratación | `sessionHydration.js` al boot | `GET /profile/{session_id}` |
 | Matching vacantes | Muestra scores y semáforo | Calcula `score_compatibilidad` |
 | Termómetro mercado | PDF (UI opcional) | Agrega sobre `jobs` |
 | Coach / chat | UI futura | Gemini + perfil en Supabase |
@@ -110,11 +115,11 @@ backend/
 frontend/src/
 ├── pages/           # WelcomePage, AboutPage, OnboardingPage, ResultsPage, VacanciesPage
 ├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/
-├── hooks/           # useOnboardingForm, useResultsData, usePdfDownload
-├── services/        # api.js, mockData.js
+├── hooks/           # useOnboardingForm, useResultsData, useSessionHydration, usePdfDownload
+├── services/        # api.js, mockData.js, mockCvPrefill.js, sessionHydration.js
 ├── store/           # useProfileStore.js
 ├── styles/          # dulia-tokens.css, dulia-kit.css
-└── utils/           # session, buildProfilePayload, generateAnalysisPdf
+└── utils/           # session, sessionCache, buildProfilePayload, validateCvFile, generateAnalysisPdf
 ```
 
 ## Modo desarrollo sin credenciales
@@ -122,8 +127,9 @@ frontend/src/
 `USE_MOCK_DATA=true` en backend `.env`:
 
 - Respuestas estables sin Supabase/Gemini real.
-- `GET /profile/{session_id}` devuelve 404 en mock; el front guarda respuesta del POST en Zustand.
+- `GET /profile/{session_id}` devuelve 404 en mock; el front persiste la respuesta del POST en `dulia_session_data`.
 
 ## Limitaciones conocidas
 
-- Refresh en `/resultados` sin perfil en Zustand → redirige a `/comenzar`. Pendiente: `GET /profile/{session_id}`.
+- Termómetro de mercado no visible en UI (solo PDF).
+- Plan 30 días con copy estático.

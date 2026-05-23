@@ -62,6 +62,7 @@ export function buildProfilePayload(form) {
   if (form.salary_max) payload.salario_esperado_max = Number(form.salary_max)
 
   const extra = [
+    form.cv_file_name && `CV importado: ${form.cv_file_name}`,
     form.current_situation && `Situación: ${form.current_situation}`,
     form.soft_skills && `Habilidades blandas: ${form.soft_skills}`,
     form.tools && `Herramientas: ${form.tools}`,

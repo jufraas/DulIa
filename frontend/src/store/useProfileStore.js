@@ -1,4 +1,9 @@
 import { create } from 'zustand'
+import {
+  clearSessionCache,
+  clearWizardDraft,
+  persistSessionCacheFromState,
+} from '../utils/sessionCache'
 
 /**
  * @typedef {Object} OnboardingFormState
@@ -23,6 +28,8 @@ import { create } from 'zustand'
  * @property {string} salary_max
  * @property {string} tools
  * @property {string} portfolio_url
+ * @property {string} cv_file_name
+ * @property {string} cv_parsed
  */
 
 /**
@@ -76,26 +83,43 @@ import { create } from 'zustand'
  * @property {string|null} [sector_filtro]
  */
 
-export const useProfileStore = create((set) => ({
+export const useProfileStore = create((set, get) => ({
   sessionId: null,
   savedProfile: null,
   formSnapshot: null,
   jobs: [],
   market: null,
   apiUsesMock: true,
+  sessionHydrated: false,
 
   setSessionId: (sessionId) => set({ sessionId }),
-  setSavedProfile: (savedProfile) => set({ savedProfile }),
-  setFormSnapshot: (formSnapshot) => set({ formSnapshot }),
-  setJobs: (jobs) => set({ jobs }),
-  setMarket: (market) => set({ market }),
+  setSessionHydrated: (sessionHydrated) => set({ sessionHydrated }),
+  setSavedProfile: (savedProfile) => {
+    set({ savedProfile })
+    persistSessionCacheFromState(get())
+  },
+  setFormSnapshot: (formSnapshot) => {
+    set({ formSnapshot })
+    persistSessionCacheFromState(get())
+  },
+  setJobs: (jobs) => {
+    set({ jobs })
+    persistSessionCacheFromState(get())
+  },
+  setMarket: (market) => {
+    set({ market })
+    persistSessionCacheFromState(get())
+  },
   setApiUsesMock: (apiUsesMock) => set({ apiUsesMock }),
 
-  reset: () =>
+  reset: () => {
+    clearSessionCache()
+    clearWizardDraft()
     set({
       savedProfile: null,
       formSnapshot: null,
       jobs: [],
       market: null,
-    }),
+    })
+  },
 }))

@@ -2,8 +2,8 @@
 
 - **Fecha:** 2026-05-23
 - **Área:** frontend + backend + ia
-- **Estado:** **diferida** — módulo backend listo; no en contrato MVP frontend
-- **Autor/es:** Equipo DulIA
+- **Estado:** **activa** — integrado en wizard paso 0
+- **Autor/es:** Equipo DulIA (Migue frontend, Carlos backend)
 
 ## Contexto
 
@@ -23,31 +23,46 @@ El módulo `backend/markitdown/` **sigue implementado** y puede integrarse cuand
 - Backend exponga multipart o endpoint dedicado de CV, y
 - El equipo decida priorizarlo sobre el wizard solo.
 
-## Por qué se difiere
+## Implementación actual (2026-05-23 tarde)
 
-- Contrato acordado con backend: `session_id` + JSON + jobs/market separados.
-- Menor complejidad para demo del hackathon con wizard de 4 pasos.
-- MarkItDown ya está listo; integración es incremental.
+Se adoptó **endpoint dedicado** en lugar de multipart en `POST /profile`:
 
-## Alternativas descartadas (original)
+| Pieza | Ubicación |
+|-------|-----------|
+| `POST /api/profile/parse-cv` | `backend/app/routes/profile.py` |
+| Servicio MarkItDown + Gemini | `backend/app/services/cv_service.py` |
+| Modelos respuesta | `backend/app/models/cv.py` (`CvParseOut`, `CvWizardPrefill`) |
+| UI paso 0 wizard | `frontend/src/components/onboarding/CvUploadZone.jsx` |
+| Cliente API | `parseCvPdf()` en `frontend/src/services/api.js` |
+| Fallback offline | `frontend/src/services/mockCvPrefill.js` |
+
+Flujo: usuario sube PDF → backend extrae campos → frontend merge en formulario → usuario revisa → `POST /profile` JSON al finalizar.
+
+## Por qué endpoint separado
+
+- Mantiene `POST /profile` JSON-only (contrato acordado con Carlos).
+- El CV es opcional y no bloquea el submit final.
+- MarkItDown + Gemini pueden fallar sin perder el wizard manual.
+
+## Alternativas descartadas
 
 | Alternativa | Por qué no |
 |-------------|------------|
 | PyPDF2 / extracción manual | Más código; peor estructura para IA |
 | Conversión en frontend | PDF parsing en browser es frágil |
-| Endpoint separado solo para CV | Dos round-trips; posible en fase 2 |
+| Multipart en POST /profile | Rompe contrato JSON del MVP |
 
 ## Consecuencias actuales
 
-- **Frontend:** sin `CvUpload` ni multipart en el submit.
-- **Backend stub (`main.py`):** aún multipart legacy — debe alinearse a [ENDPOINTS.md](../ENDPOINTS.md).
-- **MarkItDown:** ver [backend/markitdown/README.md](../../backend/markitdown/README.md).
-- **PROMPTS.md:** `{cv_markdown}` documentado para fase posterior.
+- **Frontend:** `CvUploadZone` en paso 0 de `/comenzar`.
+- **Docs:** contrato en [ENDPOINTS.md](../ENDPOINTS.md) sección `POST /profile/parse-cv`.
+- **Mock:** backend devuelve prefill simulado; frontend tiene `mockCvPrefill.js` si no hay red.
 
-## Límites acordados (cuando se reactive)
+## Límites acordados
 
 | Regla | Valor |
 |-------|-------|
 | Formatos | Solo `.pdf` |
 | Tamaño máximo | 5 MB |
-| Persistencia del PDF | No en hackathon |
+| Persistencia del PDF | No — solo se usa para extracción |
+| Rate limit | 10 req/min (mismo bucket Gemini) |

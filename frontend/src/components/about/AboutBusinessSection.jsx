@@ -5,27 +5,27 @@ import Section from '../ui/Section'
 const pillars = [
   {
     icon: Gem,
-    title: 'Freemium B2C',
+    title: 'Freemium para jóvenes',
     description:
-      'Análisis básico gratis. PDF avanzado, más matches y seguimiento en plan premium.',
+      'Análisis básico y vacantes recomendadas gratis. Premium: PDF avanzado, más matches y seguimiento del plan.',
   },
   {
     icon: Building2,
-    title: 'B2B institucional',
+    title: 'Licencias institucionales',
     description:
-      'Licencias para universidades, SENA y fundaciones que orientan cohortes de estudiantes.',
+      'Universidades, SENA y fundaciones orientan cohortes con dashboards agregados y anonimizados.',
   },
   {
     icon: Users,
-    title: 'B2B empleadores',
+    title: 'Empleadores locales',
     description:
-      'Empresas locales promocionan vacantes o pagan por candidatos mejor alineados.',
+      'Empresas del Caribe promocionan vacantes verificadas y acceden a candidatos mejor alineados.',
   },
   {
     icon: Database,
-    title: 'Insights de mercado',
+    title: 'Inteligencia de mercado',
     description:
-      'Datos agregados y anonimizados sobre demanda laboral regional, con consentimiento.',
+      'Insights sobre demanda por sector y ciudad — útil para política pública y programas de empleo.',
   },
 ]
 
@@ -34,7 +34,7 @@ export default function AboutBusinessSection() {
     <Section
       id="modelo"
       title="Modelo de negocio sostenible"
-      subtitle="Pensado para escalar después del hackathon. En el MVP priorizamos freemium y demo con datos reales."
+      subtitle="En el MVP del hackathon priorizamos la demo freemium con datos reales. El resto es la hoja de ruta post-evento."
     >
       <ul className="grid gap-4 sm:grid-cols-2">
         {pillars.map(({ icon: Icon, title, description }, i) => (

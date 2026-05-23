@@ -11,17 +11,19 @@ Tras enviar el formulario, `/resultados` necesita el payload del perfil y la res
 
 ## Decisión
 
-Store mínimo en `frontend/src/store/useProfileStore.js` con Zustand:
+Store en `frontend/src/store/useProfileStore.js` con Zustand:
 
-- `profile` — lo que envió el usuario
-- `result` — respuesta de la API o mock
-- `setProfile`, `setResult`, `reset`
+- `savedProfile` — respuesta `POST /profile`
+- `formSnapshot` — copia del formulario enviado
+- `jobs`, `market` — resultados paralelos
+- `sessionId`, `sessionHydrated` — control de sesión
+- Setters persisten en `dulia_session_data` vía `sessionCache.js`
 
 ## Por qué
 
-- API más simple que Context + reducer para 2 campos.
+- API más simple que Context + reducer para pocos campos.
 - Ya en `package.json`; sin boilerplate.
-- Suficiente para hackathon; no persiste en localStorage (evita PII en disco por ahora).
+- Persistencia en localStorage para sobrevivir refresh (ver [2026-05-23-frontend-session-rehydration.md](./2026-05-23-frontend-session-rehydration.md)).
 
 ## Alternativas descartadas
 
@@ -29,10 +31,9 @@ Store mínimo en `frontend/src/store/useProfileStore.js` con Zustand:
 |-------------|------------|
 | Props drilling | No escala entre rutas |
 | React Context | Más código para el mismo resultado |
-| localStorage | Riesgo/privacidad; innecesario en demo |
 
 ## Consecuencias
 
-- Refresh en `/resultados` redirige a `/comenzar` si `result` es null.
-- PDF y futuras pantallas leen del mismo store.
-- Si se necesita persistencia, documentar nueva decisión aquí.
+- Refresh en `/resultados` ya **no** redirige si hay cache o perfil en API.
+- PDF y pantallas de resultados leen del mismo store.
+- Borrador del wizard en `dulia_wizard_draft` para refresh en `/comenzar`.

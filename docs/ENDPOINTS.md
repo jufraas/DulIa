@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-23 · Fases 1–10 completadas. Todos los endpoints probados vía Swagger + curl con `USE_MOCK_DATA=true`.
+**Última actualización:** 2026-05-23 · Fases 1–10 + `POST /profile/parse-cv` + rehidratación de sesión en frontend.
 
 ## Base URL
 
@@ -23,7 +23,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | Auth | Ninguna. `session_id` = UUID en `localStorage` (clave sugerida: `dulia_session_id`) |
 | Errores | `{ "detail": "mensaje" }` — 404, 422, 429, 500 según FastAPI |
 | CORS | Dev: `*` o `CORS_ORIGINS`; prod: solo `CORS_ORIGINS` (ver `.env.example`) |
-| Rate limit | `POST /profile` y `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
+| Rate limit | `POST /profile`, `POST /profile/parse-cv` y `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
 | Mock | `USE_MOCK_DATA=true` en backend → respuestas de ejemplo sin Supabase/Gemini |
 
 ### Comportamiento con `USE_MOCK_DATA`
@@ -32,6 +32,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 |----------|--------------|----------------|
 | `GET /health` | `mock_data: "true"` | `mock_data: "false"` |
 | `POST /profile` | Responde perfil simulado, **no guarda** en BD | Gemini + Supabase |
+| `POST /profile/parse-cv` | Prefill simulado (sin leer PDF real) | MarkItDown + Gemini |
 | `GET /profile/{id}` | Siempre **404** | 200 si existe, 404 si no |
 | `GET /jobs/recommended/{id}` | 2 vacantes mock (cualquier `session_id`) | Top 20 reales; `[]` sin perfil o sin jobs |
 | `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos |
@@ -41,11 +42,24 @@ https://<dominio>/api       ← producción (por definir al deployar)
 
 ## Flujo recomendado (frontend)
 
-1. Al iniciar la app: crear o leer `session_id` → `localStorage`.
-2. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
-3. Pantalla vacantes → `GET /api/jobs/recommended/{session_id}`.
-4. Pantalla mercado → `GET /api/market/dashboard?city=...`.
-5. Recargar perfil (solo modo real) → `GET /api/profile/{session_id}`.
+1. Al iniciar la app: crear o leer `session_id` → `localStorage` (`dulia_session_id`).
+2. **Rehidratación** (`sessionHydration.js`): restaurar perfil/jobs/market desde cache local; si no hay cache, `GET /api/profile/{session_id}` (modo real); re-fetch jobs/market si faltan.
+3. Wizard paso 0 (opcional): subir CV → `POST /api/profile/parse-cv` → prellenar formulario.
+4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
+5. Pantalla resultados → jobs + market ya en store; persistir en `dulia_session_data`.
+6. Pantalla vacantes → `GET /api/jobs/recommended/{session_id}` (si store vacío).
+7. Pantalla mercado → `GET /api/market/dashboard?city=...`.
+8. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
+
+### Claves `localStorage` (frontend)
+
+| Clave | Contenido |
+|-------|-----------|
+| `dulia_session_id` | UUID de sesión anónima |
+| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `formSnapshot` |
+| `dulia_wizard_draft` | Borrador del wizard (paso + campos) si el usuario refresca en `/comenzar` |
+
+> En mock, `GET /profile` devuelve 404 — el frontend confía en `dulia_session_data` tras completar el wizard.
 
 ---
 
@@ -140,6 +154,70 @@ Recibe el onboarding (campos **planos** en el body), extrae/enriquece con Gemini
 **Response 200:** mismo shape que `POST /api/profile`.
 
 **Response 404:** `{ "detail": "Perfil no encontrado" }`
+
+> En `USE_MOCK_DATA=true` siempre 404. El frontend usa cache local (`dulia_session_data`) para sobrevivir refresh.
+
+---
+
+#### `POST /api/profile/parse-cv` ✅
+
+Convierte un CV en PDF a markdown (MarkItDown) y extrae campos para **prellenar el wizard** (paso 0 de `/comenzar`). No guarda el PDF ni crea perfil — el usuario revisa y envía con `POST /profile`.
+
+**Content-Type:** `multipart/form-data`
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| `cv` | file | **Requerido.** Solo PDF, máx. **5 MB** |
+
+**Response 200:**
+
+```json
+{
+  "parsed": true,
+  "fields_found": ["name", "city", "skills", "education"],
+  "prefill": {
+    "name": "María López",
+    "city": "Barranquilla",
+    "departamento": "Atlántico",
+    "edad": null,
+    "age_range": "21-25",
+    "current_situation": "recien_egresado",
+    "education_level": "universitario",
+    "education": "Ingeniería de Sistemas",
+    "has_experience": "si",
+    "experience_years": "1",
+    "experience_summary": "Práctica en desarrollo web",
+    "skills": "Python, Excel, Git",
+    "soft_skills": "Trabajo en equipo, comunicación",
+    "interests": "tecnología, startups",
+    "work_mode": "hibrido",
+    "opportunity_type": "empleo",
+    "availability": "inmediata",
+    "tools": "VS Code, Figma",
+    "portfolio_url": null
+  },
+  "message": "Detectamos 12 campos. Revisa y continúa."
+}
+```
+
+| Campo respuesta | Notas |
+|-----------------|-------|
+| `parsed` | `true` si hubo extracción usable |
+| `fields_found` | Claves del `prefill` con valor no vacío |
+| `prefill` | Claves alineadas al formulario React (`name`, `city`, …) — ver `CvWizardPrefill` en backend |
+| `message` | Copy opcional para la UI |
+
+**Errores:**
+
+| Código | Cuándo |
+|--------|--------|
+| `400` | Archivo inválido (no PDF, supera 5 MB) |
+| `422` | PDF ilegible o sin texto extraíble |
+| `500` | Error interno Gemini/conversión |
+
+**Mock (`USE_MOCK_DATA=true`):** devuelve prefill simulado sin procesar el PDF.
+
+**Frontend:** `CvUploadZone.jsx` → `parseCvPdf()` en `api.js`. Si el backend no responde, fallback a `mockCvPrefill.js`.
 
 ---
 
@@ -323,4 +401,4 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/resultados` | Score, perfil, top jobs, plan 30d, PDF |
 | `/vacantes` | Panel semáforo |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallback local en `mockData.js` para jobs/market si el backend no responde.
+Cliente Axios: `frontend/src/services/api.js`. Fallback local en `mockData.js` (jobs/market), `mockCvPrefill.js` (parse-cv) y `mockProfileFromPayload.js` (createProfile). Persistencia de sesión: `sessionCache.js` + `sessionHydration.js`.

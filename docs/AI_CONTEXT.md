@@ -28,28 +28,31 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 Landing (/) ──► Sobre DulIA (/sobre) [opcional]
      │
      ▼
-Onboarding (/comenzar, 3 pasos) ──► POST /profile
-     │
-     ├──► GET /jobs/recommended/{session_id}
-     └──► GET /market/dashboard
+Onboarding (/comenzar, 3 pasos)
+     │  paso 0: POST /profile/parse-cv (opcional)
+     ▼
+POST /profile ──► GET jobs + market (paralelo)
      │
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
+     ▲
+     └── refresh OK: rehidratación (cache + GET /profile)
 ```
 
 - `session_id` en `localStorage` (`dulia_session_id`).
-- Estado UI en Zustand; refresh sin perfil redirige a `/comenzar`.
+- Estado UI en Zustand; cache en `dulia_session_data` para sobrevivir refresh.
+- Borrador del wizard en `dulia_wizard_draft` si refresca en `/comenzar`.
 - UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
 
 ## Rutas y dueños frontend
 
 | Ruta | Pantalla | Dueño |
 |------|----------|-------|
-| `/` | Landing | Compañero |
+| `/` | Landing | Joufra |
 | `/sobre` | Sobre DulIA | **Migue** |
 | `/comenzar` | Wizard | Compartido |
-| `/resultados` | Resultados | Compañero |
-| `/vacantes` | Vacantes | Compañero |
+| `/resultados` | Resultados | Joufra |
+| `/vacantes` | Vacantes | Joufra |
 
 Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
@@ -83,6 +86,7 @@ backend/
 |--------|------|--------|
 | GET | `/api/health` | ✅ |
 | POST | `/api/profile` | ✅ |
+| POST | `/api/profile/parse-cv` | ✅ |
 | GET | `/api/profile/{session_id}` | ✅ |
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
 | GET | `/api/market/dashboard` | ✅ |
@@ -120,4 +124,5 @@ cd frontend && npm run dev
 
 - Python 3.14 + `pydantic>=2.14.0a1` en backend.
 - CORS abierto en dev; restringir con `CORS_ORIGINS` en producción.
-- `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock.
+- `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock — el front usa cache local (`dulia_session_data`).
+- Persistencia: `frontend/src/utils/sessionCache.js`, `frontend/src/services/sessionHydration.js`.
