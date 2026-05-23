@@ -4,19 +4,19 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Fase 1 completa. Cambio de alcance en pipeline.
+2026-05-23 — Fase 9 completa: slowapi, CORS prod, `.env` verificado en `.gitignore`.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Rama `Backend` activa, docs actualizadas |
-| Backend (FastAPI) | 🚧 Fase 2 en curso | Fase 1 ✅ — estructura lista, `/api/health` responde |
-| Frontend (React+Vite) | 🔲 No iniciado | Esperando contrato de endpoints (ver ENDPOINTS.md) |
-| Pipeline | 🔁 Cambio de alcance | Scrapers pospuestos → mock data + APIs públicas (Adzuna/Jooble) |
-| Integración Gemini | 🔲 No iniciado | Cliente listo en `app/db/gemini.py`, faltan prompts |
-| Base de datos | 🚧 Fase 2 parcial | 4 tablas creadas en Supabase (profiles, jobs, companies, scoring_history). Mock data pendiente — a cargo del pipeline |
-| Deploy | 🔲 No iniciado | Espera MVP funcional |
+| Backend (FastAPI) | 🚧 Fases 0-9 | API completa + seguridad mínima |
+| Frontend (React+Vite) | 🔲 No iniciado | Integrar contra `docs/ENDPOINTS.md` |
+| Pipeline | 🔁 Cambio de alcance | Insertar mock en `jobs` |
+| Integración Gemini | ✅ | Rate limit 10/min en profile y coach |
+| Base de datos | 🚧 Schema listo | Datos pendientes pipeline |
+| Deploy | 🔲 No iniciado | Configurar `CORS_ORIGINS` en Railway/Render |
 
 ## Leyenda
 
@@ -35,20 +35,19 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | -1 | Repo + docs + MCPs | ✅ |
 | 0 | Entorno + dependencias + Hello World | ✅ |
 | 1 | Estructura profesional + CORS + conexiones | ✅ |
-| 2 | Schema Supabase + mock data (30-50 vacantes) | 🚧 En curso |
-| 3 | Modelos Pydantic | 🔲 |
-| 4 | Endpoints de perfil + Gemini extracción | 🔲 |
-| 5 | Integración real Gemini | 🔲 |
-| 6 | Endpoint vacantes recomendadas + scoring | 🔲 |
-| 7 | Termómetro del mercado | 🔲 |
-| 8 | Coach conversacional | 🔲 |
-| 9 | Seguridad y robustez | 🔲 |
+| 2 | Schema Supabase + mock data | 🚧 Tablas ✅, datos pendientes pipeline |
+| 3 | Modelos Pydantic | ✅ |
+| 4 | Endpoints de perfil + Gemini extracción | ✅ |
+| 5 | Integración real Gemini | ✅ |
+| 6 | Vacantes recomendadas + scoring | ✅ |
+| 7 | Termómetro del mercado | ✅ |
+| 8 | Coach conversacional | ✅ |
+| 9 | Seguridad y robustez | ✅ |
 | 10 | Testing + docs finales | 🔲 |
 | 11 | Deploy | 🔲 |
 
 ## Próximos pasos inmediatos
 
-1. ✅ Proyecto Supabase DulIA confirmado (id: ikyrbkbhxpoycverkdqh)
-2. ✅ Tablas creadas: profiles, jobs, companies, scoring_history
-3. Mock data → a cargo del equipo de pipeline (insertar en tabla `jobs`)
-4. Continuar Fase 3 (modelos Pydantic)
+1. Fase 10 — smoke test de todos los endpoints en `/docs`
+2. Fase 11 — deploy con `APP_ENV=production` y `CORS_ORIGINS=<url-front>`
+3. Pipeline — vacantes en `jobs`

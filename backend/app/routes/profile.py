@@ -1,14 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from app.models.profile import OnboardingInput, ProfileOut
 from app.services import profile_service
 from app.utils.logger import get_logger
+from app.utils.limiter import limiter, GEMINI_RATE_LIMIT
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 
 @router.post("/profile", response_model=ProfileOut, tags=["Perfil"])
-async def crear_perfil(data: OnboardingInput):
+@limiter.limit(GEMINI_RATE_LIMIT)
+async def crear_perfil(request: Request, data: OnboardingInput):
     """
     Recibe las respuestas del onboarding, extrae el perfil con Gemini
     y lo guarda en Supabase. Si el session_id ya existe, lo actualiza.

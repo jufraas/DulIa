@@ -30,7 +30,7 @@ Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos
 
 ## Estado actual
 
-**Fase 2 parcial completa.** 4 tablas creadas en Supabase proyecto DulIA (`ikyrbkbhxpoycverkdqh`): `profiles`, `jobs`, `companies`, `scoring_history`. Mock data queda a cargo del pipeline. Siguiente: Fase 3 — modelos Pydantic.
+**Fase 9 completa.** Rate limit Gemini (10/min), CORS por entorno, `.env` fuera del repo. Siguiente: Fase 10 — testing + deploy.
 
 ## Estructura del backend
 
@@ -51,21 +51,26 @@ backend/
 | Método | Ruta | Fase |
 |--------|------|------|
 | GET | `/api/health` | ✅ Fase 1 |
-| POST | `/api/profile` | Fase 4 |
-| GET | `/api/profile/{session_id}` | Fase 4 |
-| GET | `/api/jobs/recommended/{session_id}` | Fase 6 |
-| GET | `/api/market/dashboard` | Fase 7 |
-| POST | `/api/coach/chat` | Fase 8 |
+| POST | `/api/profile` | ✅ Fase 4 |
+| GET | `/api/profile/{session_id}` | ✅ Fase 4 |
+| GET | `/api/jobs/recommended/{session_id}` | ✅ Fase 6 |
+| GET | `/api/market/dashboard` | ✅ Fase 7 |
+| POST | `/api/coach/chat` | ✅ Fase 8 |
 
 ## Archivos clave
 
 | Archivo | Para qué |
 |---------|----------|
+| **ENDPOINTS.md** | **Contrato API — fuente de verdad para el frontend** |
 | ARCHITECTURE.md | Cómo se conectan los módulos |
 | SCHEMA.md | Estructura de datos (tablas en Supabase) |
-| ENDPOINTS.md | Contrato de la API (para el frontend) |
+| PROJECT_STATE.md | Fases y estado por módulo |
 | DECISIONS.md | Por qué se tomó cada decisión |
 | PROMPTS.md | System prompts de Gemini |
+
+## Regla para cambios de API
+
+Al implementar o modificar un endpoint: actualizar `ENDPOINTS.md` en el mismo cambio. No anidar el onboarding en `respuestas_onboarding` — el body es plano (`OnboardingInput`).
 
 ## Notas técnicas importantes
 

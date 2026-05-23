@@ -62,7 +62,7 @@ Vacantes laborales scrapeadas por el pipeline. El pipeline escribe aquí; el bac
 | `experiencia_requerida` | `numeric` | SÍ | `0` | Años de experiencia requeridos |
 | `nivel_educativo_req` | `text` | SÍ | — | Nivel educativo mínimo requerido |
 | `modalidad` | `text` | SÍ | — | `presencial`, `remoto`, `hibrido` |
-| `status` | `text` | NO | `'green'` | `green` 🟢 / `yellow` 🟡 / `red` 🔴 (calidad de la vacante) |
+| `semaforo` | `text` | NO | `'green'` | `green` 🟢 / `yellow` 🟡 / `red` 🔴 (calidad de la vacante) |
 | `fuente` | `text` | NO | — | Portal de origen (ej: "computrabajo", "elempleo") |
 | `url` | `text` | SÍ | — | URL original de la vacante |
 | `hash_unico` | `text` | NO | — | SHA256 de `titulo+empresa+url` para deduplicación |
@@ -70,9 +70,9 @@ Vacantes laborales scrapeadas por el pipeline. El pipeline escribe aquí; el bac
 | `scrapeado_at` | `timestamptz` | NO | `now()` | Fecha en que el pipeline la capturó |
 | `activo` | `boolean` | NO | `true` | Si la vacante sigue vigente |
 
-**Índices:** `hash_unico` (único), `ciudad`, `sector`, `status`, `activo`, `empresa`
+**Índices:** `hash_unico` (único), `ciudad`, `sector`, `semaforo`, `activo`, `empresa`
 
-> **Nota para el pipeline (Jose/Compa 2):** el campo `status` lo calcula el pipeline según heurísticas (empresa reconocida, salario publicado, descripción detallada, etc.). El backend solo filtra `status != 'red'` y `activo = true`.
+> **Nota para el pipeline:** el campo `semaforo` lo calcula el pipeline según heurísticas (empresa reconocida, salario publicado, descripción detallada, etc.). El backend filtra `semaforo != 'red'` y `activo = true` en recomendaciones.
 
 ---
 
@@ -87,7 +87,7 @@ Estadísticas agregadas por empresa. Se puede recalcular con una query sobre `jo
 | `sector` | `text` | SÍ | — | Sector principal |
 | `ciudad_principal` | `text` | SÍ | — | Ciudad donde más publica |
 | `total_vacantes` | `integer` | NO | `0` | Total de vacantes activas |
-| `vacantes_verdes` | `integer` | NO | `0` | Vacantes con `status = 'green'` |
+| `vacantes_verdes` | `integer` | NO | `0` | Vacantes con `semaforo = 'green'` |
 | `ratio_calidad` | `numeric` | SÍ | — | `vacantes_verdes / total_vacantes` |
 | `contrata_jovenes` | `boolean` | SÍ | — | Si tiene vacantes sin experiencia requerida |
 | `ultima_publicacion` | `timestamptz` | SÍ | — | Fecha de la vacante más reciente |
@@ -128,7 +128,7 @@ El score 0-100 se calcula así:
 | Brecha de experiencia | 25% | `1.0` si cumple, decrece linealmente si le falta hasta 3 años |
 | Match de nivel educativo | 15% | `1.0` si cumple o supera, `0.5` si está un nivel abajo |
 
-> Score final = suma ponderada × 100, redondeado a entero.
+> Score final = suma nponderada × 100, redondeado a entero.
 
 ---
 

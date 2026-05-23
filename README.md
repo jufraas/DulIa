@@ -10,11 +10,11 @@ DulIA es una plataforma web que usa inteligencia artificial para orientar a jóv
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend API | Python 3.12 · FastAPI · Uvicorn |
+| Backend API | Python 3.14 · FastAPI · Uvicorn |
 | Frontend | React 18 · Vite · Tailwind CSS |
 | Data Pipeline | Python · scrapers async |
 | IA | Google Gemini API |
-| Base de datos | Por definir (ver [SCHEMA.md](docs/SCHEMA.md)) |
+| Base de datos | PostgreSQL 17 · Supabase (ver [SCHEMA.md](docs/SCHEMA.md)) |
 
 ---
 
@@ -43,7 +43,9 @@ cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # USE_MOCK_DATA=true para dev sin credenciales
 uvicorn main:app --reload
+# Swagger: http://localhost:8000/docs · Contrato: docs/ENDPOINTS.md
 
 # 3. Frontend (en otra terminal)
 cd frontend
