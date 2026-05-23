@@ -2,6 +2,8 @@ import { Navigate } from 'react-router-dom'
 import { Download, Sparkles } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
+import CareerTimeline from '../components/results/CareerTimeline'
+import CoachChatBubble from '../components/results/CoachChatBubble'
 import MarketThermometer from '../components/results/MarketThermometer'
 import OpportunitiesPreview from '../components/results/OpportunitiesPreview'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
@@ -80,6 +82,12 @@ export default function ResultsPage() {
           )}
 
           <RadarMatch profile={savedProfile} jobs={jobs} radar={radar} />
+
+          <div className="anim-in-delay-3 mt-6">
+            <CareerTimeline />
+          </div>
+
+          <CoachChatBubble />
 
           <div
             className="anim-in-delay-3 mt-12 flex flex-col items-center justify-between gap-6 rounded-[24px] p-9 sm:flex-row"
