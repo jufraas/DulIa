@@ -9,16 +9,16 @@
 │  Tailwind   │                    │  matching + Gemini  │
 └─────────────┘                    └────────┬────────────┘
                                             │
-                              ┌─────────────┼──────────────┐
-                              │             │              │
-                    ┌─────────▼──────┐  ┌───▼───┐  ┌──────▼──────┐
-                    │  Base de datos │  │ jobs  │  │ Gemini API  │
-                    │ profiles/jobs  │  │ table │  │  (Fase 8)   │
-                    └────────────────┘  └───────┘  └─────────────┘
-                              ▲
+                              ┌─────────────┴──────────────┐
+                              │                            │
+                    ┌─────────▼──────┐            ┌────────▼────────┐
+                    │    Supabase    │            │   Gemini API    │
+                    │  PostgreSQL 17 │            │    (Google)     │
+                    └─────────▲──────┘            └─────────────────┘
+                              │
                     ┌─────────┴──────┐
                     │    Pipeline    │
-                    │  scrapers.py   │
+                    │ mock / Adzuna  │
                     └────────────────┘
 ```
 
@@ -40,54 +40,58 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 
 - Genera `session_id` (UUID) en `localStorage` (`dulia_session_id`).
 - Envía `POST /api/profile` (JSON, campos en español) al completar el wizard.
-- Consulta en paralelo:
-  - `GET /api/jobs/recommended/{session_id}`
-  - `GET /api/market/dashboard?city=...`
-- Estado de UI en **Zustand** (`useProfileStore`): perfil, jobs, market.
+- Consulta en paralelo jobs + market; estado en **Zustand** (`useProfileStore`).
 - Fallback a `mockData.js` si jobs/market no responden.
-- PDF (jsPDF) incluye perfil, vacantes y datos de mercado si están en store.
+- PDF (jsPDF) con perfil, vacantes y mercado.
 - **No** llama a Gemini directamente.
-- Referencia visual: `frontend/ReBrand/DulIA Design System (1)/` (no es código de producción).
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
 ### `backend/`
 
 - API REST según [ENDPOINTS.md](ENDPOINTS.md).
-- Persiste perfil por `session_id`.
-- Calcula compatibilidad perfil ↔ vacantes (algoritmo o IA).
-- Expone dashboard agregado del mercado laboral.
-- **Fase 8:** coach conversacional vía Gemini ([PROMPTS.md](PROMPTS.md)).
-- Módulo `markitdown/` listo para CV PDF → markdown (integración posterior).
+- Extrae perfiles con Gemini (`profile_service`); scoring en `jobs_service`.
+- Dashboard de mercado sobre tabla `jobs` (`market_service`).
+- Coach conversacional (`coach_service` + [PROMPTS.md](PROMPTS.md)).
 - **Responsable:** Carlos
 
-> **Nota:** `backend/main.py` aún tiene stub multipart legacy. Debe migrarse al contrato de `ENDPOINTS.md`.
+```
+backend/
+├── main.py              → CORS + routers + startup
+└── app/
+    ├── routes/          → health, profile, jobs, market, coach
+    ├── services/        → profile, jobs, market, coach
+    ├── models/          → schemas Pydantic
+    ├── db/supabase.py   → cliente Supabase
+    ├── db/gemini.py     → cliente Gemini
+    └── utils/           → logger, limiter, cors, prompts
+```
 
 ### `pipeline/`
 
-- Scrapers de portales laborales colombianos → BD (`job_offers`).
-- Independiente del backend; alimenta matching y dashboard.
-- **Responsable:** Compa 2
+- Inserta vacantes en Supabase tabla `jobs` (mock Gemini, Adzuna, Jooble).
+- No depende del backend en runtime.
+- **Responsable:** Jose
 
 ## Flujo principal (happy path)
 
-0. Usuario ve **landing** (`/`) o lee **Sobre DulIA** (`/sobre`) — sin registro.
-1. Usuario completa **onboarding** (`/comenzar`, wizard 3 pasos).
-2. Frontend genera/reutiliza `session_id` y envía `POST /api/profile` (JSON).
-3. Backend guarda perfil asociado al `session_id`.
-4. Frontend consulta en paralelo jobs + market y guarda en Zustand.
-5. Usuario ve **resultados** (`/resultados`): score, perfil, top vacantes, plan 30d.
-6. Usuario puede ir a **vacantes** (`/vacantes`) — listado completo con semáforo.
-7. Usuario descarga **PDF** con plan de acción (incluye mercado si hay datos).
+0. Usuario ve **landing** (`/`) o **Sobre DulIA** (`/sobre`).
+1. Completa **onboarding** (`/comenzar`, 3 pasos).
+2. Frontend envía `POST /api/profile` con `session_id`.
+3. Backend estructura perfil (Gemini) y guarda en `profiles`.
+4. Frontend pide jobs + market en paralelo.
+5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d.
+6. **Vacantes** (`/vacantes`): listado completo con semáforo.
+7. Usuario descarga **PDF**.
+8. (Opcional) **Coach** → `POST /api/coach/chat`.
 
 ## Comunicación entre módulos
 
 | De | A | Protocolo |
 |----|---|-----------|
-| Frontend | Backend | HTTP REST (`application/json`) |
-| Backend | BD | Driver nativo (por definir) |
-| Backend | Gemini | HTTPS — Fase 8 (coach) |
-| Backend | MarkItDown | In-process — fase posterior (CV) |
-| Pipeline | BD | Driver nativo (por definir) |
+| Frontend | Backend | HTTP REST (JSON) — `ENDPOINTS.md` |
+| Backend | Gemini | HTTPS (google-generativeai) |
+| Backend | Supabase | supabase-py (PostgREST) |
+| Pipeline | Supabase | Inserción directa en `jobs` |
 
 ## Responsabilidades: datos del usuario
 
@@ -96,49 +100,30 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 | Formulario wizard | Captura + valida (3 pasos) | Recibe JSON (`nombre`, `ciudad`, …) |
 | session_id | Genera en localStorage | Clave de persistencia anónima |
 | Matching vacantes | Muestra scores y semáforo | Calcula `score_compatibilidad` |
-| Termómetro mercado | PDF (UI opcional / pendiente) | Agrega datos de BD |
-| Plan 30 días | Copy estático en UI | Futuro: Gemini |
-| Coach / chat | UI futura | Gemini — Fase 8 |
+| Termómetro mercado | PDF (UI opcional) | Agrega sobre `jobs` |
+| Coach / chat | UI futura | Gemini + perfil en Supabase |
 | PDF plan de acción | Genera (jsPDF) | — |
 
 ## Estructura frontend relevante
 
 ```
 frontend/src/
-├── pages/
-│   ├── WelcomePage.jsx      # / — Landing
-│   ├── AboutPage.jsx        # /sobre
-│   ├── OnboardingPage.jsx   # /comenzar
-│   ├── ResultsPage.jsx      # /resultados
-│   └── VacanciesPage.jsx    # /vacantes
-├── components/
-│   ├── about/               # Secciones Sobre DulIA
-│   ├── welcome/             # Hero, Features (landing)
-│   ├── onboarding/          # Wizard (3 pasos)
-│   ├── results/             # Score, perfil, PDF, plan 30d
-│   ├── vacancies/           # Panel semáforo
-│   ├── layout/              # SiteHeader, SiteFooter, LandingFooter
-│   ├── brand/               # Logo, ScoreRing, IconBox
-│   └── ui/                  # Button, Input, Container, …
-├── hooks/
-│   ├── useOnboardingForm.js
-│   ├── useResultsData.js
-│   └── usePdfDownload.js
-├── services/
-│   ├── api.js               # Cliente Axios
-│   └── mockData.js          # Fallback
-├── store/
-│   └── useProfileStore.js   # Zustand: perfil, jobs, market
-├── styles/
-│   ├── dulia-tokens.css
-│   └── dulia-kit.css
-└── utils/
-    ├── session.js
-    ├── buildProfilePayload.js
-    └── generateAnalysisPdf.js
+├── pages/           # WelcomePage, AboutPage, OnboardingPage, ResultsPage, VacanciesPage
+├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/
+├── hooks/           # useOnboardingForm, useResultsData, usePdfDownload
+├── services/        # api.js, mockData.js
+├── store/           # useProfileStore.js
+├── styles/          # dulia-tokens.css, dulia-kit.css
+└── utils/           # session, buildProfilePayload, generateAnalysisPdf
 ```
+
+## Modo desarrollo sin credenciales
+
+`USE_MOCK_DATA=true` en backend `.env`:
+
+- Respuestas estables sin Supabase/Gemini real.
+- `GET /profile/{session_id}` devuelve 404 en mock; el front guarda respuesta del POST en Zustand.
 
 ## Limitaciones conocidas
 
-- **Refresh en `/resultados`:** si Zustand no tiene perfil, redirige a `/comenzar`. Recuperación vía `GET /profile/{session_id}` pendiente de implementar en frontend.
-- **Estado en memoria:** jobs/market se pierden al recargar si no se re-fetchan (hooks lo intentan si hay perfil en store).
+- Refresh en `/resultados` sin perfil en Zustand → redirige a `/comenzar`. Pendiente: `GET /profile/{session_id}`.

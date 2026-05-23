@@ -22,6 +22,7 @@ Razones principales (tiempo, demo, equipo, costo, etc.).
 | Alternativa | Por qué no |
 |-------------|------------|
 | Opción A | … |
+| Opción B | … |
 
 ## Consecuencias
 

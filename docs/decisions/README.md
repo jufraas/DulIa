@@ -1,10 +1,17 @@
 # Decisiones técnicas — DulIA
 
-Un archivo `.md` por decisión. Plantilla: [`_TEMPLATE.md`](./_TEMPLATE.md).
+Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEMPLATE.md`](./_TEMPLATE.md).
+
+## Cómo agregar una decisión
+
+1. Copia [`_TEMPLATE.md`](./_TEMPLATE.md).
+2. Nómbrala: `YYYY-MM-DD-[area]-[slug-corto].md`
+3. Completa contexto, decisión, por qué y alternativas.
+4. Añade una fila al índice de abajo y en [`../DECISIONS.md`](../DECISIONS.md).
 
 ## Índice
 
-### General
+### General / full-stack
 
 | Fecha | Archivo | Resumen |
 |-------|---------|---------|
@@ -16,19 +23,23 @@ Un archivo `.md` por decisión. Plantilla: [`_TEMPLATE.md`](./_TEMPLATE.md).
 
 | Fecha | Archivo | Resumen |
 |-------|---------|---------|
-| 2026-05-23 | Ver [DECISIONS.md](../DECISIONS.md) | FastAPI, React+Vite+Tailwind, Gemini |
+| 2026-05-23 | [2026-05-23-backend-fastapi.md](./2026-05-23-backend-fastapi.md) | Backend en FastAPI |
+| 2026-05-23 | [2026-05-23-frontend-react-vite-tailwind.md](./2026-05-23-frontend-react-vite-tailwind.md) | Frontend React + Vite + Tailwind |
+| 2026-05-23 | [2026-05-23-ia-gemini.md](./2026-05-23-ia-gemini.md) | IA con Google Gemini |
 
 ### Frontend
 
-| Fecha | Decisión | Estado |
-|-------|----------|--------|
-| 2026-05-23 | Landing antes del onboarding | ✅ |
-| 2026-05-23 | Mock fallback (`mockData.js`) | ✅ |
-| 2026-05-23 | React Router SPA (5 rutas) | ✅ |
-| 2026-05-23 | Zustand estado perfil | ✅ |
-| 2026-05-23 | Wizard 3 pasos formulario | ✅ |
-| 2026-05-23 | PDF descargable (jsPDF) | ✅ |
-| 2026-05-23 | UI kit ReBrand — pantallas separadas | ✅ |
-| 2026-05-23 | Página Sobre DulIA (`/sobre`) | ✅ |
-| 2026-05-23 | Panel vacantes con semáforo (`/vacantes`) | ✅ |
-| 2026-05-23 | Scaffolding por componentes | Ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_OWNERS.md) |
+| Fecha | Archivo | Resumen |
+|-------|---------|---------|
+| 2026-05-23 | [2026-05-23-frontend-landing-antes-onboarding.md](./2026-05-23-frontend-landing-antes-onboarding.md) | Landing antes del formulario |
+| 2026-05-23 | [2026-05-23-frontend-mock-fallback-api.md](./2026-05-23-frontend-mock-fallback-api.md) | Mock si el backend no responde |
+| 2026-05-23 | [2026-05-23-frontend-react-router-flujo-spa.md](./2026-05-23-frontend-react-router-flujo-spa.md) | Rutas SPA (5 pantallas) |
+| 2026-05-23 | [2026-05-23-frontend-zustand-estado-perfil.md](./2026-05-23-frontend-zustand-estado-perfil.md) | Zustand para perfil y resultados |
+
+Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_OWNERS.md).
+
+### Backend / Pipeline
+
+| Fecha | Archivo | Resumen |
+|-------|---------|---------|
+| — | Ver [DECISIONS.md](../DECISIONS.md) | pydantic 3.14, slowapi, jobs en inglés, mock data |

@@ -4,19 +4,19 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Frontend alineado al kit ReBrand (5 rutas, pantallas separadas); documentación sincronizada.
+2026-05-23 — Merge FRONT + main: backend Fase 10 completa; frontend kit ReBrand integrado.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| Repositorio | ✅ Listo | Estructura creada |
-| Backend (FastAPI) | 🚧 En progreso | Contrato session_id + jobs/market; stub legacy en `main.py` |
-| Frontend (React+Vite) | 🚧 En progreso | UI kit ReBrand integrada; falta deploy y pulido |
-| Pipeline (scrapers) | 🔲 No iniciado | — |
-| Integración Gemini | 🔲 No iniciado | Ver PROMPTS.md (Fase 8) |
-| Base de datos | 🔲 No definida | Ver SCHEMA.md |
-| Deploy | 🔲 No iniciado | `frontend/vercel.json` listo |
+| Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
+| Backend (FastAPI) | 🚧 Fases 0–10 | API completa + seguridad mínima; falta deploy (Fase 11) |
+| Frontend (React+Vite) | 🚧 En progreso | UI kit ReBrand (5 rutas); falta deploy y pulido |
+| Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
+| Integración Gemini | ✅ | Profile, coach; rate limit 10/min |
+| Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |
+| Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
 
@@ -35,39 +35,33 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Pieza | Estado | Notas |
 |-------|--------|-------|
 | Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
-| `SiteHeader` / nav kit | ✅ | Cómo funciona, Oportunidades, Sobre DulIA, Empezar |
-| Integración Axios → API Carlos (fallback mock) | ✅ | `services/api.js` + `mockData.js` |
+| Integración Axios → API | ✅ | `services/api.js` + fallback `mockData.js` |
 | `session_id` en localStorage | ✅ | Clave `dulia_session_id` |
-| POST `/profile` al completar wizard | ✅ | `useOnboardingForm.js` |
-| GET jobs + market en paralelo | ✅ | Tras guardar perfil y en `/resultados` si falta estado |
-| Descarga PDF (jsPDF) | ✅ | Incluye jobs + datos de mercado si están en store |
-| Scaffolding por componentes | ✅ | Ver `frontend/COMPONENT_OWNERS.md` |
+| POST `/profile` al completar wizard | ✅ | Alineado a contrato JSON en `ENDPOINTS.md` |
+| GET jobs + market en paralelo | ✅ | Tras guardar perfil |
+| Descarga PDF (jsPDF) | ✅ | Incluye jobs + mercado si están en store |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
-| Commit rama `FRONT` | 🔲 | — |
 
-### Deuda técnica / pendiente frontend
+### Deuda técnica frontend
 
 | Item | Prioridad | Detalle |
 |------|-----------|---------|
-| Refresh en `/resultados` pierde estado | Media | Zustand solo en memoria; `GET /profile/{session_id}` existe en contrato pero no se usa aún |
-| Termómetro mercado no visible en UI | Baja | `MarketThermometer.jsx` existe; datos de market van al PDF, no a la pantalla de resultados |
-| Plan 30 días estático | Baja | `ThirtyDayPlan.jsx` — copy fijo, no generado por Gemini |
-| Archivos huérfanos | Baja | `welcome/ProblemSection`, `AudienceSection`, `BusinessModelSection`; varios en `results/` del layout anterior |
-| ESLint ruidoso | Baja | `eslint .` analiza `.vite/deps/` y `ReBrand/` — ignorar en config o excluir carpetas |
-| Pulido visual/copy | Media | Migue: `/sobre`; compañero: landing, resultados, vacantes |
+| Refresh en `/resultados` pierde estado | Media | Implementar `GET /profile/{session_id}` |
+| Termómetro mercado no visible en UI | Baja | Datos van al PDF; `MarketThermometer.jsx` huérfano |
+| Plan 30 días estático | Baja | `ThirtyDayPlan.jsx` — copy fijo |
+| ESLint ruidoso | Baja | Excluir `.vite/**` y `ReBrand/**` |
 
-## Backend — pendiente (referencia para coordinación)
+## Backend — fases
 
-| Pieza | Estado |
-|-------|--------|
-| `GET /health` con `mock_data` | 🚧 |
-| `POST /profile` (JSON + session_id) | 🚧 |
-| `GET /profile/{session_id}` | 🚧 |
-| `GET /jobs/recommended/{session_id}` | 🚧 |
-| `GET /market/dashboard` | 🚧 |
-| Migrar `main.py` del stub multipart legacy | 🚧 |
-| MarkItDown PDF → markdown | ✅ módulo listo (fase posterior) |
-| Coach / chat (Fase 8) | 🔲 |
+| Fase | Descripción | Estado |
+|------|-------------|--------|
+| 0–1 | Entorno + estructura + CORS | ✅ |
+| 2 | Schema Supabase | 🚧 Tablas ✅, datos pendientes pipeline |
+| 3–5 | Modelos + perfil + Gemini | ✅ |
+| 6–7 | Jobs recomendados + mercado | ✅ |
+| 8 | Coach conversacional | ✅ |
+| 9–10 | Seguridad + smoke tests | ✅ |
+| 11 | Deploy | 🔲 |
 
 ## Leyenda
 
@@ -76,18 +70,20 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | ✅ | Completo |
 | 🚧 | En progreso |
 | 🔲 | No iniciado |
+| 🔁 | Cambio de alcance |
 | ❌ | Bloqueado |
 
 ## Próximos pasos inmediatos
 
-### Frontend
-1. Deploy Vercel (root: `frontend`, env `VITE_API_URL`)
-2. Commit rama `FRONT`
-3. Migue: pulir `/sobre` (`components/about/*`)
-4. Compañero: pulir landing, resultados y vacantes
-5. (Opcional) Excluir `.vite/**` y `ReBrand/**` en `eslint.config.js`
+### Integración
+1. Levantar backend con `USE_MOCK_DATA=true` y probar flujo wizard → resultados
+2. Frontend: deploy Vercel (`VITE_API_URL` apuntando al backend)
+3. Backend Fase 11: deploy con `CORS_ORIGINS=<url-front>`
 
-### Backend (Carlos)
-1. Implementar endpoints según `docs/ENDPOINTS.md`
-2. Conectar Gemini con PROMPTS.md
-3. Coach / chat cuando esté listo Fase 8
+### Frontend
+1. Migue: pulir `/sobre`
+2. Compañero: pulir landing, resultados, vacantes
+3. Implementar rehidratación con `GET /profile/{session_id}`
+
+### Pipeline
+1. Insertar vacantes en tabla `jobs` para modo real

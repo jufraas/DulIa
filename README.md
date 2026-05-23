@@ -10,11 +10,11 @@ DulIA es una plataforma web que usa inteligencia artificial para orientar a jóv
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend API | Python 3.12 · FastAPI · Uvicorn |
+| Backend API | Python 3.14 · FastAPI · Uvicorn |
 | Frontend | React 19 · Vite · Tailwind CSS |
-| Data Pipeline | Python · scrapers async |
+| Data Pipeline | Python · scrapers async / Adzuna |
 | IA | Google Gemini API |
-| Base de datos | Por definir (ver [SCHEMA.md](docs/SCHEMA.md)) |
+| Base de datos | PostgreSQL 17 · Supabase (ver [SCHEMA.md](docs/SCHEMA.md)) |
 
 ---
 
@@ -41,9 +41,11 @@ cd DulIa
 # 2. Backend
 cd backend
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env       # USE_MOCK_DATA=true para dev sin credenciales
 uvicorn main:app --reload
+# Swagger: http://localhost:8000/docs · Contrato: docs/ENDPOINTS.md
 
 # 3. Frontend (en otra terminal — debe ser desde frontend/)
 cd frontend
@@ -67,9 +69,9 @@ python main.py
 |--------|-----|
 | Carlos (krl0s) | Backend — FastAPI, integración IA |
 | Migue | Frontend — Sobre DulIA (`/sobre`), onboarding/API |
-| Compa 1 | Frontend — Landing, resultados, vacantes |
-| Compa 2 | Data Pipeline — scrapers Python |
-| Otros | IA + integración general |
+| Compañero | Frontend — Landing, resultados, vacantes |
+| Jose | Data Pipeline — scrapers Python |
+| Jufra | IA + integración general, Pitch |
 
 ---
 
