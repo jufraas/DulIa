@@ -33,31 +33,32 @@ VITE_API_URL=http://localhost:8000/api
 | `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF opcional |
-| `/resultados` | Resultados | Score, perfil, vacantes, plan 30d, **Match Radar**, PDF |
-| `/vacantes` | Vacantes | Panel con semáforo verde/amarillo/rojo |
+| `/resultados` | Resultados | Score, termómetro, plan 30d, Match Radar, PDF |
+| `/vacantes` | Vacantes | Termómetro + semáforo verde/amarillo/rojo |
 
 ## Flujo de datos
 
-1. Usuario completa wizard en `/comenzar` (opcional: sube CV → `parseCvPdf`).
+1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; opcional: CV → `parseCvPdf`).
 2. **POST** `/api/profile` con `session_id` (UUID en `localStorage`, clave `dulia_session_id`).
-3. En paralelo: **GET** jobs + market + plan.
-4. Estado en Zustand (`useProfileStore`: `savedProfile`, `jobs`, `market`, `plan`).
+3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
+4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
 6. `/resultados` y `/vacantes` consumen el store; PDF con jsPDF.
 
-Si el backend no responde, fallbacks en `src/services/mock*.js`.
+Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil.
 
 ### API cliente (`services/api.js`)
 
-| Función | Endpoint |
-|---------|----------|
+| Función | Endpoint / rol |
+|---------|----------------|
 | `createProfile` | POST `/profile` |
 | `getProfile` | GET `/profile/{session_id}` |
 | `parseCvPdf` | POST `/profile/parse-cv` |
+| `loadResultsBundle` | Plan 2: analyze + action-plan + jobs/market/radar/timeline |
 | `getRecommendedJobs` | GET `/jobs/recommended/{session_id}` |
 | `getMarketDashboard` | GET `/market/dashboard` |
-| `getPlan` | GET `/plan/{session_id}` (backend pendiente) |
-| `postCoachChat` | POST `/coach/chat` (UI burbuja pendiente Joufra) |
+| `getRadarData` | GET `/profile/{id}/radar-data` |
+| `postCoachChat` | POST `/coach/chat` |
 
 ## Estructura relevante
 
@@ -70,10 +71,12 @@ src/
 ├── hooks/              # useOnboardingForm, useResultsData, useSessionHydration, …
 ├── services/
 │   ├── api.js
+│   ├── mockResultsBundle.js   # fallbacks Plan 2 personalizados
 │   ├── sessionHydration.js
-│   └── mock*.js        # fallbacks offline
+│   └── mock*.js
+├── constants/colombiaLocations.js
 ├── store/useProfileStore.js
-├── utils/              # session, sessionCache, planDisplay, radarMatchData, …
+├── utils/              # session, sessionCache, planDisplay, radarApi, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Briefcase, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
+import MarketThermometer from '../components/results/MarketThermometer'
 import {
   FilterChip,
   TrafficStat,
@@ -12,16 +13,36 @@ import { mapJobToVacancyRow } from '../components/vacancies/vacancyStatus'
 import IconBox from '../components/brand/IconBox'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
-import { getRecommendedJobs } from '../services/api'
+import { getMarketDashboard, getRecommendedJobs } from '../services/api'
 import { useProfileStore } from '../store/useProfileStore'
 import { getOrCreateSessionId } from '../utils/session'
 
 /** Pantalla 04 — Panel de vacantes con semáforo (kit ReBrand) */
 export default function VacanciesPage() {
   const jobs = useProfileStore((s) => s.jobs)
+  const savedProfile = useProfileStore((s) => s.savedProfile)
+  const market = useProfileStore((s) => s.market)
   const setJobs = useProfileStore((s) => s.setJobs)
+  const setMarket = useProfileStore((s) => s.setMarket)
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(!jobs.length)
+
+  useEffect(() => {
+    if (market) return undefined
+    let cancelled = false
+
+    ;(async () => {
+      const data = await getMarketDashboard(
+        { city: savedProfile?.ciudad },
+        savedProfile,
+      )
+      if (!cancelled) setMarket(data)
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [market, savedProfile, setMarket])
 
   useEffect(() => {
     if (jobs.length) return undefined
@@ -83,6 +104,10 @@ export default function VacanciesPage() {
                 Volver
               </Button>
             </Link>
+          </div>
+
+          <div className="anim-in-delay-1 mb-6">
+            <MarketThermometer market={market} />
           </div>
 
           <div className="anim-in-delay-1 mb-6 grid gap-4 md:grid-cols-3">

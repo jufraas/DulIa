@@ -33,18 +33,19 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 | `/` | Landing — splash, pitch, features con scroll reveal, CTA |
 | `/sobre` | Sobre DulIA — problema, audiencia, modelo, equipo |
 | `/comenzar` | Wizard onboarding (3 pasos) |
-| `/resultados` | Score, resumen perfil, preview vacantes, plan 30d, **Match Radar**, PDF |
-| `/vacantes` | Panel de vacantes con semáforo de confianza |
+| `/resultados` | Score, resumen perfil, **termómetro**, preview vacantes, plan 30d, **Match Radar**, PDF |
+| `/vacantes` | **Termómetro** + panel de vacantes con semáforo de confianza |
 
 **Flujo de datos:**
 
 - Genera `session_id` (UUID) en `localStorage` (`dulia_session_id`).
 - **Paso 0 wizard (opcional):** sube CV PDF → `POST /api/profile/parse-cv` → prellena formulario.
-- Envía `POST /api/profile` (JSON, campos en español) al completar el wizard.
-- Consulta en paralelo jobs + market + **plan**; estado en **Zustand** (`useProfileStore`: `savedProfile`, `jobs`, `market`, `plan`).
-- **Persistencia:** cache en `dulia_session_data` (incluye `plan`); borrador wizard en `dulia_wizard_draft`.
-- **Rehidratación** al cargar app (`sessionHydration.js`): cache → `GET /profile` → re-fetch jobs/market/plan.
-- Fallbacks: `mockData`, `mockCvPrefill`, `mockProfileFromPayload`, `mockPlan`, `mockCoachChat`.
+- Envía `POST /api/profile` (JSON, campos en español) al completar el wizard (paso 1: departamento + municipio DANE).
+- Tras guardar perfil: `loadResultsBundle()` — analyze, action-plan, jobs, market, radar, timeline.
+- Estado en **Zustand** (`useProfileStore`: `savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`).
+- **Persistencia:** cache en `dulia_session_data` (incluye plan, radar, timeline); borrador wizard en `dulia_wizard_draft`.
+- **Rehidratación** al cargar app (`sessionHydration.js`): cache → `GET /profile` → `loadResultsBundle` si faltan datos.
+- Fallbacks: `mockResultsBundle.js` (personalizado al perfil) + `mockData`, `mockCvPrefill`, `mockProfileFromPayload`, `mockPlan`, `mockCoachChat`.
 - PDF (jsPDF): perfil + vacantes + mercado (plan en PDF pendiente).
 - **Coach UI** pendiente (Joufra); API `postCoachChat()` lista.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
@@ -107,9 +108,9 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | session_id | Genera en localStorage | Clave de persistencia anónima |
 | Cache sesión | `sessionCache.js` (localStorage) | — |
 | Rehidratación | `sessionHydration.js` al boot | `GET /profile/{session_id}` |
-| Matching vacantes | Scores, semáforo y **RadarMatch** (4 ejes estimados desde perfil/jobs) | Calcula `score_compatibilidad` |
-| Termómetro mercado | Datos en store; `MarketThermometer.jsx` no montado | Agrega sobre `jobs` |
-| Plan 30 días | `ThirtyDayPlan` lee store (`getPlan` + mock) | `GET /plan/{session_id}` pendiente |
+| Matching vacantes | Scores, semáforo y **RadarMatch** (5 ejes vía API) | Calcula `score_compatibilidad` |
+| Termómetro mercado | `MarketThermometer` en `/resultados` y `/vacantes` | Agrega sobre `jobs` |
+| Plan 30 días | `ThirtyDayPlan` ← `POST .../action-plan` (`fase_30`) | Plan 2 + Gemini |
 | Coach / chat | `postCoachChat()` en api.js; UI burbuja pendiente | Gemini + perfil |
 | PDF plan de acción | Genera (jsPDF) | — |
 
@@ -121,10 +122,10 @@ frontend/src/
 ├── components/      # about/, welcome/, onboarding/, results/, vacancies/, layout/, brand/, ui/, motion/
 │   └── motion/RevealOnScroll.jsx   # whileInView (scroll) | animate (mount)
 ├── hooks/           # useOnboardingForm, useResultsData, useSessionHydration, usePdfDownload
-├── services/        # api.js, mock*.js, sessionHydration.js
-├── store/           # useProfileStore.js (profile, jobs, market, plan)
-├── styles/          # dulia-tokens.css, dulia-kit.css
-└── utils/           # session, sessionCache, planDisplay, radarMatchData, buildProfilePayload, generateAnalysisPdf
+├── services/        # api.js, mockResultsBundle.js, mock*.js, sessionHydration.js
+├── store/           # useProfileStore.js (profile, jobs, market, plan, radar, timeline)
+├── constants/       # colombiaLocations.js (DANE)
+└── utils/           # session, sessionCache, planDisplay, radarApi, buildProfilePayload, generateAnalysisPdf
 ```
 
 ## Roadmap post-MVP
@@ -141,8 +142,7 @@ Spinoff emprendimiento (no mezclar en MVP): [EXTRA_IDEAS/ideallamativamacondo.md
 
 ## Limitaciones conocidas (MVP)
 
-- Termómetro de mercado no montado en `/resultados` (solo PDF).
 - Burbuja del coach sin UI (API lista).
-- `GET /plan` backend pendiente (front usa mock personalizado).
+- Timeline Plan 2 en store pero sin componente visual.
 - Plan 30d y **RadarMatch** no incluidos en PDF aún.
 - Deploy producción pendiente.

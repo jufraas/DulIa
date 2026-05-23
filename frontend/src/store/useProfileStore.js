@@ -84,7 +84,7 @@ import {
  */
 
 /**
- * Semana del plan de 30 días — contrato GET /api/plan/{session_id}
+ * Semana del plan — derivado de POST /profile/{id}/action-plan (fase_30).
  * @typedef {Object} PlanWeek
  * @property {number} numero
  * @property {string} titulo
@@ -92,9 +92,18 @@ import {
  */
 
 /**
- * @typedef {Object} ThirtyDayPlan
+ * @typedef {Object} ActionPlan
  * @property {string} session_id
  * @property {PlanWeek[]} semanas
+ * @property {string} [resumen_ejecutivo]
+ * @property {unknown} [fase_60]
+ * @property {unknown} [fase_90]
+ * @property {unknown[]} [milestones]
+ * @property {unknown[]} [recursos_recomendados]
+ */
+
+/**
+ * @typedef {import('../utils/radarApi').RadarChartData} RadarChartData
  */
 
 /**
@@ -110,6 +119,8 @@ export const useProfileStore = create((set, get) => ({
   jobs: [],
   market: null,
   plan: null,
+  radar: null,
+  timeline: null,
   apiUsesMock: true,
   sessionHydrated: false,
 
@@ -135,6 +146,14 @@ export const useProfileStore = create((set, get) => ({
     set({ plan })
     persistSessionCacheFromState(get())
   },
+  setRadar: (radar) => {
+    set({ radar })
+    persistSessionCacheFromState(get())
+  },
+  setTimeline: (timeline) => {
+    set({ timeline })
+    persistSessionCacheFromState(get())
+  },
   setApiUsesMock: (apiUsesMock) => set({ apiUsesMock }),
 
   reset: () => {
@@ -146,6 +165,8 @@ export const useProfileStore = create((set, get) => ({
       jobs: [],
       market: null,
       plan: null,
+      radar: null,
+      timeline: null,
     })
   },
 }))

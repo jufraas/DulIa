@@ -1,10 +1,18 @@
 import axios from 'axios'
 import { mockCoachChatResponse } from './mockCoachChat'
-import { mockJobs, mockMarket } from './mockData'
-import { buildMockPlanFromProfile, mockPlan } from './mockPlan'
-import { buildMockProfileFromPayload } from './mockProfileFromPayload'
 import { MOCK_CV_PREFILL } from './mockCvPrefill'
-import { normalizePlanOut } from '../utils/planDisplay'
+import {
+  buildMockJobsFromProfile,
+  buildMockMarketFromProfile,
+  buildMockRadarFromProfile,
+  buildMockAnalysisFromProfile,
+  buildMockTimelineFromProfile,
+  fillResultsFallbacks,
+} from './mockResultsBundle'
+import { buildMockPlanFromProfile } from './mockPlan'
+import { buildMockProfileFromPayload } from './mockProfileFromPayload'
+import { normalizeActionPlanOut } from '../utils/planDisplay'
+import { parseRadarApiResponse } from '../utils/radarApi'
 import { getOrCreateSessionId } from '../utils/session'
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
@@ -14,6 +22,13 @@ const api = axios.create({
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 })
+
+/** @param {unknown} err */
+function logOfflineFallback(label, err) {
+  if (import.meta.env.DEV) {
+    console.warn(`[DulIA] ${label}: usando datos mock locales`, err)
+  }
+}
 
 /** @returns {Promise<{ mock: boolean }>} */
 export async function fetchHealth() {
@@ -34,9 +49,7 @@ export async function createProfile(payload) {
     const { data } = await api.post('/profile', payload)
     return data
   } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn('[DulIA] createProfile: usando perfil mock local', err)
-    }
+    logOfflineFallback('createProfile', err)
     return buildMockProfileFromPayload(payload)
   }
 }
@@ -51,7 +64,8 @@ export async function getProfile(sessionId = getOrCreateSessionId()) {
     return data
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 404) return null
-    throw err
+    logOfflineFallback('getProfile', err)
+    return null
   }
 }
 
@@ -75,9 +89,7 @@ export async function parseCvPdf(file) {
     if (axios.isAxiosError(err) && err.response?.status === 422) {
       throw new Error(String(err.response.data?.detail ?? 'No pudimos leer el PDF'), { cause: err })
     }
-    if (import.meta.env.DEV) {
-      console.warn('[DulIA] parseCvPdf: usando prefill mock local', err)
-    }
+    logOfflineFallback('parseCvPdf', err)
     return MOCK_CV_PREFILL
   }
 }
@@ -95,9 +107,7 @@ export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId())
     })
     return data
   } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn('[DulIA] postCoachChat: usando respuesta mock local', err)
-    }
+    logOfflineFallback('postCoachChat', err)
     return mockCoachChatResponse(mensaje)
   }
 }
@@ -105,48 +115,153 @@ export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId())
 /**
  * @param {string} [sessionId]
  * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
- * @returns {Promise<import('../store/useProfileStore').ThirtyDayPlan>}
+ * @returns {Promise<unknown>}
+ */
+export async function postProfileAnalyze(
+  sessionId = getOrCreateSessionId(),
+  profile = null,
+) {
+  try {
+    const { data } = await api.post(`/profile/${sessionId}/analyze`)
+    return data
+  } catch (err) {
+    logOfflineFallback('postProfileAnalyze', err)
+    return buildMockAnalysisFromProfile(profile)
+  }
+}
+
+/**
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @returns {Promise<import('../store/useProfileStore').ActionPlan>}
+ */
+export async function postActionPlan(
+  sessionId = getOrCreateSessionId(),
+  profile = null,
+) {
+  try {
+    const { data } = await api.post(`/profile/${sessionId}/action-plan`)
+    const normalized = normalizeActionPlanOut(data)
+    if (!normalized) throw new Error('Respuesta de action-plan inválida')
+    return normalized
+  } catch (err) {
+    logOfflineFallback('postActionPlan', err)
+    return buildMockPlanFromProfile(profile)
+  }
+}
+
+/**
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @param {import('../store/useProfileStore').Job[]} [jobs]
+ * @returns {Promise<import('../utils/radarApi').RadarChartData>}
+ */
+export async function getRadarData(
+  sessionId = getOrCreateSessionId(),
+  profile = null,
+  jobs = [],
+) {
+  try {
+    const { data } = await api.get(`/profile/${sessionId}/radar-data`)
+    const parsed = parseRadarApiResponse(data)
+    if (!parsed) throw new Error('Respuesta radar inválida')
+    return parsed
+  } catch (err) {
+    logOfflineFallback('getRadarData', err)
+    return buildMockRadarFromProfile(profile, jobs)
+  }
+}
+
+/**
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @param {import('../store/useProfileStore').ActionPlan | null} [plan]
+ * @param {import('../store/useProfileStore').Job[]} [jobs]
+ * @returns {Promise<unknown>}
+ */
+export async function getTimelineData(
+  sessionId = getOrCreateSessionId(),
+  profile = null,
+  plan = null,
+  jobs = [],
+) {
+  try {
+    const { data } = await api.get(`/profile/${sessionId}/timeline-data`)
+    return data?.timeline ?? data ?? null
+  } catch (err) {
+    logOfflineFallback('getTimelineData', err)
+    return buildMockTimelineFromProfile(profile, plan, jobs)
+  }
+}
+
+/**
+ * Secuencia Plan 2 tras POST /profile. Si el backend/BD falla, rellena mocks al perfil.
+ * @param {string} sessionId
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ */
+export async function loadResultsBundle(sessionId, profile = null) {
+  const city = profile?.ciudad
+
+  const analysis = await postProfileAnalyze(sessionId, profile)
+
+  const jobs = await getRecommendedJobs(sessionId, profile)
+  const market = await getMarketDashboard(city ? { city } : {}, profile)
+  const plan = await postActionPlan(sessionId, profile)
+  const radar = await getRadarData(sessionId, profile, jobs)
+  const timeline = await getTimelineData(sessionId, profile, plan, jobs)
+
+  if (!profile) {
+    return { jobs, market, plan, radar, timeline, analysis }
+  }
+
+  return fillResultsFallbacks(
+    { jobs, market, plan, radar, timeline, analysis },
+    profile,
+  )
+}
+
+/**
+ * @deprecated Usar postActionPlan / loadResultsBundle.
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
  */
 export async function getPlan(
   sessionId = getOrCreateSessionId(),
   profile = null,
 ) {
-  try {
-    const { data } = await api.get(`/plan/${sessionId}`)
-    const normalized = normalizePlanOut(data)
-    if (normalized) return normalized
-  } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn('[DulIA] getPlan: usando plan mock local', err)
-    }
-  }
-
-  return profile ? buildMockPlanFromProfile(profile) : mockPlan
+  return postActionPlan(sessionId, profile)
 }
 
 /**
  * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
  * @returns {Promise<import('../store/useProfileStore').Job[]>}
  */
-export async function getRecommendedJobs(sessionId = getOrCreateSessionId()) {
+export async function getRecommendedJobs(
+  sessionId = getOrCreateSessionId(),
+  profile = null,
+) {
   try {
     const { data } = await api.get(`/jobs/recommended/${sessionId}`)
-    return Array.isArray(data) ? data : []
-  } catch {
-    return mockJobs
+    return Array.isArray(data) && data.length ? data : buildMockJobsFromProfile(profile)
+  } catch (err) {
+    logOfflineFallback('getRecommendedJobs', err)
+    return buildMockJobsFromProfile(profile)
   }
 }
 
 /**
  * @param {{ city?: string, sector?: string }} [filters]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
  * @returns {Promise<import('../store/useProfileStore').MarketDashboard>}
  */
-export async function getMarketDashboard(filters = {}) {
+export async function getMarketDashboard(filters = {}, profile = null) {
   try {
     const { data } = await api.get('/market/dashboard', { params: filters })
     return data
-  } catch {
-    return { ...mockMarket, ciudad_filtro: filters.city ?? mockMarket.ciudad_filtro }
+  } catch (err) {
+    logOfflineFallback('getMarketDashboard', err)
+    return buildMockMarketFromProfile({ ...profile, ciudad: filters.city ?? profile?.ciudad })
   }
 }
 

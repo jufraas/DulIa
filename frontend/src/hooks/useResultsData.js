@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getMarketDashboard, getPlan, getRecommendedJobs } from '../services/api'
+import { loadResultsBundle } from '../services/api'
 import { getOrCreateSessionId } from '../utils/session'
 import { useProfileStore } from '../store/useProfileStore'
 
@@ -8,30 +8,33 @@ export function useResultsData() {
   const jobs = useProfileStore((s) => s.jobs)
   const market = useProfileStore((s) => s.market)
   const plan = useProfileStore((s) => s.plan)
+  const radar = useProfileStore((s) => s.radar)
   const setJobs = useProfileStore((s) => s.setJobs)
   const setMarket = useProfileStore((s) => s.setMarket)
   const setPlan = useProfileStore((s) => s.setPlan)
+  const setRadar = useProfileStore((s) => s.setRadar)
+  const setTimeline = useProfileStore((s) => s.setTimeline)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!savedProfile || (jobs.length > 0 && market && plan)) return undefined
+    if (!savedProfile || (jobs.length > 0 && market && plan && radar)) return undefined
 
     let cancelled = false
     const sessionId = getOrCreateSessionId()
-    const city = savedProfile.ciudad
 
     ;(async () => {
       setLoading(true)
       try {
-        const [nextJobs, nextMarket, nextPlan] = await Promise.all([
-          jobs.length ? Promise.resolve(jobs) : getRecommendedJobs(sessionId),
-          market ? Promise.resolve(market) : getMarketDashboard({ city }),
-          plan ? Promise.resolve(plan) : getPlan(sessionId, savedProfile),
-        ])
+        if (jobs.length && market && plan && radar) return
+
+        const bundle = await loadResultsBundle(sessionId, savedProfile)
         if (cancelled) return
-        if (!jobs.length) setJobs(nextJobs)
-        if (!market) setMarket(nextMarket)
-        if (!plan) setPlan(nextPlan)
+
+        if (!jobs.length && bundle.jobs.length) setJobs(bundle.jobs)
+        if (!market && bundle.market) setMarket(bundle.market)
+        if (!plan && bundle.plan) setPlan(bundle.plan)
+        if (!radar && bundle.radar) setRadar(bundle.radar)
+        if (bundle.timeline) setTimeline(bundle.timeline)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -40,12 +43,23 @@ export function useResultsData() {
     return () => {
       cancelled = true
     }
-  }, [savedProfile, jobs, market, plan, setJobs, setMarket, setPlan])
+  }, [
+    savedProfile,
+    jobs,
+    market,
+    plan,
+    radar,
+    setJobs,
+    setMarket,
+    setPlan,
+    setRadar,
+    setTimeline,
+  ])
 
   const topScore =
     jobs.length > 0
       ? Math.max(...jobs.map((j) => j.score_compatibilidad ?? 0))
-      : 0
+      : radar?.usuario?.preparacion ?? 0
 
   const topJob = jobs.reduce(
     (best, job) =>
@@ -55,5 +69,5 @@ export function useResultsData() {
     /** @type {import('../store/useProfileStore').Job | null} */ (null),
   )
 
-  return { savedProfile, jobs, market, loading, topScore, topJob }
+  return { savedProfile, jobs, market, plan, radar, loading, topScore, topJob }
 }

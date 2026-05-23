@@ -3,7 +3,24 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-23 · Plan 2 Fase 3 (gráficas) incluido.
+**Última actualización:** 2026-05-23 · Plan 2 integrado en frontend + termómetro en UI.
+
+---
+
+## Estado de integración frontend (2026-05-23)
+
+| Pieza | Estado | Notas |
+|-------|--------|-------|
+| `loadResultsBundle()` | ✅ | Tras wizard y rehidratación |
+| `POST .../analyze` | ✅ | Fallback: `buildMockAnalysisFromProfile` |
+| `POST .../action-plan` | ✅ | `ThirtyDayPlan` ← `fase_30` |
+| `GET .../radar-data` | ✅ | `RadarMatch.jsx` (5 dimensiones) |
+| `GET .../timeline-data` | ✅ API | UI timeline pendiente (datos en store) |
+| `GET market/dashboard` | ✅ | `MarketThermometer` en `/resultados` y `/vacantes` |
+| Fallbacks offline | ✅ | `mockResultsBundle.js` — rellena huecos al perfil |
+| Wizard ubicación | ✅ | 32 deptos / 1.119 municipios (DANE) |
+
+Ver decisión: [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](decisions/2026-05-23-frontend-plan2-locations-thermometer.md).
 
 ---
 
@@ -227,25 +244,16 @@ GET /api/profile/{session_id}/timeline-data
 ## Ejemplo Axios (secuencia Plan 2)
 
 ```javascript
-import api from "./services/api"; // baseURL = VITE_API_URL
+import { loadResultsBundle } from "./services/api";
 
 const sessionId = localStorage.getItem("dulia_session_id");
 
 // Tras POST /profile en el wizard:
-await api.post(`/profile/${sessionId}/analyze`);
-await api.post(`/profile/${sessionId}/action-plan`);
+const { jobs, market, plan, radar, timeline, analysis } =
+  await loadResultsBundle(sessionId, savedProfile);
 
-const [jobs, market, radar, timeline] = await Promise.all([
-  api.get(`/jobs/recommended/${sessionId}`),
-  api.get("/market/dashboard", { params: { city: "Barranquilla" } }),
-  api.get(`/profile/${sessionId}/radar-data`),
-  api.get(`/profile/${sessionId}/timeline-data`),
-]);
-
-// jobs.data → array vacantes
-// market.data → termómetro
-// radar.data.radar → recharts
-// timeline.data.timeline → timeline UI
+// jobs → vacantes · market → MarketThermometer · plan → ThirtyDayPlan
+// radar → RadarMatch · timeline → (UI pendiente)
 ```
 
 ---

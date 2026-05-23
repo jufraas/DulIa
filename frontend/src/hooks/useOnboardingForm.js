@@ -2,11 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   createProfile,
-  getMarketDashboard,
-  getPlan,
-  getRecommendedJobs,
+  loadResultsBundle,
   parseCvPdf,
 } from '../services/api'
+import { resolveLocationFields } from '../constants/colombiaLocations'
 import { mergeCvPrefillIntoForm } from '../services/mockCvPrefill'
 import { EMPTY_ONBOARDING_FORM } from '../constants/emptyForm'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
@@ -27,6 +26,8 @@ export function useOnboardingForm() {
   const setJobs = useProfileStore((s) => s.setJobs)
   const setMarket = useProfileStore((s) => s.setMarket)
   const setPlan = useProfileStore((s) => s.setPlan)
+  const setRadar = useProfileStore((s) => s.setRadar)
+  const setTimeline = useProfileStore((s) => s.setTimeline)
   const setSessionId = useProfileStore((s) => s.setSessionId)
   const savedProfile = useProfileStore((s) => s.savedProfile)
   const sessionHydrated = useProfileStore((s) => s.sessionHydrated)
@@ -77,11 +78,26 @@ export function useOnboardingForm() {
     [],
   )
 
+  const patchForm = useCallback((patch) => {
+    setForm((prev) => ({ ...prev, ...patch }))
+    setErrors((prev) => {
+      const next = { ...prev }
+      Object.keys(patch).forEach((field) => {
+        next[field] = ''
+      })
+      return next
+    })
+    setApiError('')
+  }, [])
+
   const applyCvResult = useCallback((result, fileName) => {
     const merged = mergeCvPrefillIntoForm(result.prefill || {}, result.fields_found || [])
+    const location = resolveLocationFields(merged.city, merged.departamento)
     setForm((prev) => ({
       ...prev,
       ...merged,
+      city: location.city,
+      departamento: location.departamento,
       cv_file_name: fileName,
       cv_parsed: 'true',
     }))
@@ -163,17 +179,18 @@ export function useOnboardingForm() {
         const payload = buildProfilePayload(form)
         const savedProfile = await createProfile(payload)
 
-        const [jobs, market, plan] = await Promise.all([
-          getRecommendedJobs(sessionId),
-          getMarketDashboard({ city: savedProfile.ciudad || form.city.trim() }),
-          getPlan(sessionId, savedProfile),
-        ])
+        const { jobs, market, plan, radar, timeline } = await loadResultsBundle(
+          sessionId,
+          savedProfile,
+        )
 
         setSavedProfile(savedProfile)
         setFormSnapshot(form)
         setJobs(jobs)
         setMarket(market)
-        setPlan(plan)
+        if (plan) setPlan(plan)
+        if (radar) setRadar(radar)
+        if (timeline) setTimeline(timeline)
         clearWizardDraft()
         navigate('/resultados')
       } catch (err) {
@@ -190,6 +207,8 @@ export function useOnboardingForm() {
       setJobs,
       setMarket,
       setPlan,
+      setRadar,
+      setTimeline,
       setSessionId,
       navigate,
     ],
@@ -210,6 +229,7 @@ export function useOnboardingForm() {
     cvError,
     cvSuccessMessage,
     update,
+    patchForm,
     goNext,
     goBack,
     handleSubmit,
