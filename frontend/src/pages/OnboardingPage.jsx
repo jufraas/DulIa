@@ -18,13 +18,11 @@ export default function OnboardingPage() {
   const {
     step,
     form,
-    cvFile,
     errors,
     loading,
     apiError,
     progress,
     update,
-    setCv,
     goNext,
     goBack,
     handleSubmit,
@@ -60,20 +58,13 @@ export default function OnboardingPage() {
                 <StepPersonalInfo form={form} errors={errors} update={update} />
               )}
               {step === 1 && (
-                <StepWorkProfile
-                  form={form}
-                  errors={errors}
-                  cvFile={cvFile}
-                  update={update}
-                  onCvChange={setCv}
-                />
+                <StepWorkProfile form={form} errors={errors} update={update} />
               )}
               {step === 2 && (
                 <StepPreferences form={form} errors={errors} update={update} />
               )}
 
               <ApiErrorBanner message={apiError} />
-
               <PrivacyNotice />
 
               <WizardActions

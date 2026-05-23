@@ -19,12 +19,13 @@ export default function StepPreferences({ form, errors, update }) {
   return (
     <>
       <TextArea
-        label="Intereses laborales"
+        label="Sectores de interés"
         name="interests"
-        placeholder="Ej. Marketing digital, contenido para redes, ventas..."
+        placeholder="Ej. tecnología, logística, marketing digital..."
         value={form.interests}
         onChange={update('interests')}
         error={errors.interests}
+        hint="Separa con comas — se envían como sectores_interes"
       />
       <Select
         label="Modalidad de trabajo"
@@ -50,6 +51,28 @@ export default function StepPreferences({ form, errors, update }) {
         error={errors.availability}
         options={AVAILABILITY_OPTIONS}
       />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Input
+          label="Salario esperado mín. (opcional)"
+          name="salary_min"
+          type="number"
+          min={0}
+          step={100000}
+          placeholder="2500000"
+          value={form.salary_min}
+          onChange={update('salary_min')}
+        />
+        <Input
+          label="Salario esperado máx. (opcional)"
+          name="salary_max"
+          type="number"
+          min={0}
+          step={100000}
+          placeholder="3500000"
+          value={form.salary_max}
+          onChange={update('salary_max')}
+        />
+      </div>
       <TextArea
         label="Herramientas que manejas (opcional)"
         name="tools"

@@ -1,35 +1,33 @@
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import UserProfileCard from '../components/results/UserProfileCard'
 import PageShell from '../components/layout/PageShell'
 import SiteFooter from '../components/layout/SiteFooter'
-import PrivacyNotice from '../components/shared/PrivacyNotice'
+import MarketThermometer from '../components/results/MarketThermometer'
 import OpportunitiesList from '../components/results/OpportunitiesList'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
 import ProfileSummary from '../components/results/ProfileSummary'
 import ResultsBottomCta from '../components/results/ResultsBottomCta'
 import ResultsHeader from '../components/results/ResultsHeader'
 import ResultsHeroTitle from '../components/results/ResultsHeroTitle'
-import RoadmapPlan from '../components/results/RoadmapPlan'
 import ScoreCard from '../components/results/ScoreCard'
+import UserProfileCard from '../components/results/UserProfileCard'
+import PrivacyNotice from '../components/shared/PrivacyNotice'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { usePdfDownload } from '../hooks/usePdfDownload'
+import { useResultsData } from '../hooks/useResultsData'
 import { useProfileStore } from '../store/useProfileStore'
-import { parseSkillsList } from '../utils/parseSkillsList'
 
 export default function ResultsPage() {
-  const result = useProfileStore((s) => s.result)
-  const profile = useProfileStore((s) => s.profile)
-  const cvFileName = useProfileStore((s) => s.cvFileName)
+  const apiUsesMock = useProfileStore((s) => s.apiUsesMock)
+  const { savedProfile, jobs, market, loading, topScore, topJob } = useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
-  if (!result) {
+  if (!savedProfile) {
     return <Navigate to="/comenzar" replace />
   }
 
-  const score = typeof result.score === 'number' ? result.score : Number(result.score) || 0
-  const skills = parseSkillsList(profile?.skills)
+  const profileLabel = topJob?.titulo ?? savedProfile.carrera ?? 'Tu perfil'
 
   return (
     <PageShell>
@@ -37,33 +35,46 @@ export default function ResultsPage() {
 
       <main className="relative z-[1] flex-1 pb-24 pt-10 sm:pt-14">
         <Container>
-          <ResultsHeroTitle name={profile?.name} />
+          {apiUsesMock && (
+            <p
+              className="anim-in mb-6 rounded-[14px] px-4 py-2 text-center text-xs text-[color:var(--violet-200)]"
+              style={{
+                border: '1px dashed rgba(168,85,247,0.35)',
+                background: 'rgba(168,85,247,0.08)',
+              }}
+            >
+              Backend en modo mock — vacantes y mercado pueden ser datos de ejemplo
+            </p>
+          )}
+
+          <ResultsHeroTitle name={savedProfile.nombre} />
 
           <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScoreCard score={score} profileLabel={result.profile} />
+            <ScoreCard score={topScore} profileLabel={profileLabel} />
 
             <div className="flex flex-col gap-4">
               <ProfileSummary
-                profile={profile}
-                result={result}
-                score={score}
-                skills={skills}
+                profile={savedProfile}
+                topScore={topScore}
+                topJobTitle={topJob?.titulo}
               />
               <PdfDownloadCard onDownload={downloadPdf} downloading={downloading} />
             </div>
           </div>
 
           <div className="anim-in-delay-2 grid gap-6 lg:grid-cols-2">
-            <OpportunitiesList opportunities={result.opportunities} />
-            <RoadmapPlan roadmap={result.roadmap} />
+            <OpportunitiesList jobs={jobs} />
+            <MarketThermometer market={market} />
           </div>
 
+          {loading && (
+            <p className="anim-in-delay-2 mt-4 text-center text-sm text-[color:var(--fg-3)]">
+              Actualizando vacantes y mercado…
+            </p>
+          )}
+
           <div className="anim-in-delay-3 mt-8">
-            <UserProfileCard
-              profile={profile}
-              cvFileName={cvFileName}
-              cvParsed={result.cv_parsed}
-            />
+            <UserProfileCard profile={savedProfile} />
           </div>
 
           <PrivacyNotice className="anim-in-delay-3 mt-6" />

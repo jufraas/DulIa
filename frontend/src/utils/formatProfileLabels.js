@@ -1,85 +1,57 @@
-const SITUATION = {
-  estudiante: 'Estudiante',
-  recien_egresado: 'Recién egresado',
-  primer_empleo: 'Buscando primer empleo',
-  desempleado: 'Desempleado',
-  cambio_laboral: 'Trabajando, quiero cambiar',
-}
-
 const EDUCATION = {
   bachiller: 'Bachiller',
   tecnico: 'Técnico / SENA',
   tecnologo: 'Tecnólogo',
   universitario: 'Universitario',
-  postgrado: 'Postgrado',
+  posgrado: 'Posgrado',
+  postgrado: 'Posgrado',
 }
 
-const WORK_MODE = {
+const MODALITY = {
   presencial: 'Presencial',
   remoto: 'Remoto',
   hibrido: 'Híbrido',
   indiferente: 'Indiferente',
 }
 
-const OPPORTUNITY = {
-  empleo: 'Empleo formal',
-  practica: 'Práctica / pasantía',
-  freelance: 'Freelance / proyectos',
-  primer_empleo: 'Primer empleo junior',
-}
-
-const AVAILABILITY = {
-  inmediata: 'Inmediata',
-  '1_mes': 'En 1 mes',
-  fines_semana: 'Fines de semana',
-  medio_tiempo: 'Medio tiempo',
-}
-
-/** @param {string | undefined} value */
-export function labelAgeRange(value) {
-  if (!value) return ''
-  return value === '31+' ? '31 años o más' : `${value.replace('-', ' – ')} años`
-}
-
-/** @param {import('../store/useProfileStore').ProfileForm | null} profile */
-export function profileToDisplayFields(profile) {
+/** @param {import('../store/useProfileStore').SavedProfile | null} profile */
+export function savedProfileToDisplayFields(profile) {
   if (!profile) return []
 
   /** @type {{ label: string, value: string }[]} */
   const fields = [
-    { label: 'Nombre', value: profile.name },
-    { label: 'Ciudad', value: profile.city },
-    { label: 'Edad', value: labelAgeRange(profile.age_range) },
+    { label: 'Nombre', value: profile.nombre },
+    { label: 'Ciudad', value: profile.ciudad },
+    { label: 'Departamento', value: profile.departamento },
     {
-      label: 'Situación',
-      value: SITUATION[profile.current_situation] ?? profile.current_situation,
+      label: 'Edad',
+      value: profile.edad != null ? `${profile.edad} años` : '',
     },
     {
       label: 'Nivel de estudios',
-      value: EDUCATION[profile.education_level] ?? profile.education_level,
+      value: EDUCATION[profile.nivel_educativo ?? ''] ?? profile.nivel_educativo,
     },
-    { label: 'Formación', value: profile.education },
+    { label: 'Carrera', value: profile.carrera },
     {
       label: 'Experiencia',
-      value: profile.has_experience
-        ? profile.experience_summary || 'Sí, con experiencia laboral'
-        : 'Buscando primera experiencia',
-    },
-    { label: 'Habilidades técnicas', value: profile.skills },
-    { label: 'Habilidades blandas', value: profile.soft_skills },
-    { label: 'Intereses', value: profile.interests },
-    { label: 'Modalidad', value: WORK_MODE[profile.work_mode] ?? profile.work_mode },
-    {
-      label: 'Tipo de oportunidad',
-      value: OPPORTUNITY[profile.opportunity_type] ?? profile.opportunity_type,
+      value:
+        profile.experiencia_anios != null
+          ? `${profile.experiencia_anios} año(s)`
+          : '',
     },
     {
-      label: 'Disponibilidad',
-      value: AVAILABILITY[profile.availability] ?? profile.availability,
+      label: 'Habilidades',
+      value: (profile.habilidades ?? []).join(', '),
     },
-    { label: 'Herramientas', value: profile.tools },
-    { label: 'Portafolio / LinkedIn', value: profile.portfolio_url },
+    {
+      label: 'Sectores de interés',
+      value: (profile.sectores_interes ?? []).join(', '),
+    },
+    {
+      label: 'Modalidad',
+      value: MODALITY[profile.modalidad ?? ''] ?? profile.modalidad,
+    },
   ]
 
-  return fields.filter((f) => f.value?.trim())
+  return fields.filter((f) => f.value?.toString().trim())
 }

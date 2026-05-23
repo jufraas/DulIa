@@ -1,26 +1,22 @@
 import { useCallback, useState } from 'react'
 import { useProfileStore } from '../store/useProfileStore'
 
-/**
- * @owner compañero-front
- * Descarga del PDF de análisis.
- */
 export function usePdfDownload() {
-  const profile = useProfileStore((s) => s.profile)
-  const result = useProfileStore((s) => s.result)
-  const cvFileName = useProfileStore((s) => s.cvFileName)
+  const savedProfile = useProfileStore((s) => s.savedProfile)
+  const jobs = useProfileStore((s) => s.jobs)
+  const market = useProfileStore((s) => s.market)
   const [downloading, setDownloading] = useState(false)
 
   const downloadPdf = useCallback(async () => {
-    if (!result) return
+    if (!savedProfile) return
     setDownloading(true)
     try {
       const { generateAnalysisPdf } = await import('../utils/generateAnalysisPdf')
-      generateAnalysisPdf({ profile, result, cvFileName })
+      generateAnalysisPdf({ profile: savedProfile, jobs, market })
     } finally {
       setDownloading(false)
     }
-  }, [profile, result, cvFileName])
+  }, [savedProfile, jobs, market])
 
   return { downloading, downloadPdf }
 }

@@ -2,28 +2,11 @@ import {
   EDUCATION_LEVEL_OPTIONS,
   HAS_EXPERIENCE_OPTIONS,
 } from '../../constants/onboardingOptions'
-import CvUpload from './CvUpload'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import TextArea from '../ui/TextArea'
 
-/**
- * @owner migue
- * @param {{
- *   form: import('../../store/useProfileStore').OnboardingFormState,
- *   errors: Record<string, string>,
- *   cvFile: File | null,
- *   update: (field: string) => (e: import('react').ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void,
- *   onCvChange: (file: File | null) => void,
- * }} props
- */
-export default function StepWorkProfile({
-  form,
-  errors,
-  cvFile,
-  update,
-  onCvChange,
-}) {
+export default function StepWorkProfile({ form, errors, update }) {
   return (
     <>
       <Select
@@ -37,7 +20,7 @@ export default function StepWorkProfile({
       <Input
         label="Carrera o área de estudio"
         name="education"
-        placeholder="Ej. Comunicación social, diseño gráfico..."
+        placeholder="Ej. Ingeniería de Sistemas, diseño gráfico..."
         value={form.education}
         onChange={update('education')}
         error={errors.education}
@@ -51,23 +34,36 @@ export default function StepWorkProfile({
         options={HAS_EXPERIENCE_OPTIONS}
       />
       {form.has_experience === 'si' && (
-        <TextArea
-          label="Describe tu experiencia"
-          name="experience_summary"
-          placeholder="Ej. 6 meses en retail, practicante en marketing..."
-          value={form.experience_summary}
-          onChange={update('experience_summary')}
-          error={errors.experience_summary}
-        />
+        <>
+          <Input
+            label="Años de experiencia"
+            name="experience_years"
+            type="number"
+            min={0}
+            max={40}
+            placeholder="Ej. 1"
+            value={form.experience_years}
+            onChange={update('experience_years')}
+            error={errors.experience_years}
+          />
+          <TextArea
+            label="Describe tu experiencia"
+            name="experience_summary"
+            placeholder="Ej. 6 meses en retail, practicante en marketing..."
+            value={form.experience_summary}
+            onChange={update('experience_summary')}
+            error={errors.experience_summary}
+          />
+        </>
       )}
       <TextArea
         label="Habilidades técnicas"
         name="skills"
-        placeholder="Ej. Canva, Excel, Python, atención al cliente..."
+        placeholder="Ej. Python, Excel, Git, atención al cliente..."
         value={form.skills}
         onChange={update('skills')}
         error={errors.skills}
-        hint="Separa con comas"
+        hint="Separa con comas — se envían como array al backend"
       />
       <TextArea
         label="Habilidades blandas (opcional)"
@@ -75,9 +71,8 @@ export default function StepWorkProfile({
         placeholder="Ej. Comunicación, trabajo en equipo, liderazgo..."
         value={form.soft_skills}
         onChange={update('soft_skills')}
-        hint="Opcional — mejora tu análisis"
+        hint="Se incluyen en texto libre para la IA"
       />
-      <CvUpload file={cvFile} onChange={onCvChange} error={errors.cv} />
     </>
   )
 }

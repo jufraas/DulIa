@@ -1,18 +1,11 @@
 import { User } from 'lucide-react'
-import { profileToDisplayFields } from '../../utils/formatProfileLabels'
-import { CvAttachedBadge } from '../shared/PrivacyNotice'
+import { savedProfileToDisplayFields } from '../../utils/formatProfileLabels'
 
 /**
- * Sección "Tu perfil" — datos que el usuario envió en el wizard (+ CV).
- *
- * @param {{
- *   profile: import('../../store/useProfileStore').ProfileForm | null,
- *   cvFileName?: string | null,
- *   cvParsed?: boolean,
- * }} props
+ * @param {{ profile: import('../../store/useProfileStore').SavedProfile | null }} props
  */
-export default function UserProfileCard({ profile, cvFileName, cvParsed }) {
-  const fields = profileToDisplayFields(profile)
+export default function UserProfileCard({ profile }) {
+  const fields = savedProfileToDisplayFields(profile)
 
   if (!profile) return null
 
@@ -21,14 +14,13 @@ export default function UserProfileCard({ profile, cvFileName, cvParsed }) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="eyebrow-dl">
           <User className="h-3.5 w-3.5" aria-hidden />
-          Tu perfil
+          Tu perfil guardado
         </div>
-        <CvAttachedBadge fileName={cvFileName} cvParsed={cvParsed} />
       </div>
 
       <p className="body mb-5 mt-0">
-        Esto es lo que nos contaste. DulIA lo cruzó con oportunidades laborales reales en
-        Colombia para armar tu plan.
+        Perfil registrado con tu <strong className="text-[color:var(--fg-1)]">session_id</strong>.
+        En modo mock el GET no persiste — usamos la respuesta del POST en memoria.
       </p>
 
       <dl className="grid gap-3 sm:grid-cols-2">
@@ -45,18 +37,7 @@ export default function UserProfileCard({ profile, cvFileName, cvParsed }) {
               {label}
             </dt>
             <dd className="mt-1 text-sm font-medium leading-snug text-[color:var(--fg-1)]">
-              {label === 'Portafolio / LinkedIn' && value.startsWith('http') ? (
-                <a
-                  href={value}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[color:var(--violet-300)] underline-offset-2 hover:underline"
-                >
-                  {value}
-                </a>
-              ) : (
-                value
-              )}
+              {value}
             </dd>
           </div>
         ))}

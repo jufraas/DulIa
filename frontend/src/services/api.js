@@ -1,41 +1,73 @@
 import axios from 'axios'
-import { mockResponse } from '../Mock_Response.js'
+import { mockJobs, mockMarket } from './mockData'
+import { getOrCreateSessionId } from '../utils/session'
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
 const api = axios.create({
   baseURL,
   timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
 })
 
-/**
- * @param {import('../store/useProfileStore').ProfileForm} profile
- * @param {File | null} [cvFile]
- * @returns {Promise<import('../store/useProfileStore').AnalysisResult>}
- */
-export async function submitProfile(profile, cvFile = null) {
+/** @returns {Promise<{ mock: boolean }>} */
+export async function fetchHealth() {
   try {
-    if (cvFile) {
-      const formData = new FormData()
-      formData.append('profile', JSON.stringify(profile))
-      formData.append('cv', cvFile, cvFile.name)
+    const { data } = await api.get('/health')
+    return { mock: data.mock_data === 'true' || data.mock_data === true }
+  } catch {
+    return { mock: true }
+  }
+}
 
-      const { data } = await api.post('/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      return data
+/**
+ * @param {import('../utils/buildProfilePayload').ProfileApiPayload} payload
+ * @returns {Promise<import('../store/useProfileStore').SavedProfile>}
+ */
+export async function createProfile(payload) {
+  try {
+    const { data } = await api.post('/profile', payload)
+    return data
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.data?.detail) {
+      throw new Error(String(err.response.data.detail))
     }
+    throw new Error('No pudimos guardar tu perfil. Intenta de nuevo.')
+  }
+}
 
-    const { data } = await api.post('/profile', profile, {
-      headers: { 'Content-Type': 'application/json' },
-    })
+/**
+ * @param {string} [sessionId]
+ * @returns {Promise<import('../store/useProfileStore').SavedProfile>}
+ */
+export async function getProfile(sessionId = getOrCreateSessionId()) {
+  const { data } = await api.get(`/profile/${sessionId}`)
+  return data
+}
+
+/**
+ * @param {string} [sessionId]
+ * @returns {Promise<import('../store/useProfileStore').Job[]>}
+ */
+export async function getRecommendedJobs(sessionId = getOrCreateSessionId()) {
+  try {
+    const { data } = await api.get(`/jobs/recommended/${sessionId}`)
+    return Array.isArray(data) ? data : []
+  } catch {
+    return mockJobs
+  }
+}
+
+/**
+ * @param {{ city?: string, sector?: string }} [filters]
+ * @returns {Promise<import('../store/useProfileStore').MarketDashboard>}
+ */
+export async function getMarketDashboard(filters = {}) {
+  try {
+    const { data } = await api.get('/market/dashboard', { params: filters })
     return data
   } catch {
-    await new Promise((r) => setTimeout(r, 1200))
-    return {
-      ...mockResponse,
-      cv_parsed: Boolean(cvFile),
-    }
+    return { ...mockMarket, ciudad_filtro: filters.city ?? mockMarket.ciudad_filtro }
   }
 }
 

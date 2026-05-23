@@ -7,17 +7,16 @@ Estructura para trabajar en paralelo sin conflictos.
 
 | Archivo | Descripción |
 |---------|-------------|
-| `src/components/onboarding/*` | Wizard completo + CvUpload |
-| `src/hooks/useOnboardingForm.js` | Estado y validación del wizard |
-| `src/utils/buildProfilePayload.js` | Payload JSON al backend |
+| `src/components/onboarding/*` | Wizard completo (4 pasos) |
+| `src/hooks/useOnboardingForm.js` | Estado, validación y POST profile |
+| `src/utils/buildProfilePayload.js` | Payload JSON → POST /api/profile |
+| `src/utils/session.js` | session_id en localStorage |
 | `src/utils/validateOnboardingStep.js` | Validación por paso |
-| `src/utils/validateCvFile.js` | Validación PDF 5MB |
 | `src/utils/formatProfileLabels.js` | Labels legibles del perfil |
 | `src/constants/onboardingOptions.js` | Opciones de selects |
 | `src/constants/emptyForm.js` | Estado inicial del form |
-| `src/services/submitProfileWithCv.js` | Envío JSON + multipart |
 | `src/services/api.js` | Cliente Axios (`VITE_API_URL`) |
-| `src/components/ui/FileInput.jsx` | Input de archivo reutilizable |
+| `src/services/mockData.js` | Fallback cuando backend usa mock |
 | `src/components/shared/PrivacyNotice.jsx` | Aviso sin sesión |
 | `src/store/useProfileStore.js` | Estado global (coordinar cambios) |
 
@@ -27,6 +26,7 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------------|
 | `src/components/results/*` | Pantalla de resultados |
 | `src/hooks/usePdfDownload.js` | Descarga PDF |
+| `src/hooks/useResultsData.js` | Carga jobs + market |
 | `src/utils/generateAnalysisPdf.js` | Generación jsPDF |
 | `src/components/welcome/*` | Landing sections |
 | `src/components/layout/SiteHeader.jsx` | Header landing |
@@ -53,8 +53,9 @@ Estructura para trabajar en paralelo sin conflictos.
 
 | Pieza | Estado |
 |-------|--------|
-| Multipart profile + CV | ✅ frontend listo |
-| UserProfileCard en resultados | ✅ |
-| Mock con `cv_parsed` | ✅ |
+| POST /api/profile (JSON) + session_id | ✅ |
+| GET jobs + market dashboard | ✅ |
+| UserProfileCard + OpportunitiesList + MarketThermometer | ✅ |
+| PDF con jobs y termómetro | ✅ |
 | Deploy Vercel | 🔲 — root `frontend`, env `VITE_API_URL` |
-| ProfileSummary enriquecido con texto IA del backend | 🔲 cuando Carlos conecte Gemini |
+| Coach / chat (Fase 8) | 🔲 pendiente backend |

@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf'
-import { profileToDisplayFields } from './formatProfileLabels'
+import { savedProfileToDisplayFields } from './formatProfileLabels'
+import { formatSalary } from './formatters'
 
 const MARGIN = 20
 const PAGE_WIDTH = 210
@@ -8,25 +9,15 @@ const LINE_HEIGHT = 7
 
 const BRAND_DARK = [13, 13, 13]
 const BRAND_VIOLET = [124, 58, 237]
-const BRAND_MAGENTA = [236, 72, 153]
 const TEXT_PRIMARY = [250, 250, 252]
 const TEXT_SECONDARY = [100, 100, 120]
 
-/**
- * @param {string} text
- * @param {number} maxWidth
- * @param {import('jspdf').jsPDF} doc
- */
+/** @param {string} text @param {number} maxWidth @param {import('jspdf').jsPDF} doc */
 function splitLines(text, maxWidth, doc) {
   return doc.splitTextToSize(text, maxWidth)
 }
 
-/**
- * @param {import('jspdf').jsPDF} doc
- * @param {number} y
- * @param {string} title
- * @returns {number}
- */
+/** @param {import('jspdf').jsPDF} doc @param {number} y @param {string} title */
 function sectionTitle(doc, y, title) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
@@ -40,91 +31,68 @@ function sectionTitle(doc, y, title) {
 
 /**
  * @param {{
- *   profile?: import('../store/useProfileStore').ProfileForm | null,
- *   result: import('../store/useProfileStore').AnalysisResult,
- *   cvFileName?: string | null,
+ *   profile: import('../store/useProfileStore').SavedProfile,
+ *   jobs?: import('../store/useProfileStore').Job[],
+ *   market?: import('../store/useProfileStore').MarketDashboard | null,
  * }} data
  */
-export function generateAnalysisPdf({ profile, result, cvFileName = null }) {
+export function generateAnalysisPdf({ profile, jobs = [], market = null }) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   let y = MARGIN
 
   doc.setFillColor(...BRAND_DARK)
   doc.rect(0, 0, PAGE_WIDTH, 36, 'F')
-
   doc.setTextColor(...TEXT_PRIMARY)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
   doc.text('DulIA', MARGIN, 16)
-
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(...TEXT_SECONDARY)
-  doc.text('Coach de carrera con IA · Barranqui-IA 2026 · Colombia', MARGIN, 24)
+  doc.text('Coach de carrera con IA · Barranqui-IA 2026', MARGIN, 24)
 
   y = 48
   doc.setTextColor(51, 65, 85)
   doc.setFontSize(10)
-  const dateStr = new Date().toLocaleDateString('es-CO', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-  doc.text(`Generado el ${dateStr}`, MARGIN, y)
+  doc.text(
+    `Generado el ${new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}`,
+    MARGIN,
+    y,
+  )
   y += 10
 
-  if (profile?.name) {
+  if (profile.nombre) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(14)
     doc.setTextColor(...BRAND_DARK)
-    doc.text(`Plan de acción — ${profile.name}`, MARGIN, y)
+    doc.text(`Plan de acción — ${profile.nombre}`, MARGIN, y)
     y += 8
-    if (profile.city) {
+    if (profile.ciudad) {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
       doc.setTextColor(...TEXT_SECONDARY)
-      doc.text(profile.city, MARGIN, y)
+      doc.text(profile.ciudad, MARGIN, y)
       y += 8
     }
   }
 
-  if (cvFileName || result.cv_parsed) {
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
-    doc.setTextColor(...BRAND_MAGENTA)
-    doc.text(
-      result.cv_parsed
-        ? `CV analizado: ${cvFileName || 'archivo adjunto'}`
-        : `CV adjunto: ${cvFileName}`,
-      MARGIN,
-      y,
+  if (jobs.length > 0) {
+    const top = jobs.reduce((a, b) =>
+      (a.score_compatibilidad ?? 0) >= (b.score_compatibilidad ?? 0) ? a : b,
     )
-    y += 8
+    y = sectionTitle(doc, y, 'Mejor match')
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.text(`${top.titulo} — ${top.empresa} (${top.score_compatibilidad}% match)`, MARGIN, y)
+    y += 10
   }
 
-  y = sectionTitle(doc, y, 'Perfil sugerido por IA')
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(11)
-  doc.setTextColor(30, 41, 59)
-  const profileLines = splitLines(result.profile, CONTENT_WIDTH - 40, doc)
-  doc.text(profileLines, MARGIN, y)
-  y += profileLines.length * LINE_HEIGHT + 2
-
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(...BRAND_MAGENTA)
-  doc.text(
-    `Score: ${result.score}/100`,
-    PAGE_WIDTH - MARGIN - 35,
-    y - profileLines.length * LINE_HEIGHT,
-  )
-  y += 6
-
-  y = sectionTitle(doc, y, 'Oportunidades laborales reales')
+  y = sectionTitle(doc, y, 'Vacantes recomendadas')
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.setTextColor(51, 65, 85)
-  result.opportunities.forEach((item) => {
-    const lines = splitLines(`• ${item}`, CONTENT_WIDTH - 4, doc)
+  jobs.forEach((job) => {
+    const line = `• ${job.titulo} (${job.empresa}) — ${job.score_compatibilidad}% — ${formatSalary(job.salario_min, job.salario_max)}`
+    const lines = splitLines(line, CONTENT_WIDTH - 4, doc)
     if (y + lines.length * LINE_HEIGHT > 270) {
       doc.addPage()
       y = MARGIN
@@ -134,52 +102,37 @@ export function generateAnalysisPdf({ profile, result, cvFileName = null }) {
   })
   y += 4
 
-  y = sectionTitle(doc, y, 'Tu plan de 30 días')
-  result.roadmap.forEach((step, i) => {
-    const lines = splitLines(`${i + 1}. ${step}`, CONTENT_WIDTH - 8, doc)
-    if (y + lines.length * LINE_HEIGHT > 270) {
-      doc.addPage()
-      y = MARGIN
-    }
-    doc.text(lines, MARGIN + 4, y)
-    y += lines.length * LINE_HEIGHT + 4
-  })
-
-  if (profile) {
-    if (y > 220) {
-      doc.addPage()
-      y = MARGIN
-    }
-    y = sectionTitle(doc, y + 4, 'Tu perfil (datos enviados)')
+  if (market) {
+    y = sectionTitle(doc, y, 'Termómetro del mercado')
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
-    doc.setTextColor(71, 85, 105)
-
-    profileToDisplayFields(profile).forEach(({ label, value }) => {
-      const lines = splitLines(`${label}: ${value}`, CONTENT_WIDTH, doc)
-      if (y + lines.length * LINE_HEIGHT > 280) {
-        doc.addPage()
-        y = MARGIN
-      }
-      doc.text(lines, MARGIN, y)
-      y += lines.length * LINE_HEIGHT + 3
+    const marketLines = [
+      `Vacantes activas: ${market.total_vacantes_activas ?? '—'}`,
+      market.salario_promedio
+        ? `Salario promedio: ${formatSalary(market.salario_promedio, undefined)}`
+        : null,
+    ].filter(Boolean)
+    marketLines.forEach((line) => {
+      doc.text(String(line), MARGIN, y)
+      y += LINE_HEIGHT + 2
     })
+    y += 4
   }
 
-  const pageCount = doc.getNumberOfPages()
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i)
-    doc.setFontSize(8)
-    doc.setTextColor(...TEXT_SECONDARY)
-    doc.text(
-      'DulIA — coach de carrera con IA para jóvenes colombianos · Sin sesión · Pág. ' +
-        `${i}/${pageCount}`,
-      MARGIN,
-      290,
-    )
-  }
+  y = sectionTitle(doc, y + 4, 'Tu perfil')
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  savedProfileToDisplayFields(profile).forEach(({ label, value }) => {
+    const lines = splitLines(`${label}: ${value}`, CONTENT_WIDTH, doc)
+    if (y + lines.length * LINE_HEIGHT > 280) {
+      doc.addPage()
+      y = MARGIN
+    }
+    doc.text(lines, MARGIN, y)
+    y += lines.length * LINE_HEIGHT + 3
+  })
 
-  const safeName = (profile?.name || 'usuario')
+  const safeName = (profile.nombre || 'usuario')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9]+/g, '-')

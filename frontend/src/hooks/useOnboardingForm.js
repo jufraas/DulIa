@@ -1,26 +1,23 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createProfile, getMarketDashboard, getRecommendedJobs } from '../services/api'
 import { EMPTY_ONBOARDING_FORM } from '../constants/emptyForm'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
 import { buildProfilePayload } from '../utils/buildProfilePayload'
-import { validateCvFile } from '../utils/validateCvFile'
 import { validateOnboardingStep } from '../utils/validateOnboardingStep'
-import { submitProfileWithCv } from '../services/submitProfileWithCv'
+import { getOrCreateSessionId } from '../utils/session'
 import { useProfileStore } from '../store/useProfileStore'
 
-/**
- * @owner migue
- * Estado, validación y navegación del wizard de onboarding.
- */
 export function useOnboardingForm() {
   const navigate = useNavigate()
-  const setProfile = useProfileStore((s) => s.setProfile)
-  const setResult = useProfileStore((s) => s.setResult)
-  const setCvFile = useProfileStore((s) => s.setCvFileName)
+  const setSavedProfile = useProfileStore((s) => s.setSavedProfile)
+  const setFormSnapshot = useProfileStore((s) => s.setFormSnapshot)
+  const setJobs = useProfileStore((s) => s.setJobs)
+  const setMarket = useProfileStore((s) => s.setMarket)
+  const setSessionId = useProfileStore((s) => s.setSessionId)
 
   const [step, setStep] = useState(0)
   const [form, setForm] = useState(EMPTY_ONBOARDING_FORM)
-  const [cvFile, setLocalCvFile] = useState(/** @type {File | null} */ (null))
   const [errors, setErrors] = useState(/** @type {Record<string, string>} */ ({}))
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
@@ -33,24 +30,6 @@ export function useOnboardingForm() {
     },
     [],
   )
-
-  const setCv = useCallback((file) => {
-    if (!file) {
-      setLocalCvFile(null)
-      setErrors((prev) => ({ ...prev, cv: '' }))
-      setApiError('')
-      return
-    }
-    const cvError = validateCvFile(file)
-    if (cvError) {
-      setLocalCvFile(null)
-      setErrors((prev) => ({ ...prev, cv: cvError }))
-      return
-    }
-    setLocalCvFile(file)
-    setErrors((prev) => ({ ...prev, cv: '' }))
-    setApiError('')
-  }, [])
 
   const validateCurrentStep = useCallback(() => {
     const next = validateOnboardingStep(step, form)
@@ -81,14 +60,24 @@ export function useOnboardingForm() {
       setApiError('')
 
       try {
+        const sessionId = getOrCreateSessionId()
+        setSessionId(sessionId)
+
         const payload = buildProfilePayload(form)
-        const result = await submitProfileWithCv(payload, cvFile)
-        setProfile(payload)
-        setCvFile(cvFile?.name ?? null)
-        setResult(result)
+        const savedProfile = await createProfile(payload)
+
+        const [jobs, market] = await Promise.all([
+          getRecommendedJobs(sessionId),
+          getMarketDashboard({ city: savedProfile.ciudad || form.city.trim() }),
+        ])
+
+        setSavedProfile(savedProfile)
+        setFormSnapshot(form)
+        setJobs(jobs)
+        setMarket(market)
         navigate('/resultados')
-      } catch {
-        setApiError('No pudimos procesar tu perfil. Intenta de nuevo.')
+      } catch (err) {
+        setApiError(err instanceof Error ? err.message : 'No pudimos procesar tu perfil.')
       } finally {
         setLoading(false)
       }
@@ -96,10 +85,11 @@ export function useOnboardingForm() {
     [
       validateCurrentStep,
       form,
-      cvFile,
-      setProfile,
-      setCvFile,
-      setResult,
+      setSavedProfile,
+      setFormSnapshot,
+      setJobs,
+      setMarket,
+      setSessionId,
       navigate,
     ],
   )
@@ -109,13 +99,11 @@ export function useOnboardingForm() {
   return {
     step,
     form,
-    cvFile,
     errors,
     loading,
     apiError,
     progress,
     update,
-    setCv,
     goNext,
     goBack,
     handleSubmit,

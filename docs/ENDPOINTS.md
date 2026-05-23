@@ -1,6 +1,6 @@
 # ENDPOINTS — Contrato de la API
 
-> Última actualización: 2026-05-23 — incluye importación de CV (PDF).
+> Última actualización: 2026-05-23 — contrato Carlos (session_id, JSON, jobs + market separados).
 
 ## Base URL
 
@@ -11,31 +11,40 @@ https://<dominio>/api       ← producción (por definir)
 
 ## Autenticación
 
-**Sin auth en el MVP.** El usuario no inicia sesión; envía perfil (+ CV opcional) y recibe análisis en la misma visita.
+**Sin auth en el MVP.** El frontend genera un `session_id` (UUID) en `localStorage` (`dulia_session_id`) y lo envía en cada request de perfil.
 
 ## Endpoints
 
 | Método | Ruta | Descripción | Estado |
 |--------|------|-------------|--------|
-| GET | `/health` | Health check del servidor | 🔲 |
-| POST | `/profile` | Enviar perfil (+ CV PDF opcional) | 🔲 |
-| GET | `/recommendations/{id}` | Obtener recomendaciones (fase 2) | 🔲 |
-| GET | `/jobs` | Listar ofertas laborales | 🔲 |
+| GET | `/health` | Health check (`mock_data` indica modo mock) | 🚧 |
+| POST | `/profile` | Guardar perfil del usuario (JSON) | 🚧 |
+| GET | `/profile/{session_id}` | Recuperar perfil guardado | 🚧 |
+| GET | `/jobs/recommended/{session_id}` | Vacantes recomendadas con score | 🚧 |
+| GET | `/market/dashboard` | Termómetro del mercado (`?city=&sector=`) | 🚧 |
 
 ## Convenciones
 
 - Errores: `{ "detail": "mensaje de error" }`.
-- Sin persistencia de PDF en hackathon (procesar en memoria y descartar).
+- Campos del perfil en **español** (ver payload abajo).
+- Frontend usa `frontend/src/services/mockData.js` como fallback si jobs/market fallan.
+
+---
+
+## `GET /health`
+
+```json
+{
+  "status": "ok",
+  "mock_data": true
+}
+```
 
 ---
 
 ## `POST /profile`
 
-Recibe el perfil del usuario y opcionalmente un **CV en PDF**. El backend convierte el PDF a Markdown (MarkItDown) y lo incluye en el prompt de Gemini.
-
-### Modo A — Solo formulario (JSON)
-
-Cuando el usuario **no** sube CV.
+Guarda el perfil del usuario. **Solo JSON** (sin multipart ni CV en este contrato).
 
 ```
 POST /api/profile
@@ -46,88 +55,92 @@ Content-Type: application/json
 
 ```json
 {
-  "name": "María González",
-  "city": "Barranquilla",
-  "age_range": "21-25",
-  "current_situation": "recien_egresado",
-  "education_level": "universitario",
-  "education": "Comunicación social",
-  "has_experience": false,
-  "experience_summary": "",
-  "skills": "Canva, edición de video, redacción",
-  "soft_skills": "comunicación, creatividad",
-  "interests": "Marketing digital, contenido para redes",
-  "work_mode": "hibrido",
-  "opportunity_type": "empleo",
-  "availability": "inmediata",
-  "tools": "Canva, CapCut",
-  "portfolio_url": "https://linkedin.com/in/ejemplo"
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "nombre": "María González",
+  "edad": 23,
+  "ciudad": "Barranquilla",
+  "departamento": "Atlántico",
+  "nivel_educativo": "universitario",
+  "carrera": "Comunicación social",
+  "experiencia_anios": 0,
+  "habilidades": ["Canva", "edición de video", "redacción"],
+  "sectores_interes": ["Marketing digital", "contenido para redes"],
+  "salario_esperado_min": 2000000,
+  "salario_esperado_max": 3500000,
+  "modalidad": "hibrido",
+  "texto_libre": "Situación: recien_egresado · Herramientas: Canva, CapCut"
 }
 ```
 
-> Implementado en frontend: wizard 3 pasos en `frontend/src/pages/OnboardingPage.jsx` + componentes en `frontend/src/components/onboarding/`.
+**Respuesta:** objeto `SavedProfile` con los mismos campos + `id`, `created_at`.
 
-### Modo B — Formulario + CV (multipart)
-
-Cuando el usuario **importa CV en PDF**.
-
-```
-POST /api/profile
-Content-Type: multipart/form-data
-```
-
-| Campo | Tipo | Obligatorio | Descripción |
-|-------|------|-------------|-------------|
-| `profile` | string | ✅ | JSON stringificado (mismo objeto que Modo A) |
-| `cv` | file | ❌ | Archivo PDF, max 5 MB |
-
-**Ejemplo curl:**
-
-```bash
-curl -X POST http://localhost:8000/api/profile \
-  -F 'profile={"name":"María","city":"Barranquilla",...};type=application/json' \
-  -F "cv=@/ruta/hoja_de_vida.pdf;type=application/pdf"
-```
-
-### Procesamiento backend (referencia)
-
-1. Parsear `profile` (JSON).
-2. Si hay `cv`: módulo `backend/markitdown/` → `cv_markdown`.
-3. `build_gemini_prompt_vars(profile, cv_result)` — ver `docs/PROMPTS.md`.
-4. Llamar Gemini.
-5. Responder JSON de recomendaciones (`cv_parsed: true` si hubo CV).
+> Implementado en frontend: wizard en `frontend/src/components/onboarding/` → `buildProfilePayload.js` → `useOnboardingForm.js`.
 
 ---
 
-## Respuesta de `POST /profile`
+## `GET /jobs/recommended/{session_id}`
 
-> Shape en `frontend/src/Mock_Response.js`. Frontend usa mock si backend no responde.
+Array de vacantes con compatibilidad calculada.
 
 ```json
-{
-  "profile": "Editor de contenido junior",
-  "score": 74,
-  "opportunities": [
-    "Editar TikToks para negocios",
-    "Diseño Canva para emprendedores"
-  ],
-  "roadmap": [
-    "Crear portafolio",
-    "Publicar en LinkedIn",
-    "Buscar clientes locales"
-  ],
-  "cv_parsed": true
-}
+[
+  {
+    "id": "job-1",
+    "titulo": "Desarrollador Backend Python",
+    "empresa": "Sophos Solutions",
+    "ciudad": "Barranquilla",
+    "departamento": "Atlántico",
+    "salario_min": 2500000,
+    "salario_max": 3500000,
+    "habilidades_requeridas": ["python", "fastapi"],
+    "sector": "tecnología",
+    "experiencia_requerida": 1,
+    "nivel_educativo_req": "universitario",
+    "modalidad": "hibrido",
+    "semaforo": "green",
+    "descripcion": "...",
+    "publicado_at": "2026-05-23T10:00:00Z",
+    "score_compatibilidad": 84,
+    "habilidades_match": ["python"],
+    "habilidades_faltantes": ["fastapi"]
+  }
+]
 ```
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
-| `profile` | string | Perfil sugerido por IA |
-| `score` | number | Encaje 0–100 |
-| `opportunities` | string[] | Oportunidades alineadas |
-| `roadmap` | string[] | Pasos accionables |
-| `cv_parsed` | boolean | Opcional; `true` si se procesó CV |
+| `score_compatibilidad` | number | 0–100 por vacante |
+| `semaforo` | string | `green` \| `yellow` \| `red` |
 
 ---
 
-_Actualizar cuando backend confirme implementación._
+## `GET /market/dashboard`
+
+Query params opcionales: `city`, `sector`.
+
+```json
+{
+  "total_vacantes_activas": 312,
+  "top_sectores": [{ "sector": "tecnología", "count": 87 }],
+  "salario_promedio": 2800000,
+  "top_empresas_verdes": ["Bancolombia", "Rappi"],
+  "crecimiento_semanal_pct": 12.4,
+  "ciudad_filtro": "Barranquilla",
+  "sector_filtro": null
+}
+```
+
+---
+
+## Flujo frontend
+
+1. `GET /health` → detectar `mock_data`.
+2. `POST /profile` con `session_id`.
+3. En paralelo: `GET /jobs/recommended/{session_id}` + `GET /market/dashboard?city=...`.
+4. Pantalla de resultados + PDF con jobs y termómetro.
+
+---
+
+## Nota: CV / MarkItDown
+
+El módulo `backend/markitdown/` existe para procesar PDFs, pero **no forma parte del contrato actual** entre frontend y backend de Carlos. Puede integrarse en una fase posterior.

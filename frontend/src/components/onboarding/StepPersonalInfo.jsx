@@ -5,14 +5,6 @@ import {
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 
-/**
- * @owner migue
- * @param {{
- *   form: import('../../store/useProfileStore').OnboardingFormState,
- *   errors: Record<string, string>,
- *   update: (field: string) => (e: import('react').ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void,
- * }} props
- */
 export default function StepPersonalInfo({ form, errors, update }) {
   return (
     <>
@@ -34,14 +26,35 @@ export default function StepPersonalInfo({ form, errors, update }) {
         error={errors.city}
         autoComplete="address-level2"
       />
-      <Select
-        label="Rango de edad"
-        name="age_range"
-        value={form.age_range}
-        onChange={update('age_range')}
-        error={errors.age_range}
-        options={AGE_RANGE_OPTIONS}
+      <Input
+        label="Departamento (opcional)"
+        name="departamento"
+        placeholder="Ej. Atlántico"
+        value={form.departamento}
+        onChange={update('departamento')}
+        error={errors.departamento}
       />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Input
+          label="Edad"
+          name="edad"
+          type="number"
+          min={16}
+          max={99}
+          placeholder="Ej. 22"
+          value={form.edad}
+          onChange={update('edad')}
+          error={errors.edad}
+        />
+        <Select
+          label="O rango de edad"
+          name="age_range"
+          value={form.age_range}
+          onChange={update('age_range')}
+          error={errors.age_range}
+          options={AGE_RANGE_OPTIONS}
+        />
+      </div>
       <Select
         label="Situación actual"
         name="current_situation"

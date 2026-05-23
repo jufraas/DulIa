@@ -1,0 +1,58 @@
+/** @type {import('../store/useProfileStore').Job[]} */
+export const mockJobs = [
+  {
+    id: 'mock-job-1',
+    titulo: 'Desarrollador Backend Python',
+    empresa: 'Sophos Solutions',
+    ciudad: 'Barranquilla',
+    departamento: 'Atlántico',
+    salario_min: 2500000,
+    salario_max: 3500000,
+    habilidades_requeridas: ['python', 'fastapi', 'postgresql', 'git'],
+    sector: 'tecnología',
+    experiencia_requerida: 1,
+    nivel_educativo_req: 'universitario',
+    modalidad: 'hibrido',
+    semaforo: 'green',
+    descripcion: 'Vacante junior para apoyar APIs con FastAPI en proyectos del Caribe.',
+    publicado_at: '2026-05-23T10:00:00Z',
+    score_compatibilidad: 84,
+    habilidades_match: ['python', 'git'],
+    habilidades_faltantes: ['postgresql', 'fastapi'],
+  },
+  {
+    id: 'mock-job-2',
+    titulo: 'Analista de datos junior',
+    empresa: 'Grupo Éxito',
+    ciudad: 'Barranquilla',
+    departamento: 'Atlántico',
+    salario_min: 2200000,
+    salario_max: 3000000,
+    habilidades_requeridas: ['excel', 'python', 'power bi'],
+    sector: 'retail',
+    experiencia_requerida: 0,
+    nivel_educativo_req: 'universitario',
+    modalidad: 'presencial',
+    semaforo: 'yellow',
+    descripcion: 'Primer empleo en analytics para cadena de retail costa norte.',
+    publicado_at: '2026-05-22T14:00:00Z',
+    score_compatibilidad: 71,
+    habilidades_match: ['excel', 'python'],
+    habilidades_faltantes: ['power bi'],
+  },
+]
+
+/** @type {import('../store/useProfileStore').MarketDashboard} */
+export const mockMarket = {
+  total_vacantes_activas: 312,
+  top_sectores: [
+    { sector: 'tecnología', count: 87 },
+    { sector: 'comercial', count: 64 },
+    { sector: 'logística', count: 41 },
+  ],
+  salario_promedio: 2800000,
+  top_empresas_verdes: ['Bancolombia', 'Rappi', 'Teleperformance'],
+  crecimiento_semanal_pct: 12.4,
+  ciudad_filtro: 'Barranquilla',
+  sector_filtro: null,
+}

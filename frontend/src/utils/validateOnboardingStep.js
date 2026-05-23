@@ -6,7 +6,9 @@ export function validateOnboardingStep(currentStep, form) {
   if (currentStep === 0) {
     if (!form.name.trim()) errors.name = 'Escribe tu nombre'
     if (!form.city.trim()) errors.city = 'Indica tu ciudad'
-    if (!form.age_range) errors.age_range = 'Selecciona tu rango de edad'
+    if (!form.edad && !form.age_range) {
+      errors.edad = 'Indica tu edad o rango'
+    }
     if (!form.current_situation) {
       errors.current_situation = 'Indica tu situación actual'
     }
@@ -24,6 +26,9 @@ export function validateOnboardingStep(currentStep, form) {
     }
     if (form.has_experience === 'si' && !form.experience_summary.trim()) {
       errors.experience_summary = 'Describe brevemente tu experiencia'
+    }
+    if (form.has_experience === 'si' && !form.experience_years.trim()) {
+      errors.experience_years = 'Indica cuántos años de experiencia tienes'
     }
     if (!form.skills.trim()) errors.skills = 'Menciona al menos una habilidad'
   }

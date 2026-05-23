@@ -4,15 +4,15 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Frontend: rebrand, scaffolding por componentes, CV upload, multipart, resumen perfil.
+2026-05-23 — Frontend migrado al contrato real de Carlos (session_id, JSON, jobs + market).
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Estructura creada |
-| Backend (FastAPI) | 🚧 En progreso | Módulo `markitdown/` + `POST /profile` stub; falta Gemini |
-| Frontend (React+Vite) | 🚧 En progreso | Flujo demo completo; falta deploy |
+| Backend (FastAPI) | 🚧 En progreso | Contrato session_id + jobs/market; MarkItDown opcional |
+| Frontend (React+Vite) | 🚧 En progreso | Migración API completa; falta deploy |
 | Pipeline (scrapers) | 🔲 No iniciado | — |
 | Integración Gemini | 🔲 No iniciado | Ver PROMPTS.md |
 | Base de datos | 🔲 No definida | Ver SCHEMA.md |
@@ -24,13 +24,12 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |------------------|--------|
 | Landing (bienvenida) + rebrand DulIA | ✅ |
 | Footer (contacto, copyright) | ✅ |
-| Wizard formulario (3 pasos) | ✅ |
+| Wizard formulario (4 pasos) | ✅ |
 | Scaffolding por componentes (`COMPONENT_OWNERS.md`) | ✅ |
-| Pantalla de resultados + score ring | ✅ |
-| Descarga PDF (jsPDF, colores marca) | ✅ |
-| Integración Axios → backend (fallback mock) | ✅ |
-| Importar CV (PDF) — UI upload | ✅ |
-| Envío multipart (profile + cv) | ✅ |
+| Pantalla de resultados (jobs + termómetro mercado) | ✅ |
+| Descarga PDF (jsPDF, jobs + market) | ✅ |
+| Integración Axios → API Carlos (fallback mock) | ✅ |
+| session_id en localStorage | ✅ |
 | Resumen perfil del usuario en resultados | ✅ |
 | Aviso flujo sin sesión | ✅ |
 | Deploy producción (Vercel) | 🔲 |
@@ -39,12 +38,12 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 | Pieza | Estado |
 |-------|--------|
-| `GET /health` | ✅ stub |
-| `POST /profile` (JSON) | ✅ stub + mock |
-| `POST /profile` (multipart + CV) | ✅ MarkItDown en `backend/markitdown/` |
-| MarkItDown PDF → markdown | ✅ |
-| Prompt Gemini con cv_markdown | 🚧 vars listas; falta llamada API |
-| CORS para frontend | ✅ |
+| `GET /health` con `mock_data` | 🚧 |
+| `POST /profile` (JSON + session_id) | 🚧 |
+| `GET /jobs/recommended/{session_id}` | 🚧 |
+| `GET /market/dashboard` | 🚧 |
+| MarkItDown PDF → markdown | ✅ módulo listo (fase posterior) |
+| Coach / chat (Fase 8) | 🔲 |
 
 ## Leyenda
 
@@ -63,6 +62,6 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 3. Compañero: pulir landing/resultados en sus archivos asignados
 
 ### Backend (Carlos)
-1. `POST /profile` según ENDPOINTS.md
-2. Integrar MarkItDown
-3. Conectar Gemini con PROMPTS.md
+1. Implementar endpoints según `docs/ENDPOINTS.md`
+2. Conectar Gemini con PROMPTS.md
+3. Coach / chat cuando esté listo Fase 8
