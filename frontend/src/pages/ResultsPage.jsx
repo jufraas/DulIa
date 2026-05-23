@@ -1,21 +1,29 @@
 import { Navigate } from 'react-router-dom'
-import { Download, Sparkles, TrendingUp } from 'lucide-react'
+import { Download, Sparkles } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
 import OpportunitiesPreview from '../components/results/OpportunitiesPreview'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
 import ProfileSummary from '../components/results/ProfileSummary'
+import RadarMatch from '../components/results/RadarMatch'
 import ScoreCard from '../components/results/ScoreCard'
 import ThirtyDayPlan from '../components/results/ThirtyDayPlan'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import SessionLoading from '../components/shared/SessionLoading'
 import { usePdfDownload } from '../hooks/usePdfDownload'
 import { useResultsData } from '../hooks/useResultsData'
+import { useSessionHydration } from '../hooks/useSessionHydration'
 
 /** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
+  const { ready } = useSessionHydration()
   const { savedProfile, jobs, loading, topScore, topJob } = useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
+
+  if (!ready) {
+    return <SessionLoading />
+  }
 
   if (!savedProfile) {
     return <Navigate to="/comenzar" replace />
@@ -64,6 +72,8 @@ export default function ResultsPage() {
               Actualizando vacantes…
             </p>
           )}
+
+          <RadarMatch profile={savedProfile} jobs={jobs} topScore={topScore || 78} />
 
           <div
             className="anim-in-delay-3 mt-12 flex flex-col items-center justify-between gap-6 rounded-[24px] p-9 sm:flex-row"

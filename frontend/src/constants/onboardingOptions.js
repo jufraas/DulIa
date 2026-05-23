@@ -3,7 +3,7 @@ import { Briefcase, Flag, Sparkles, Target, Zap } from 'lucide-react'
 export const WIZARD_STEPS = [
   {
     title: 'Quién eres',
-    subtitle: 'Datos básicos para personalizar tu ruta',
+    subtitle: 'Sube tu CV en PDF o completa tus datos — personalizamos tu ruta',
     icon: Sparkles,
   },
   {

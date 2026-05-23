@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-23 · Fases 1–10 completadas. Todos los endpoints probados vía Swagger + curl con `USE_MOCK_DATA=true`.
+**Última actualización:** 2026-05-23 · Fases 1–10 + `POST /profile/parse-cv` + rehidratación de sesión en frontend.
 
 ## Base URL
 
@@ -23,7 +23,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | Auth | Ninguna. `session_id` = UUID en `localStorage` (clave sugerida: `dulia_session_id`) |
 | Errores | `{ "detail": "mensaje" }` — 404, 422, 429, 500 según FastAPI |
 | CORS | Dev: `*` o `CORS_ORIGINS`; prod: solo `CORS_ORIGINS` (ver `.env.example`) |
-| Rate limit | `POST /profile`, `POST /profile/.../analyze`, `POST /profile/.../action-plan`, `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
+| Rate limit | `POST /profile`, `POST /profile/parse-cv`, `POST /profile/.../analyze`, `POST /profile/.../action-plan`, `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
 | Mock | `USE_MOCK_DATA=true` en backend → respuestas de ejemplo sin Supabase/Gemini |
 
 ### Comportamiento con `USE_MOCK_DATA`
@@ -32,9 +32,11 @@ https://<dominio>/api       ← producción (por definir al deployar)
 |----------|--------------|----------------|
 | `GET /health` | `mock_data: "true"` | `mock_data: "false"` |
 | `POST /profile` | Responde perfil simulado, **no guarda** en BD | Gemini + Supabase |
+| `POST /profile/parse-cv` | Prefill simulado (sin leer PDF real) | MarkItDown + Gemini |
 | `GET /profile/{id}` | Siempre **404** | 200 si existe, 404 si no |
 | `GET /jobs/recommended/{id}` | 2 vacantes mock (cualquier `session_id`) | Top 20 reales; `[]` sin perfil o sin jobs |
 | `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos |
+| `GET /plan/{id}` | Plan mock genérico (frontend fallback) | Gemini + perfil; **pendiente implementación backend** |
 | `POST /coach/chat` | Respuesta simulada | Gemini + perfil en Supabase; 404 sin perfil |
 | `POST /profile/.../analyze` | Análisis mock fijo | Gemini + tabla `profile_analysis` |
 | `POST /profile/.../action-plan` | Plan mock 30-60-90 | Gemini + tabla `action_plans`; requiere análisis previo |
@@ -47,12 +49,34 @@ https://<dominio>/api       ← producción (por definir al deployar)
 
 ## Flujo recomendado (frontend)
 
-1. Al iniciar la app: crear o leer `session_id` → `localStorage`.
-2. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
-3. Plan 2 (pantalla resultados) → `POST .../analyze` → `POST .../action-plan` → `GET .../radar-data` + `GET .../timeline-data`.
-4. Pantalla vacantes → `GET /api/jobs/recommended/{session_id}`.
-5. Pantalla mercado → `GET /api/market/dashboard?city=...`.
-6. Recargar perfil (solo modo real) → `GET /api/profile/{session_id}`.
+### MVP actual (FRONT — implementado)
+
+1. Al iniciar la app: crear o leer `session_id` → `localStorage` (`dulia_session_id`).
+2. **Rehidratación** (`sessionHydration.js`): restaurar perfil/jobs/market/plan desde cache; si no hay cache, `GET /api/profile/{session_id}` (modo real).
+3. Wizard paso 0 (opcional): subir CV → `POST /api/profile/parse-cv` → prellenar formulario.
+4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
+5. Pantalla resultados → jobs + market + plan en store; `RadarMatch` con datos estimados (`radarMatchData.js`).
+6. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
+
+### Plan 2 (backend listo — integración pendiente en UI)
+
+Tras `POST /profile`, opcionalmente:
+
+1. `POST /api/profile/{session_id}/analyze`
+2. `POST /api/profile/{session_id}/action-plan`
+3. `GET /api/profile/{session_id}/radar-data` + `GET .../timeline-data`
+
+Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
+
+### Claves `localStorage` (frontend)
+
+| Clave | Contenido |
+|-------|-----------|
+| `dulia_session_id` | UUID de sesión anónima |
+| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `formSnapshot` |
+| `dulia_wizard_draft` | Borrador del wizard si refresca en `/comenzar` |
+
+> En mock, `GET /profile` devuelve 404 — el frontend confía en `dulia_session_data` tras completar el wizard.
 
 ---
 
@@ -148,6 +172,70 @@ Recibe el onboarding (campos **planos** en el body), extrae/enriquece con Gemini
 
 **Response 404:** `{ "detail": "Perfil no encontrado" }`
 
+> En `USE_MOCK_DATA=true` siempre 404. El frontend usa cache local (`dulia_session_data`) para sobrevivir refresh.
+
+---
+
+#### `POST /api/profile/parse-cv` ✅
+
+Convierte un CV en PDF a markdown (MarkItDown) y extrae campos para **prellenar el wizard** (paso 0 de `/comenzar`). No guarda el PDF ni crea perfil — el usuario revisa y envía con `POST /profile`.
+
+**Content-Type:** `multipart/form-data`
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| `cv` | file | **Requerido.** Solo PDF, máx. **5 MB** |
+
+**Response 200:**
+
+```json
+{
+  "parsed": true,
+  "fields_found": ["name", "city", "skills", "education"],
+  "prefill": {
+    "name": "María López",
+    "city": "Barranquilla",
+    "departamento": "Atlántico",
+    "edad": null,
+    "age_range": "21-25",
+    "current_situation": "recien_egresado",
+    "education_level": "universitario",
+    "education": "Ingeniería de Sistemas",
+    "has_experience": "si",
+    "experience_years": "1",
+    "experience_summary": "Práctica en desarrollo web",
+    "skills": "Python, Excel, Git",
+    "soft_skills": "Trabajo en equipo, comunicación",
+    "interests": "tecnología, startups",
+    "work_mode": "hibrido",
+    "opportunity_type": "empleo",
+    "availability": "inmediata",
+    "tools": "VS Code, Figma",
+    "portfolio_url": null
+  },
+  "message": "Detectamos 12 campos. Revisa y continúa."
+}
+```
+
+| Campo respuesta | Notas |
+|-----------------|-------|
+| `parsed` | `true` si hubo extracción usable |
+| `fields_found` | Claves del `prefill` con valor no vacío |
+| `prefill` | Claves alineadas al formulario React (`name`, `city`, …) — ver `CvWizardPrefill` en backend |
+| `message` | Copy opcional para la UI |
+
+**Errores:**
+
+| Código | Cuándo |
+|--------|--------|
+| `400` | Archivo inválido (no PDF, supera 5 MB) |
+| `422` | PDF ilegible o sin texto extraíble |
+| `500` | Error interno Gemini/conversión |
+
+**Mock (`USE_MOCK_DATA=true`):** devuelve prefill simulado sin procesar el PDF.
+
+**Frontend:** `CvUploadZone.jsx` → `parseCvPdf()` en `api.js`. Si el backend no responde, fallback a `mockCvPrefill.js`.
+
 ---
 
 ### Vacantes recomendadas
@@ -234,7 +322,49 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 
 ---
 
-### Coach conversacional
+### Plan de 30 días
+
+#### `GET /api/plan/{session_id}` 🚧 _(contrato acordado — pendiente backend Carlos)_
+
+Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil previo (`POST /profile`).
+
+**Response 200:**
+
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "semanas": [
+    {
+      "numero": 1,
+      "titulo": "Pon tu portfolio en línea",
+      "tareas": [
+        "Sube 3 proyectos a Behance",
+        "Conecta tu LinkedIn",
+        "Reescribe tu bio"
+      ]
+    },
+    {
+      "numero": 2,
+      "titulo": "Aplica a 10 vacantes (con cariño)",
+      "tareas": [
+        "Carta personalizada cada una",
+        "Sigue a 5 reclutadores en LinkedIn"
+      ]
+    }
+  ]
+}
+```
+
+| Campo | Notas |
+|-------|-------|
+| `semanas` | 4 semanas típicas; cada una con `titulo` + `tareas[]` |
+| `numero` | 1–4, usado en UI como "Semana N" |
+
+**Errores:** `404` sin perfil · `500` error interno.
+
+**Frontend:** `getPlan()` en `api.js` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockPlan.js` (personalizado con nombre/ciudad si hay perfil).
+
+---
 
 #### `POST /api/coach/chat` ✅
 
@@ -509,4 +639,6 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/resultados` | Score, perfil, top jobs, plan 30d, PDF |
 | `/vacantes` | Panel semáforo |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallback local en `mockData.js` para jobs/market si el backend no responde.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
+
+**Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)

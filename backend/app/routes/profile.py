@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, File, HTTPException, Query, Request, UploadFile
+from app.models.cv import CvParseOut
 from app.models.profile import OnboardingInput, ProfileOut
-from app.services import profile_service
+from app.services import cv_service, profile_service
 from app.services.profile_analysis_service import profile_analysis_service
 from app.services.action_plan_service import action_plan_service
 from app.utils.logger import get_logger
@@ -37,6 +38,23 @@ async def obtener_perfil(session_id: str):
     except Exception as e:
         logger.error(f"Error en GET /profile/{session_id}: {e}")
         raise HTTPException(status_code=500, detail="Error al obtener el perfil")
+
+
+@router.post("/profile/parse-cv", response_model=CvParseOut, tags=["Perfil"])
+@limiter.limit(GEMINI_RATE_LIMIT)
+async def parse_cv(
+    request: Request,
+    cv: UploadFile = File(..., description="CV en PDF, máx. 5 MB"),
+):
+    """
+    Convierte el CV a markdown (MarkItDown) y extrae campos para prellenar el wizard.
+    """
+    file_bytes = await cv.read()
+    return await cv_service.parse_cv_pdf(
+        file_bytes,
+        filename=cv.filename or "cv.pdf",
+        content_type=cv.content_type,
+    )
 
 
 @router.post("/profile/{session_id}/analyze", tags=["Perfil - Plan 2"])

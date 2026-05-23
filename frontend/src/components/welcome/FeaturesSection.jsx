@@ -1,8 +1,12 @@
 import { Shield, Sparkles, Target, TrendingUp, Zap } from 'lucide-react'
 import IconBox from '../brand/IconBox'
+import RevealOnScroll from '../motion/RevealOnScroll'
 import Section from '../ui/Section'
 import CTABanner from './CTABanner'
 
+/** @typedef {{ icon: import('lucide-react').LucideIcon, variant: 'violet' | 'magenta', eyebrow: string, title: string, body: string }} FeatureItem */
+
+/** @type {FeatureItem[]} */
 const features = [
   {
     icon: Sparkles,
@@ -37,25 +41,26 @@ const features = [
 /** Features + CTA — alineado al kit ReBrand (Landing.jsx) */
 export default function FeaturesSection() {
   return (
-    <Section
-      id="features"
-      centered
-      className="pb-24 sm:pb-28"
-      eyebrow={
-        <>
+    <Section id="features" centered className="pb-24 sm:pb-28">
+      <RevealOnScroll as="header" className="mb-10 max-w-2xl sm:mb-12 mx-auto text-center">
+        <div className="eyebrow-dl mb-4 inline-flex">
           <Zap className="h-3.5 w-3.5" aria-hidden />
           Lo que hace DulIA
-        </>
-      }
-      title={
-        <>
+        </div>
+        <h2 className="h2 m-0 text-[color:var(--fg-1)]">
           Cuatro herramientas, <span className="brand-text">un solo flujo</span>.
-        </>
-      }
-    >
+        </h2>
+      </RevealOnScroll>
+
       <div className="grid gap-4 sm:grid-cols-2">
-        {features.map(({ icon: Icon, variant, eyebrow, title, body }) => (
-          <article key={title} className="card-dl hoverable" style={{ padding: 28 }}>
+        {features.map(({ icon: Icon, variant, eyebrow, title, body }, index) => (
+          <RevealOnScroll
+            key={title}
+            as="article"
+            className="card-dl hoverable"
+            style={{ padding: 28 }}
+            delay={index * 0.08}
+          >
             <IconBox variant={variant}>
               <Icon className="h-[26px] w-[26px] text-white" strokeWidth={2} aria-hidden />
             </IconBox>
@@ -66,9 +71,10 @@ export default function FeaturesSection() {
             <p className="m-0 mt-2 text-[15px] leading-relaxed text-[color:var(--fg-3)]">
               {body}
             </p>
-          </article>
+          </RevealOnScroll>
         ))}
       </div>
+
       <CTABanner />
     </Section>
   )

@@ -9,8 +9,9 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 1. Captura perfil en wizard (**3 pasos**, campos en español).
 2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
 3. Backend calcula matching con vacantes y expone dashboard de mercado.
-4. Frontend muestra resultados y genera PDF (jsPDF).
-5. Coach: `POST /api/coach/chat` (backend Fase 8 ✅).
+4. Frontend muestra resultados, plan 30d (store) y genera PDF (jsPDF).
+5. Coach: `postCoachChat()` → `POST /api/coach/chat` (API ✅; UI burbuja pendiente Joufra).
+6. Plan: `getPlan()` → `GET /api/plan/{session_id}` (front ✅; backend Carlos pendiente).
 
 ## Contexto del hackathon
 
@@ -28,32 +29,40 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 Landing (/) ──► Sobre DulIA (/sobre) [opcional]
      │
      ▼
-Onboarding (/comenzar, 3 pasos) ──► POST /profile
+Onboarding (/comenzar, 3 pasos)
+     │  paso 0: POST /profile/parse-cv (opcional)
+     ▼
+POST /profile ──► GET jobs + market + plan (paralelo)
      │
-     ├──► POST /profile/{id}/analyze
-     ├──► POST /profile/{id}/action-plan
-     ├──► GET /jobs/recommended/{session_id}
-     ├──► GET /market/dashboard
-     ├──► GET /profile/{id}/radar-data
-     └──► GET /profile/{id}/timeline-data
+     │  Plan 2 (backend, UI pendiente):
+     │  POST .../analyze → POST .../action-plan → GET .../radar-data + timeline-data
+     ▼
      │
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
+     │  (score, plan 30d, Match Radar)
+     │                              │
+     └── Coach (UI Joufra) ─────────┘ postCoachChat()
+     ▲
+     └── refresh OK: rehidratación (cache + GET /profile)
 ```
 
 - `session_id` en `localStorage` (`dulia_session_id`).
-- Estado UI en Zustand; refresh sin perfil redirige a `/comenzar`.
+- Estado UI en Zustand; cache en `dulia_session_data` para sobrevivir refresh.
+- Borrador del wizard en `dulia_wizard_draft` si refresca en `/comenzar`.
 - UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
+- **Landing motion:** `framer-motion` + `RevealOnScroll` (splash en `WelcomePage`, hero `trigger="mount"`, secciones `trigger="scroll"`).
+- **Resultados:** `RadarMatch.jsx` montado; datos desde store vía `radarMatchData.js` (ejes estimados hasta endpoint dedicado).
 
 ## Rutas y dueños frontend
 
 | Ruta | Pantalla | Dueño |
 |------|----------|-------|
-| `/` | Landing | Compañero |
+| `/` | Landing | Joufra |
 | `/sobre` | Sobre DulIA | **Migue** |
 | `/comenzar` | Wizard | Compartido |
-| `/resultados` | Resultados | Compañero |
-| `/vacantes` | Vacantes | Compañero |
+| `/resultados` | Resultados | Joufra |
+| `/vacantes` | Vacantes | Joufra |
 
 Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
@@ -87,10 +96,12 @@ backend/
 |--------|------|--------|
 | GET | `/api/health` | ✅ |
 | POST | `/api/profile` | ✅ |
+| POST | `/api/profile/parse-cv` | ✅ |
 | GET | `/api/profile/{session_id}` | ✅ |
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
 | GET | `/api/market/dashboard` | ✅ |
 | POST | `/api/coach/chat` | ✅ |
+| GET | `/api/plan/{session_id}` | 🚧 contrato legacy; front con mock |
 | GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |
 | GET | `/api/profile/{session_id}/timeline-data` | ✅ Plan 2 F3 |
 | POST | `/api/profile/{session_id}/analyze` | ✅ Plan 2 F1 |
@@ -107,6 +118,9 @@ backend/
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |
 | [PROMPTS.md](PROMPTS.md) | Prompts Gemini |
 | [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | División frontend |
+| [decisions/2026-05-23-frontend-landing-animations.md](decisions/2026-05-23-frontend-landing-animations.md) | Splash + scroll animations landing |
+| [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Fase 2: login, timeline plan, pulido pitch |
+| [EXTRA_IDEAS/ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer (no MVP) |
 
 ## Variables de entorno
 
@@ -129,4 +143,7 @@ cd frontend && npm run dev
 
 - Python 3.14 + `pydantic>=2.14.0a1` en backend.
 - CORS abierto en dev; restringir con `CORS_ORIGINS` en producción.
-- `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock.
+- `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock — el front usa cache local (`dulia_session_data`).
+- Persistencia: `sessionCache.js`, `sessionHydration.js`.
+- API cliente: `postCoachChat`, `getPlan`, `createProfile`, `parseCvPdf`, jobs, market — fallbacks en `mock*.js`.
+- Post-MVP (login, timeline plan): ver [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).

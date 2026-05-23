@@ -9,14 +9,12 @@ export default function ScoreRing({
   stroke = 18,
   animate = true,
 }) {
-  const [displayValue, setDisplayValue] = useState(animate ? 0 : value)
+  const [animatedValue, setAnimatedValue] = useState(animate ? 0 : value)
+  const displayValue = animate ? animatedValue : value
 
   useEffect(() => {
-    if (!animate) {
-      setDisplayValue(value)
-      return
-    }
-    const id = window.setTimeout(() => setDisplayValue(value), 150)
+    if (!animate) return undefined
+    const id = window.setTimeout(() => setAnimatedValue(value), 150)
     return () => window.clearTimeout(id)
   }, [value, animate])
 

@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react'
 
 /**
- * @owner compañero-front
+ * @owner joufra
  * @param {{ name?: string }} props
  */
 export default function ResultsHeroTitle({ name }) {

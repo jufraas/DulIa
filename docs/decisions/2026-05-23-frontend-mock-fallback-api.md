@@ -11,13 +11,24 @@ Backend y frontend avanzan en paralelo. La demo no puede depender de que FastAPI
 
 ## Decisión
 
-En `frontend/src/services/api.js`, `submitProfile()` intenta `POST /api/profile` y, si falla, devuelve el mock de `Mock_Response.js` tras un delay corto (~1.2 s).
+Fallbacks en `frontend/src/services/api.js` y módulos auxiliares:
+
+| Función | Fallback | Estado |
+|---------|----------|--------|
+| `getRecommendedJobs()` | `mockData.js` → `mockJobs` | ✅ |
+| `getMarketDashboard()` | `mockData.js` → `mockMarket` | ✅ |
+| `parseCvPdf()` | `mockCvPrefill.js` en `api.js` | ✅ |
+| `getPlan()` | `mockPlan.js` / `buildMockPlanFromProfile` | ✅ |
+| `postCoachChat()` | `mockCoachChat.js` | ✅ |
+| `fetchHealth()` | `{ mock: true }` | ✅ |
+| `getProfile()` | `null` en 404; cache local vía `sessionHydration.js` | ✅ |
+| `createProfile()` | `mockProfileFromPayload.js` desde el payload del wizard | ✅ |
 
 ## Por qué
 
-- Demo siempre funcional en el pitch.
+- Demo funcional en pitch aunque jobs/market o parse-cv fallen.
 - Frontend puede desarrollar resultados y PDF sin bloquearse.
-- El shape del mock documenta el contrato esperado en [`../ENDPOINTS.md`](../ENDPOINTS.md).
+- El shape de los mocks documenta el contrato en [`../ENDPOINTS.md`](../ENDPOINTS.md).
 
 ## Alternativas descartadas
 
@@ -29,6 +40,5 @@ En `frontend/src/services/api.js`, `submitProfile()` intenta `POST /api/profile`
 
 ## Consecuencias
 
-- Cuando backend esté listo, el mismo `submitProfile` usará datos reales sin cambiar la UI.
-- Hay que alinear JSON request/response con backend antes de producción.
-- El delay simula IA; quitar o reducir cuando haya latencia real.
+- Wizard completa aunque `POST /profile` falle; perfil mock se persiste en `dulia_session_data`.
+- Pendiente eliminado: mock de `createProfile` en `mockProfileFromPayload.js`.

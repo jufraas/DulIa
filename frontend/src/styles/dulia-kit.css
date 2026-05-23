@@ -59,11 +59,11 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 16px;
   color: #fff;
   border-radius: 999px;
-  background: var(--grad-cta);
-  box-shadow: var(--glow-cta);
+  background: #EC4899;
+  box-shadow: 0 10px 28px rgba(236,72,153,0.40);
 }
 .btn-primary:hover {
-  background: var(--grad-cta-hot);
+  background: #DB2777;
   box-shadow: 0 14px 36px rgba(236,72,153,0.50), 0 6px 16px rgba(168,85,247,0.40);
   transform: translateY(-1px);
 }
@@ -202,6 +202,118 @@ button { font-family: inherit; cursor: pointer; }
 .anim-in-delay-2 { animation: slideUp 0.5s var(--ease-out) 0.16s both; }
 .anim-in-delay-3 { animation: slideUp 0.5s var(--ease-out) 0.24s both; }
 .anim-in-delay-4 { animation: slideUp 0.5s var(--ease-out) 0.32s both; }
+
+/* ===== Landing splash ===== */
+@keyframes splashLogoIn {
+  from { opacity: 0; transform: scale(0.88) translateY(14px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes splashTaglineIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes splashFadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+@keyframes splashHaloPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.88; }
+}
+
+.landing-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-1, #0d0d0d);
+  cursor: pointer;
+  contain: layout style paint;
+  will-change: opacity;
+}
+.landing-splash--out {
+  animation: splashFadeOut 0.4s var(--ease-out) forwards;
+  pointer-events: none;
+}
+.landing-splash__atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% -10%, rgba(124,58,237,0.30) 0%, transparent 45%),
+    radial-gradient(circle at 90% 110%, rgba(236,72,153,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 95% 10%, rgba(168,85,247,0.12) 0%, transparent 40%);
+}
+.landing-splash__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+  transform: translateZ(0);
+}
+.landing-splash__halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168,85,247,0.5) 0%, rgba(236,72,153,0.25) 45%, transparent 70%);
+  filter: blur(24px);
+  pointer-events: none;
+  animation: splashHaloPulse 2.2s ease-in-out infinite;
+  will-change: opacity;
+}
+.landing-splash__logo {
+  position: relative;
+  animation: splashLogoIn 0.55s var(--ease-out) both;
+  will-change: transform, opacity;
+}
+.landing-splash__tagline {
+  position: relative;
+  margin: 20px 0 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--fg-2);
+  animation: splashTaglineIn 0.45s var(--ease-out) 0.12s both;
+}
+.landing-splash__hint {
+  position: relative;
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  animation: splashTaglineIn 0.45s var(--ease-out) 0.22s both;
+}
+
+.landing-splash-hidden {
+  visibility: hidden;
+  overflow: hidden;
+  max-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-splash__logo,
+  .landing-splash__tagline,
+  .landing-splash__hint,
+  .landing-splash__halo,
+  .landing-splash--out {
+    animation: none !important;
+  }
+  .landing-splash--out {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 
 /* ===== PDF card — kit ReBrand ===== */
 @keyframes pdfHalo {

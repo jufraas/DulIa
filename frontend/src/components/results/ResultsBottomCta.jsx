@@ -2,7 +2,7 @@ import { Download } from 'lucide-react'
 import Button from '../ui/Button'
 
 /**
- * @owner compañero-front
+ * @owner joufra
  * @param {{ onDownload: () => void, downloading?: boolean }} props
  */
 export default function ResultsBottomCta({ onDownload, downloading = false }) {

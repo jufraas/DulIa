@@ -17,7 +17,7 @@ Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEM
 |-------|---------|---------|
 | 2026-05-23 | [2026-05-23-sin-login-flujo-anonimo.md](./2026-05-23-sin-login-flujo-anonimo.md) | Sin registro; session_id anónimo |
 | 2026-05-23 | [2026-05-23-api-session-jobs-market.md](./2026-05-23-api-session-jobs-market.md) | API con endpoints separados |
-| 2026-05-23 | [2026-05-23-cv-pdf-markitdown.md](./2026-05-23-cv-pdf-markitdown.md) | CV PDF → MarkItDown (diferida) |
+| 2026-05-23 | [2026-05-23-cv-pdf-markitdown.md](./2026-05-23-cv-pdf-markitdown.md) | CV PDF → MarkItDown + `POST /profile/parse-cv` |
 
 ### Stack
 
@@ -35,6 +35,8 @@ Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEM
 | 2026-05-23 | [2026-05-23-frontend-mock-fallback-api.md](./2026-05-23-frontend-mock-fallback-api.md) | Mock si el backend no responde |
 | 2026-05-23 | [2026-05-23-frontend-react-router-flujo-spa.md](./2026-05-23-frontend-react-router-flujo-spa.md) | Rutas SPA (5 pantallas) |
 | 2026-05-23 | [2026-05-23-frontend-zustand-estado-perfil.md](./2026-05-23-frontend-zustand-estado-perfil.md) | Zustand para perfil y resultados |
+| 2026-05-23 | [2026-05-23-frontend-session-rehydration.md](./2026-05-23-frontend-session-rehydration.md) | Cache local + GET profile al refresh |
+| 2026-05-23 | [2026-05-23-frontend-landing-animations.md](./2026-05-23-frontend-landing-animations.md) | Splash + Framer Motion (`RevealOnScroll`) |
 
 Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_OWNERS.md).
 

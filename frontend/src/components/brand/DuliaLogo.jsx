@@ -10,6 +10,8 @@ export default function DuliaLogo({ height = 28, className = '' }) {
       style={{ height, display: 'block' }}
       width={Math.round(height * 3.2)}
       height={height}
+      fetchPriority="high"
+      decoding="async"
     />
   )
 }
