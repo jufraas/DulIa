@@ -40,6 +40,28 @@
 **`modality`:** `presencial` | `remoto` | `hibrido` (también aceptamos `remote`/`hybrid` — el backend normaliza)  
 **`education_level_req`:** `bachiller` | `tecnico` | `tecnologo` | `universitario` | `posgrado`
 
+## Campos que Adzuna NO trae — quién los rellena
+
+| Campo | Si falta en raw | Quién lo completa |
+|-------|-----------------|-------------------|
+| `city` / `department` | Solo `location` | `pipeline/enrich_job.py` parsea `"Barranquilla, Atlántico"` |
+| `sector` | — | `enrich_job.py` infiere por keywords en title+description (o `"general"`) |
+| `skills_required` | — | Lista vacía o keywords en description (`python`, `excel`, …) |
+| `experience_required` | — | Default `0` |
+| `modality` | — | Inferido de description (`remoto`, `hibrido`, `presencial`) |
+| `status` | — | Heurística: green si salario + descripción larga, si no yellow |
+| `hires_youth` | — | `true` si dice junior / sin experiencia / practicante |
+| `unique_hash` | — | SHA256(`title\|company\|url`) |
+| `active` | — | Default `true` |
+
+El **backend** también tolera huecos al leer (`location` → city para score), pero el **enriquecimiento al insertar** da mejores scores y mercado desde el día 1.
+
+```python
+# En el script de tu compa, antes del insert:
+from enrich_job import enrich_job_row
+row = enrich_job_row(adzuna_dict, source="adzuna")
+```
+
 ## Ejemplo INSERT (Python)
 
 ```python
