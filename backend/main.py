@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.utils.logger import get_logger
-from app.routes import health, profile
+from app.routes import health, profile, jobs
 
 logger = get_logger("dulia.main")
 
@@ -26,6 +26,7 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")
+app.include_router(jobs.router, prefix="/api")
 
 @app.on_event("startup")
 async def startup():
