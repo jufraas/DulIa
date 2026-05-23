@@ -78,7 +78,7 @@ async def obtener_perfil(session_id: str) -> ProfileOut | None:
 
 async def _extraer_con_gemini(data: OnboardingInput) -> dict:
     """Llama a Gemini para estructurar el perfil a partir del input."""
-    model = get_gemini_model("gemini-1.5-flash")
+    model = get_gemini_model("gemini-3.1-flash-lite")
     input_texto = json.dumps(data.model_dump(), ensure_ascii=False, indent=2)
     prompt = PROMPT_EXTRACCION.format(input=input_texto)
 
