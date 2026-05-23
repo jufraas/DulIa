@@ -91,5 +91,47 @@ export function buildMockPlanFromProfile(profile) {
         ],
       },
     ],
+    fase_60: {
+      titulo: 'Consolida entrevistas y networking',
+      objetivo: `Amplía tu red en ${city} y convierte postulaciones en conversaciones reales.`,
+      acciones: [
+        { tarea: 'Agenda 2 cafés virtuales con profesionales del sector' },
+        { tarea: 'Prepara respuestas STAR para entrevistas técnicas' },
+        { tarea: 'Publica un logro reciente en LinkedIn' },
+      ],
+      metricas: ['3 entrevistas agendadas', 'Red +15 contactos relevantes'],
+    },
+    fase_90: {
+      titulo: 'Cierra tu transición laboral',
+      objetivo: `Objetivo: oferta o pipeline sólido en ${city} con ${skillsSummary}.`,
+      acciones: [
+        { tarea: 'Negocia al menos una oferta o contrato' },
+        { tarea: 'Documenta aprendizajes del proceso de búsqueda' },
+        { tarea: 'Actualiza portafolio con proyecto del plan' },
+      ],
+      metricas: ['Oferta firmada o 5 procesos activos', 'Score de empleabilidad +15 pts'],
+    },
+    milestones: [
+      { dia: 30, logro: 'CV y LinkedIn optimizados; 5+ postulaciones enviadas' },
+      { dia: 60, logro: 'Primeras entrevistas y red ampliada' },
+      { dia: 90, logro: 'Oferta o pipeline sólido de oportunidades' },
+    ],
+    recursos_recomendados: skillList.length
+      ? skillList.map((skill) => ({
+          tipo: 'curso',
+          nombre: `Fundamentos de ${skill}`,
+          descripcion: `Curso corto para reforzar ${skill} según demanda en ${city}.`,
+          duracion: '20–40 horas',
+          costo_aprox: 'Gratis / bajo costo',
+        }))
+      : [
+          {
+            tipo: 'curso',
+            nombre: 'Habilidades blandas para entrevistas',
+            descripcion: 'Comunicación y storytelling profesional.',
+            duracion: '10 horas',
+            costo_aprox: 'Gratis',
+          },
+        ],
   }
 }

@@ -58,6 +58,40 @@ export function normalizeActionPlanOut(data) {
 }
 
 /**
+ * @typedef {Object} PlanPhaseDisplay
+ * @property {string} title
+ * @property {string} objetivo
+ * @property {string[]} tasks
+ * @property {string[]} metricas
+ */
+
+/**
+ * @param {unknown} phase
+ * @returns {PlanPhaseDisplay | null}
+ */
+export function planPhaseToDisplay(phase) {
+  if (!phase || typeof phase !== 'object') return null
+
+  const p = /** @type {Record<string, unknown>} */ (phase)
+  const acciones = Array.isArray(p.acciones) ? p.acciones : []
+
+  const tasks = acciones
+    .map((item) => {
+      if (!item || typeof item !== 'object') return ''
+      const accion = /** @type {Record<string, unknown>} */ (item)
+      return String(accion.tarea ?? '').trim()
+    })
+    .filter(Boolean)
+
+  return {
+    title: String(p.titulo ?? 'Fase'),
+    objetivo: String(p.objetivo ?? ''),
+    tasks,
+    metricas: Array.isArray(p.metricas) ? p.metricas.map(String) : [],
+  }
+}
+
+/**
  * @param {import('../store/useProfileStore').ActionPlan | null | undefined} plan
  * @returns {{ w: string, title: string, tasks: string[] }[]}
  */
