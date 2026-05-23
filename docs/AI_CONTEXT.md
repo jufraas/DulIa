@@ -9,9 +9,9 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 1. Captura perfil en wizard (**3 pasos**, campos en español).
 2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
 3. Backend calcula matching con vacantes y expone dashboard de mercado.
-4. Frontend muestra resultados, plan 30d (store) y genera PDF (jsPDF).
+4. Frontend muestra resultados, termómetro de mercado, plan 30d, radar y genera PDF (jsPDF).
 5. Coach: `postCoachChat()` → `POST /api/coach/chat` (API ✅; UI burbuja pendiente Joufra).
-6. Plan: `getPlan()` → `GET /api/plan/{session_id}` (front ✅; backend Carlos pendiente).
+6. Plan 2: `loadResultsBundle()` → analyze + action-plan + radar/timeline (front ✅ integrado).
 
 ## Contexto del hackathon
 
@@ -32,15 +32,11 @@ Landing (/) ──► Sobre DulIA (/sobre) [opcional]
 Onboarding (/comenzar, 3 pasos)
      │  paso 0: POST /profile/parse-cv (opcional)
      ▼
-POST /profile ──► GET jobs + market + plan (paralelo)
-     │
-     │  Plan 2 (backend, UI pendiente):
-     │  POST .../analyze → POST .../action-plan → GET .../radar-data + timeline-data
-     ▼
-     │
+POST /profile ──► loadResultsBundle()
+     │  analyze → action-plan → jobs + market + radar + timeline
      ▼
 Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
-     │  (score, plan 30d, Match Radar)
+     │  score, termómetro, plan 30d, Match Radar (API)
      │                              │
      └── Coach (UI Joufra) ─────────┘ postCoachChat()
      ▲
@@ -52,7 +48,8 @@ Resultados (/resultados) ──► Vacantes (/vacantes) ──► PDF
 - Borrador del wizard en `dulia_wizard_draft` si refresca en `/comenzar`.
 - UI kit ReBrand: `frontend/ReBrand/DulIA Design System (1)/`.
 - **Landing motion:** `framer-motion` + `RevealOnScroll` (splash en `WelcomePage`, hero `trigger="mount"`, secciones `trigger="scroll"`).
-- **Resultados:** `RadarMatch.jsx` montado; datos desde store vía `radarMatchData.js` (ejes estimados hasta endpoint dedicado).
+- **Resultados:** `RadarMatch` con `GET .../radar-data`; `MarketThermometer` en `/resultados` y `/vacantes`.
+- **Wizard ubicación:** selects DANE 32 deptos / 1.119 municipios (`colombiaLocations.js`).
 
 ## Rutas y dueños frontend
 
@@ -101,7 +98,7 @@ backend/
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
 | GET | `/api/market/dashboard` | ✅ |
 | POST | `/api/coach/chat` | ✅ |
-| GET | `/api/plan/{session_id}` | 🚧 contrato legacy; front con mock |
+| GET | `/api/plan/{session_id}` | ⚠️ legacy — no usar en front |
 | GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |
 | GET | `/api/profile/{session_id}/timeline-data` | ✅ Plan 2 F3 |
 | POST | `/api/profile/{session_id}/analyze` | ✅ Plan 2 F1 |
@@ -119,6 +116,8 @@ backend/
 | [PROMPTS.md](PROMPTS.md) | Prompts Gemini |
 | [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | División frontend |
 | [decisions/2026-05-23-frontend-landing-animations.md](decisions/2026-05-23-frontend-landing-animations.md) | Splash + scroll animations landing |
+| [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](decisions/2026-05-23-frontend-plan2-locations-thermometer.md) | Plan 2 front + termómetro + mocks |
+| [decisions/2026-05-23-frontend-colombia-locations-wizard.md](decisions/2026-05-23-frontend-colombia-locations-wizard.md) | Selects ubicación DANE |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Fase 2: login, timeline plan, pulido pitch |
 | [EXTRA_IDEAS/ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md) | Spinoff Startup Analyzer (no MVP) |
 
@@ -145,5 +144,5 @@ cd frontend && npm run dev
 - CORS abierto en dev; restringir con `CORS_ORIGINS` en producción.
 - `USE_MOCK_DATA=true`: backend responde sin Supabase/Gemini; `GET /profile` devuelve 404 en mock — el front usa cache local (`dulia_session_data`).
 - Persistencia: `sessionCache.js`, `sessionHydration.js`.
-- API cliente: `postCoachChat`, `getPlan`, `createProfile`, `parseCvPdf`, jobs, market — fallbacks en `mock*.js`.
+- API cliente: `loadResultsBundle`, `postCoachChat`, `createProfile`, `parseCvPdf`, jobs, market, radar — fallbacks en `mockResultsBundle.js` + `mock*.js`.
 - Post-MVP (login, timeline plan): ver [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).

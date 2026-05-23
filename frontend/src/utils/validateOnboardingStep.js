@@ -5,7 +5,8 @@ export function validateOnboardingStep(currentStep, form) {
 
   if (currentStep === 0) {
     if (!form.name.trim()) errors.name = 'Escribe tu nombre'
-    if (!form.city.trim()) errors.city = 'Indica tu ciudad'
+    if (!form.departamento) errors.departamento = 'Selecciona tu departamento'
+    if (!form.city.trim()) errors.city = 'Selecciona tu ciudad'
     if (!form.edad && !form.age_range) {
       errors.edad = 'Indica tu edad o rango'
     }

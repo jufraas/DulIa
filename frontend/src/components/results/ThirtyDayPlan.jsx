@@ -2,10 +2,24 @@ import { Calendar, Check } from 'lucide-react'
 import { useProfileStore } from '../../store/useProfileStore'
 import { planToDisplayWeeks } from '../../utils/planDisplay'
 
-/** Plan de 30 días — datos desde store (GET /api/plan) con fallback mock */
+/** Plan de 30 días — POST /api/profile/{id}/action-plan (fase_30) */
 export default function ThirtyDayPlan() {
   const plan = useProfileStore((s) => s.plan)
   const weeks = planToDisplayWeeks(plan)
+
+  if (!weeks.length) {
+    return (
+      <div className="card-dl p-7">
+        <div className="eyebrow-dl">
+          <Calendar className="h-3.5 w-3.5" aria-hidden />
+          Tu plan de 30 días
+        </div>
+        <p className="mt-3 text-[15px] text-[color:var(--fg-2)]">
+          Generando tu plan personalizado…
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="card-dl p-7">
@@ -13,6 +27,11 @@ export default function ThirtyDayPlan() {
         <Calendar className="h-3.5 w-3.5" aria-hidden />
         Tu plan de 30 días
       </div>
+      {plan?.resumen_ejecutivo && (
+        <p className="mt-2 text-sm leading-relaxed text-[color:var(--fg-2)]">
+          {plan.resumen_ejecutivo}
+        </p>
+      )}
       <h3 className="mb-5 mt-2.5 text-[22px] font-bold tracking-[-0.015em] text-[color:var(--fg-1)]">
         Una cosa a la vez. <span className="brand-text">Tú puedes.</span>
       </h3>

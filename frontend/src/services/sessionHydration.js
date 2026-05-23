@@ -1,11 +1,11 @@
-import { getProfile, getMarketDashboard, getPlan, getRecommendedJobs } from './api'
+import { getProfile, loadResultsBundle } from './api'
 import { useProfileStore } from '../store/useProfileStore'
 import { getOrCreateSessionId } from '../utils/session'
 import { persistSessionCacheFromState, readSessionCache } from '../utils/sessionCache'
 
 let hydrationPromise = null
 
-/** Restaura perfil, vacantes y mercado desde cache local y/o API. */
+/** Restaura perfil, vacantes, plan y radar desde cache local y/o API. */
 export async function hydrateSession() {
   if (hydrationPromise) return hydrationPromise
 
@@ -22,6 +22,8 @@ export async function hydrateSession() {
       if (cached.jobs?.length) store.setJobs(cached.jobs)
       if (cached.market) store.setMarket(cached.market)
       if (cached.plan) store.setPlan(cached.plan)
+      if (cached.radar) store.setRadar(cached.radar)
+      if (cached.timeline) store.setTimeline(cached.timeline)
     }
 
     let profile = useProfileStore.getState().savedProfile
@@ -32,34 +34,18 @@ export async function hydrateSession() {
 
     profile = useProfileStore.getState().savedProfile
     if (profile) {
-      const { jobs, market, plan } = useProfileStore.getState()
-      const tasks = []
+      const { jobs, market, plan, radar } = useProfileStore.getState()
+      const needsBundle = !jobs.length || !market || !plan || !radar
 
-      if (!jobs.length) {
-        tasks.push(
-          getRecommendedJobs(sessionId).then((nextJobs) => {
-            if (nextJobs.length) store.setJobs(nextJobs)
-          }),
-        )
+      if (needsBundle) {
+        const bundle = await loadResultsBundle(sessionId, profile)
+        if (!jobs.length && bundle.jobs.length) store.setJobs(bundle.jobs)
+        if (!market && bundle.market) store.setMarket(bundle.market)
+        if (!plan && bundle.plan) store.setPlan(bundle.plan)
+        if (!radar && bundle.radar) store.setRadar(bundle.radar)
+        if (bundle.timeline) store.setTimeline(bundle.timeline)
       }
 
-      if (!market) {
-        tasks.push(
-          getMarketDashboard({ city: profile.ciudad }).then((nextMarket) => {
-            if (nextMarket) store.setMarket(nextMarket)
-          }),
-        )
-      }
-
-      if (!plan) {
-        tasks.push(
-          getPlan(sessionId, profile).then((nextPlan) => {
-            if (nextPlan) store.setPlan(nextPlan)
-          }),
-        )
-      }
-
-      await Promise.all(tasks)
       persistSessionCacheFromState(useProfileStore.getState())
     }
 

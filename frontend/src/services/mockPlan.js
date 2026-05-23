@@ -1,4 +1,4 @@
-/** @type {import('../store/useProfileStore').ThirtyDayPlan} */
+/** @type {import('../store/useProfileStore').ActionPlan} */
 export const mockPlan = {
   session_id: 'mock',
   semanas: [
@@ -27,14 +27,18 @@ export const mockPlan = {
 
 /**
  * @param {import('../store/useProfileStore').SavedProfile | null | undefined} profile
- * @returns {import('../store/useProfileStore').ThirtyDayPlan}
+ * @returns {import('../store/useProfileStore').ActionPlan}
  */
 export function buildMockPlanFromProfile(profile) {
   if (!profile?.nombre) return mockPlan
 
   const skills = (profile.habilidades ?? []).slice(0, 2).join(', ') || 'tu stack'
+  const city = profile.ciudad ?? 'tu ciudad'
+  const firstName = profile.nombre.split(' ')[0]
+
   return {
     session_id: profile.session_id,
+    resumen_ejecutivo: `Plan personalizado para ${firstName} en ${city}: refuerza ${skills}, actualiza tu perfil y postula con intención durante los próximos 30 días.`,
     semanas: [
       {
         numero: 1,

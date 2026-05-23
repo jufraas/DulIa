@@ -2,10 +2,28 @@ import {
   AGE_RANGE_OPTIONS,
   CURRENT_SITUATION_OPTIONS,
 } from '../../constants/onboardingOptions'
+import {
+  getCityOptions,
+  getDepartmentOptions,
+} from '../../constants/colombiaLocations'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 
-export default function StepPersonalInfo({ form, errors, update }) {
+export default function StepPersonalInfo({ form, errors, update, patchForm }) {
+  const cityOptions = getCityOptions(form.departamento)
+  const departmentSelected = Boolean(form.departamento)
+
+  const handleDepartmentChange = (e) => {
+    const departamento = e.target.value
+    const cities = getCityOptions(departamento).map((opt) => opt.value)
+    const keepCity = cities.includes(form.city)
+
+    patchForm({
+      departamento,
+      city: keepCity ? form.city : '',
+    })
+  }
+
   return (
     <>
       <Input
@@ -17,22 +35,28 @@ export default function StepPersonalInfo({ form, errors, update }) {
         error={errors.name}
         autoComplete="name"
       />
-      <Input
+      <Select
+        label="Departamento"
+        name="departamento"
+        value={form.departamento}
+        onChange={handleDepartmentChange}
+        error={errors.departamento}
+        options={getDepartmentOptions()}
+        placeholder="Selecciona tu departamento"
+      />
+      <Select
         label="Ciudad"
         name="city"
-        placeholder="Ej. Barranquilla"
         value={form.city}
         onChange={update('city')}
         error={errors.city}
-        autoComplete="address-level2"
-      />
-      <Input
-        label="Departamento (opcional)"
-        name="departamento"
-        placeholder="Ej. Atlántico"
-        value={form.departamento}
-        onChange={update('departamento')}
-        error={errors.departamento}
+        options={cityOptions}
+        placeholder={
+          departmentSelected
+            ? 'Selecciona tu ciudad'
+            : 'Primero elige un departamento'
+        }
+        disabled={!departmentSelected}
       />
       <div className="grid gap-4 sm:grid-cols-2">
         <Input

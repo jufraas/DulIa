@@ -55,7 +55,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 2. **Rehidratación** (`sessionHydration.js`): restaurar perfil/jobs/market/plan desde cache; si no hay cache, `GET /api/profile/{session_id}` (modo real).
 3. Wizard paso 0 (opcional): subir CV → `POST /api/profile/parse-cv` → prellenar formulario.
 4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
-5. Pantalla resultados → jobs + market + plan en store; `RadarMatch` con datos estimados (`radarMatchData.js`).
+5. Pantalla resultados → `loadResultsBundle` → store (`jobs`, `market`, `plan`, `radar`, `timeline`); `RadarMatch` + `MarketThermometer`.
 6. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
 
 ### Plan 2 (backend listo — integración pendiente en UI)
@@ -362,7 +362,7 @@ Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil pre
 
 **Errores:** `404` sin perfil · `500` error interno.
 
-**Frontend:** `getPlan()` en `api.js` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockPlan.js` (personalizado con nombre/ciudad si hay perfil).
+**Frontend:** `loadResultsBundle()` → `postActionPlan()` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockResultsBundle.js` / `mockPlan.js` (personalizado con nombre/ciudad/skills).
 
 ---
 

@@ -7,28 +7,32 @@
 
 ## Contexto
 
-Backend y frontend avanzan en paralelo. La demo no puede depender de que FastAPI esté listo, ni de CORS configurado, en cada prueba.
+Backend y frontend avanzan en paralelo. La demo no puede depender de que FastAPI/Supabase estén listos en cada prueba.
 
 ## Decisión
 
-Fallbacks en `frontend/src/services/api.js` y módulos auxiliares:
+Fallbacks en `frontend/src/services/api.js` y módulos auxiliares. Desde 2026-05-23, los datos de resultados se centralizan en **`mockResultsBundle.js`**, que personaliza mocks con el perfil del usuario (ciudad, skills, score).
 
 | Función | Fallback | Estado |
 |---------|----------|--------|
-| `getRecommendedJobs()` | `mockData.js` → `mockJobs` | ✅ |
-| `getMarketDashboard()` | `mockData.js` → `mockMarket` | ✅ |
-| `parseCvPdf()` | `mockCvPrefill.js` en `api.js` | ✅ |
-| `getPlan()` | `mockPlan.js` / `buildMockPlanFromProfile` | ✅ |
+| `createProfile()` | `mockProfileFromPayload.js` | ✅ |
+| `getProfile()` | `null` + cache `sessionHydration.js` | ✅ |
+| `parseCvPdf()` | `mockCvPrefill.js` | ✅ |
 | `postCoachChat()` | `mockCoachChat.js` | ✅ |
+| `postProfileAnalyze()` | `buildMockAnalysisFromProfile` | ✅ |
+| `postActionPlan()` | `buildMockPlanFromProfile` | ✅ |
+| `getRecommendedJobs()` | `buildMockJobsFromProfile` | ✅ |
+| `getMarketDashboard()` | `buildMockMarketFromProfile` | ✅ |
+| `getRadarData()` | `buildMockRadarFromProfile` | ✅ |
+| `getTimelineData()` | `buildMockTimelineFromProfile` | ✅ |
+| `loadResultsBundle()` | `fillResultsFallbacks()` — rellena huecos | ✅ |
 | `fetchHealth()` | `{ mock: true }` | ✅ |
-| `getProfile()` | `null` en 404; cache local vía `sessionHydration.js` | ✅ |
-| `createProfile()` | `mockProfileFromPayload.js` desde el payload del wizard | ✅ |
 
 ## Por qué
 
-- Demo funcional en pitch aunque jobs/market o parse-cv fallen.
-- Frontend puede desarrollar resultados y PDF sin bloquearse.
-- El shape de los mocks documenta el contrato en [`../ENDPOINTS.md`](../ENDPOINTS.md).
+- Demo funcional en pitch aunque BD o API fallen.
+- Mocks alineados al perfil real del wizard (no datos genéricos fijos).
+- Un solo punto (`fillResultsFallbacks`) garantiza bundle completo.
 
 ## Alternativas descartadas
 
@@ -40,5 +44,6 @@ Fallbacks en `frontend/src/services/api.js` y módulos auxiliares:
 
 ## Consecuencias
 
-- Wizard completa aunque `POST /profile` falle; perfil mock se persiste en `dulia_session_data`.
-- Pendiente eliminado: mock de `createProfile` en `mockProfileFromPayload.js`.
+- Wizard completa aunque `POST /profile` falle; perfil mock en `dulia_session_data`.
+- Resultados siempre muestran plan, radar, termómetro y vacantes (API o mock).
+- Ver también: [2026-05-23-frontend-plan2-locations-thermometer.md](./2026-05-23-frontend-plan2-locations-thermometer.md).

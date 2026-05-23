@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { Download, Sparkles } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
+import MarketThermometer from '../components/results/MarketThermometer'
 import OpportunitiesPreview from '../components/results/OpportunitiesPreview'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
 import ProfileSummary from '../components/results/ProfileSummary'
@@ -18,7 +19,7 @@ import { useSessionHydration } from '../hooks/useSessionHydration'
 /** Pantalla 03 — Resultados (kit ReBrand) */
 export default function ResultsPage() {
   const { ready } = useSessionHydration()
-  const { savedProfile, jobs, loading, topScore, topJob } = useResultsData()
+  const { savedProfile, jobs, market, loading, topScore, topJob, radar } = useResultsData()
   const { downloading, downloadPdf } = usePdfDownload()
 
   if (!ready) {
@@ -51,7 +52,7 @@ export default function ResultsPage() {
           </div>
 
           <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScoreCard score={topScore || 78} />
+            <ScoreCard score={topScore || radar?.usuario?.preparacion || 0} />
             <div className="flex flex-col gap-4">
               <ProfileSummary
                 profile={savedProfile}
@@ -62,9 +63,12 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          <div className="anim-in-delay-2 grid gap-6 lg:grid-cols-2">
-            <OpportunitiesPreview jobs={jobs} />
-            <ThirtyDayPlan />
+          <div className="anim-in-delay-2 grid gap-6">
+            <MarketThermometer market={market} />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <OpportunitiesPreview jobs={jobs} />
+              <ThirtyDayPlan />
+            </div>
           </div>
 
           {loading && (
@@ -73,7 +77,7 @@ export default function ResultsPage() {
             </p>
           )}
 
-          <RadarMatch profile={savedProfile} jobs={jobs} topScore={topScore || 78} />
+          <RadarMatch profile={savedProfile} jobs={jobs} radar={radar} />
 
           <div
             className="anim-in-delay-3 mt-12 flex flex-col items-center justify-between gap-6 rounded-[24px] p-9 sm:flex-row"

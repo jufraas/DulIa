@@ -28,6 +28,7 @@ export default function OnboardingPage() {
     cvError,
     cvSuccessMessage,
     update,
+    patchForm,
     goNext,
     goBack,
     handleSubmit,
@@ -83,7 +84,12 @@ export default function OnboardingPage() {
                       {cvSuccessMessage}
                     </p>
                   )}
-                  <StepPersonalInfo form={form} errors={errors} update={update} />
+                  <StepPersonalInfo
+                    form={form}
+                    errors={errors}
+                    update={update}
+                    patchForm={patchForm}
+                  />
                 </>
               )}
               {step === 1 && (
