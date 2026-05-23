@@ -1,10 +1,13 @@
 /* === DulIA Landing === */
 const { Logo, Button, Header, Chip, IconBox, Icon } = window.DK;
 
-function Landing({ onStart }) {
+function Landing({ onStart, onVacancies }) {
   return (
     <div className="page" data-screen-label="01 Landing">
-      <Header active="home" onNav={(t) => t === "wizard" && onStart()} />
+      <Header active="home" onNav={(t) => {
+        if (t === "wizard") onStart();
+        else if (t === "vacancies") onVacancies && onVacancies();
+      }} />
 
       {/* HERO */}
       <section style={{ paddingTop: 80, paddingBottom: 100 }}>

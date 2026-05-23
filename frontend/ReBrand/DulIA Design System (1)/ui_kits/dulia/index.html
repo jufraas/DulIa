@@ -19,12 +19,13 @@
   <script type="text/babel" src="Landing.jsx"></script>
   <script type="text/babel" src="Wizard.jsx"></script>
   <script type="text/babel" src="Results.jsx"></script>
+  <script type="text/babel" src="Vacancies.jsx"></script>
 
   <script type="text/babel">
     const { useState } = React;
 
     function App() {
-      // route: home | wizard | results
+      // route: home | wizard | results | vacancies
       const initial = (typeof location !== "undefined" && location.hash.replace("#","")) || "home";
       const [route, setRoute] = useState(initial);
       const [profile, setProfile] = useState(null);
@@ -43,9 +44,12 @@
           onBack={() => go("home")}/>;
       }
       if (route === "results") {
-        return <window.Results data={profile} onBack={() => go("home")}/>;
+        return <window.Results data={profile} onBack={() => go("home")} onVacancies={() => go("vacancies")}/>;
       }
-      return <window.Landing onStart={() => go("wizard")}/>;
+      if (route === "vacancies") {
+        return <window.Vacancies onBack={() => go("results")}/>;
+      }
+      return <window.Landing onStart={() => go("wizard")} onVacancies={() => go("vacancies")}/>;
     }
 
     ReactDOM.createRoot(document.getElementById("app")).render(<App/>);

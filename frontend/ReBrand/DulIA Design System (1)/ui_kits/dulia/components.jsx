@@ -56,9 +56,9 @@ function Header({ active = "home", onNav }) {
           <Logo />
         </a>
         <nav className="dh-nav">
-          <a href="#features">Cómo funciona</a>
-          <a href="#opps">Oportunidades</a>
-          <a href="#about">Sobre DulIA</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();onNav&&onNav("home");}}>Cómo funciona</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();onNav&&onNav("vacancies");}}>Oportunidades</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();onNav&&onNav("home");}}>Sobre DulIA</a>
         </nav>
         <Button variant="primary" size="sm" onClick={() => onNav && onNav("wizard")}>
           Empezar

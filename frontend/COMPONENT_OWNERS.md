@@ -28,7 +28,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/hooks/usePdfDownload.js` | Descarga PDF |
 | `src/hooks/useResultsData.js` | Carga jobs + market |
 | `src/utils/generateAnalysisPdf.js` | Generación jsPDF |
-| `src/components/welcome/*` | Landing sections |
+| `src/components/welcome/*` | Landing: kit ReBrand + secciones pitch (problema, audiencia, modelo) |
 | `src/components/layout/SiteHeader.jsx` | Header landing |
 | `src/components/layout/SiteFooter.jsx` | Footer |
 

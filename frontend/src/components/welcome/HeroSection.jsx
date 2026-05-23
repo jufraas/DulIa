@@ -126,7 +126,7 @@ export default function HeroSection() {
                   Descubre tu potencial
                 </Button>
               </Link>
-              <a href="#como-funciona">
+              <a href="#features">
                 <Button variant="ghost">Ver cómo funciona</Button>
               </a>
             </div>

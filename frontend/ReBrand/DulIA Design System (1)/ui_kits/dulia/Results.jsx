@@ -1,12 +1,16 @@
 /* === DulIA Results === */
 const { Logo, Button, Header, Chip, Icon, IconBox, ScoreRing } = window.DK;
 
-function Results({ data, onBack }) {
+function Results({ data, onBack, onVacancies }) {
   const score = 78;
 
   return (
     <div className="page" data-screen-label="03 Results">
-      <Header onNav={(t) => t === "home" && onBack()}/>
+      <Header onNav={(t) => {
+        if (t === "home") onBack();
+        else if (t === "vacancies") onVacancies && onVacancies();
+        else if (t === "wizard") onBack(); // restart
+      }}/>
 
       <div style={{ paddingTop: 56, paddingBottom: 120 }}>
         <div className="container">
@@ -79,7 +83,7 @@ function Results({ data, onBack }) {
           <div className="anim-in-delay-2" style={{
             display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24
           }}>
-            <Opportunities/>
+            <Opportunities onSeeAll={onVacancies}/>
             <ThirtyDayPlan/>
           </div>
 
@@ -114,19 +118,23 @@ function Results({ data, onBack }) {
 // =========================================================
 function PdfCard() {
   return (
-    <div style={{
+    <div className="pdf-card-anim" style={{
       position: "relative",
       borderRadius: 24,
       padding: 28,
       background: "linear-gradient(135deg, #EC4899 0%, #A855F7 60%, #7C3AED 100%)",
+      backgroundSize: "200% 200%",
       boxShadow: "0 24px 60px rgba(236,72,153,0.45), 0 8px 20px rgba(168,85,247,0.40)",
       overflow: "hidden",
     }}>
-      {/* shine */}
+      {/* pulsing halo behind card */}
+      <div className="pdf-halo" aria-hidden="true"/>
+
+      {/* shine blobs */}
       <div style={{
         position: "absolute", top: -40, right: -40, width: 200, height: 200,
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 70%)"
+        background: "radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 70%)"
       }}/>
       <div style={{
         position: "absolute", bottom: -50, left: -30, width: 180, height: 180,
@@ -134,8 +142,17 @@ function PdfCard() {
         background: "radial-gradient(circle, rgba(192,132,252,0.30) 0%, transparent 70%)"
       }}/>
 
+      {/* moving shine sweep */}
+      <div className="pdf-shine" aria-hidden="true"/>
+
+      {/* floating sparkles */}
+      <span className="pdf-spark s1" aria-hidden="true">✦</span>
+      <span className="pdf-spark s2" aria-hidden="true">✧</span>
+      <span className="pdf-spark s3" aria-hidden="true">★</span>
+      <span className="pdf-spark s4" aria-hidden="true">✦</span>
+
       <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 20 }}>
-        <div style={{
+        <div className="pdf-icon-bob" style={{
           width: 72, height: 72, borderRadius: 18,
           background: "rgba(13,13,13,0.30)",
           backdropFilter: "blur(8px)",
@@ -162,28 +179,28 @@ function PdfCard() {
         </div>
       </div>
 
-      <button style={{
+      <button className="pdf-btn" style={{
         position: "relative",
         marginTop: 24, width: "100%",
         padding: "18px 24px",
         border: 0, borderRadius: 16,
-        background: "rgba(13,13,13,0.85)",
+        background: "rgba(13,13,13,0.88)",
         color: "#fff",
         fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17,
         cursor: "pointer",
         display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10,
         boxShadow: "0 8px 24px rgba(0,0,0,0.40)",
-        transition: "transform 0.2s var(--ease-out)"
-      }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}>
+        overflow: "hidden",
+      }}>
+        <span className="pdf-btn-sweep" aria-hidden="true"/>
         <Icon name="download" size={20} color="#fff" strokeWidth={2.2}/>
-        Descargar PDF · 2 MB
+        <span style={{ position: "relative" }}>Descargar PDF · 2 MB</span>
       </button>
 
       <div style={{
         marginTop: 14, display: "flex", justifyContent: "center", gap: 18,
-        color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: 500
+        color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: 500,
+        position: "relative", zIndex: 1
       }}>
         <span>✓ Sin marca de agua</span>
         <span>✓ Compártelo</span>
@@ -196,7 +213,7 @@ function PdfCard() {
 // =========================================================
 // OPPORTUNITIES
 // =========================================================
-function Opportunities() {
+function Opportunities({ onSeeAll }) {
   const jobs = [
     { co: "Rappi",     role: "Practicante UX",           loc: "Bogotá · Híbrido",    pay: "$1.8M",
       match: 92, tags: ["Figma","Investigación"], hot: true },
@@ -264,6 +281,20 @@ function Opportunities() {
         <Icon name="alert" size={16} color="#F87171"/>
         <span><b style={{color:"#F87171"}}>2 vacantes filtradas</b> · pedían dinero por "capacitación".</span>
       </div>
+
+      <button onClick={onSeeAll} style={{
+        marginTop: 14, width: "100%",
+        padding: "12px 16px", borderRadius: 14,
+        background: "rgba(168,85,247,0.10)",
+        border: "1px solid rgba(168,85,247,0.35)",
+        color: "var(--fg-1)",
+        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14,
+        cursor: "pointer",
+        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+      }}>
+        Ver el panel completo con semáforo
+        <Icon name="arrow" size={16}/>
+      </button>
     </div>
   );
 }

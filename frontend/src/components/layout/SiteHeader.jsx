@@ -5,7 +5,8 @@ import DuliaLogo from '../brand/DuliaLogo'
 import Button from '../ui/Button'
 
 const navLinks = [
-  { href: '#como-funciona', label: 'Cómo funciona' },
+  { href: '#problema', label: 'Problema' },
+  { href: '#features', label: 'Cómo funciona' },
   { href: '#para-quien', label: 'Para quién' },
   { href: '#modelo', label: 'Modelo' },
 ]

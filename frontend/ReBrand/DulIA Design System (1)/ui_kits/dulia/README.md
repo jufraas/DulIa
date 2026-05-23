@@ -6,9 +6,10 @@ Recreación hi-fi del flujo del producto: **Landing → Wizard (3 pasos) → Res
 
 | Componente | Archivo | Pantalla |
 |---|---|---|
-| `Landing`  | `Landing.jsx` | Hero + 4 features + CTA |
-| `Wizard`   | `Wizard.jsx`  | 3 pasos (habilidades, experiencia, objetivos) |
-| `Results`  | `Results.jsx` | Score ring + perfil IA + oportunidades + plan 30 días + **PDF** |
+| `Landing`    | `Landing.jsx`    | Hero + 4 features + CTA |
+| `Wizard`     | `Wizard.jsx`     | 3 pasos (habilidades, experiencia, objetivos) |
+| `Results`    | `Results.jsx`    | Score ring + perfil IA + oportunidades + plan 30 días + **PDF** |
+| `Vacancies`  | `Vacancies.jsx`  | Panel completo con **semáforo verde / amarillo / rojo** |
 
 ## Átomos compartidos
 

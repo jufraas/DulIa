@@ -9,7 +9,7 @@ const CONTACT_PHONE = '3009752198'
 const quickLinks = [
   { href: '/', label: 'Inicio', router: true },
   { href: '/comenzar', label: 'Comenzar', router: true },
-  { href: '/#como-funciona', label: 'Cómo funciona', router: false },
+  { href: '/#features', label: 'Cómo funciona', router: false },
   { href: '/#modelo', label: 'Modelo de negocio', router: false },
 ]
 

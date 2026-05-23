@@ -114,10 +114,17 @@
     <div id="mount-results"></div>
   </div>
 
+  <div id="page-vacancies" class="print-page">
+    <span class="page-label">04 · Vacancies</span>
+    <div class="local-atmo"></div>
+    <div id="mount-vacancies"></div>
+  </div>
+
   <script type="text/babel" src="components.jsx"></script>
   <script type="text/babel" src="Landing.jsx"></script>
   <script type="text/babel" src="Wizard.jsx"></script>
   <script type="text/babel" src="Results.jsx"></script>
+  <script type="text/babel" src="Vacancies.jsx"></script>
 
   <script type="text/babel">
     ReactDOM.createRoot(document.getElementById("mount-landing")).render(
@@ -128,6 +135,9 @@
     );
     ReactDOM.createRoot(document.getElementById("mount-results")).render(
       <window.Results data={{}} onBack={() => {}}/>
+    );
+    ReactDOM.createRoot(document.getElementById("mount-vacancies")).render(
+      <window.Vacancies onBack={() => {}}/>
     );
 
     // Auto-print once fonts + babel are ready

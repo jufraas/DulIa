@@ -1,6 +1,7 @@
-import { Briefcase, Shield, Sparkles, Target, TrendingUp } from 'lucide-react'
+import { Shield, Sparkles, Target, TrendingUp, Zap } from 'lucide-react'
 import IconBox from '../brand/IconBox'
 import Section from '../ui/Section'
+import CTABanner from './CTABanner'
 
 const features = [
   {
@@ -33,14 +34,16 @@ const features = [
   },
 ]
 
-export default function HowItWorksSection() {
+/** Features + CTA — alineado al kit ReBrand (Landing.jsx) */
+export default function FeaturesSection() {
   return (
     <Section
-      id="como-funciona"
+      id="features"
       centered
+      className="pb-24 sm:pb-28"
       eyebrow={
         <>
-          <Briefcase className="h-3.5 w-3.5" aria-hidden />
+          <Zap className="h-3.5 w-3.5" aria-hidden />
           Lo que hace DulIA
         </>
       }
@@ -66,6 +69,7 @@ export default function HowItWorksSection() {
           </article>
         ))}
       </div>
+      <CTABanner />
     </Section>
   )
 }
