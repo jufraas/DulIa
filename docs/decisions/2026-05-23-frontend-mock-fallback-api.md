@@ -17,7 +17,9 @@ Fallbacks en `frontend/src/services/api.js` y módulos auxiliares:
 |---------|----------|--------|
 | `getRecommendedJobs()` | `mockData.js` → `mockJobs` | ✅ |
 | `getMarketDashboard()` | `mockData.js` → `mockMarket` | ✅ |
-| `parseCvPdf()` | `mockCvPrefill.js` (desde `useOnboardingForm`) | ✅ |
+| `parseCvPdf()` | `mockCvPrefill.js` en `api.js` | ✅ |
+| `getPlan()` | `mockPlan.js` / `buildMockPlanFromProfile` | ✅ |
+| `postCoachChat()` | `mockCoachChat.js` | ✅ |
 | `fetchHealth()` | `{ mock: true }` | ✅ |
 | `getProfile()` | `null` en 404; cache local vía `sessionHydration.js` | ✅ |
 | `createProfile()` | `mockProfileFromPayload.js` desde el payload del wizard | ✅ |

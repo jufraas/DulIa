@@ -1,4 +1,4 @@
-import { getProfile, getMarketDashboard, getRecommendedJobs } from './api'
+import { getProfile, getMarketDashboard, getPlan, getRecommendedJobs } from './api'
 import { useProfileStore } from '../store/useProfileStore'
 import { getOrCreateSessionId } from '../utils/session'
 import { persistSessionCacheFromState, readSessionCache } from '../utils/sessionCache'
@@ -21,6 +21,7 @@ export async function hydrateSession() {
       if (cached.formSnapshot) store.setFormSnapshot(cached.formSnapshot)
       if (cached.jobs?.length) store.setJobs(cached.jobs)
       if (cached.market) store.setMarket(cached.market)
+      if (cached.plan) store.setPlan(cached.plan)
     }
 
     let profile = useProfileStore.getState().savedProfile
@@ -31,7 +32,7 @@ export async function hydrateSession() {
 
     profile = useProfileStore.getState().savedProfile
     if (profile) {
-      const { jobs, market } = useProfileStore.getState()
+      const { jobs, market, plan } = useProfileStore.getState()
       const tasks = []
 
       if (!jobs.length) {
@@ -46,6 +47,14 @@ export async function hydrateSession() {
         tasks.push(
           getMarketDashboard({ city: profile.ciudad }).then((nextMarket) => {
             if (nextMarket) store.setMarket(nextMarket)
+          }),
+        )
+      }
+
+      if (!plan) {
+        tasks.push(
+          getPlan(sessionId, profile).then((nextPlan) => {
+            if (nextPlan) store.setPlan(nextPlan)
           }),
         )
       }

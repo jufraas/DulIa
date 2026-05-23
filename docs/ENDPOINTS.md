@@ -36,6 +36,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | `GET /profile/{id}` | Siempre **404** | 200 si existe, 404 si no |
 | `GET /jobs/recommended/{id}` | 2 vacantes mock (cualquier `session_id`) | Top 20 reales; `[]` sin perfil o sin jobs |
 | `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos |
+| `GET /plan/{id}` | Plan mock genérico (frontend fallback) | Gemini + perfil; **pendiente implementación backend** |
 | `POST /coach/chat` | Respuesta simulada | Gemini + perfil en Supabase; 404 sin perfil |
 
 ---
@@ -46,7 +47,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 2. **Rehidratación** (`sessionHydration.js`): restaurar perfil/jobs/market desde cache local; si no hay cache, `GET /api/profile/{session_id}` (modo real); re-fetch jobs/market si faltan.
 3. Wizard paso 0 (opcional): subir CV → `POST /api/profile/parse-cv` → prellenar formulario.
 4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
-5. Pantalla resultados → jobs + market ya en store; persistir en `dulia_session_data`.
+5. Pantalla resultados → jobs + market + plan ya en store; persistir en `dulia_session_data`.
 6. Pantalla vacantes → `GET /api/jobs/recommended/{session_id}` (si store vacío).
 7. Pantalla mercado → `GET /api/market/dashboard?city=...`.
 8. Refresh en `/resultados` o `/vacantes` → no redirige si la rehidratación recuperó el perfil.
@@ -56,7 +57,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | Clave | Contenido |
 |-------|-----------|
 | `dulia_session_id` | UUID de sesión anónima |
-| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `formSnapshot` |
+| `dulia_session_data` | Cache: `savedProfile`, `jobs`, `market`, `plan`, `formSnapshot` |
 | `dulia_wizard_draft` | Borrador del wizard (paso + campos) si el usuario refresca en `/comenzar` |
 
 > En mock, `GET /profile` devuelve 404 — el frontend confía en `dulia_session_data` tras completar el wizard.
@@ -305,7 +306,49 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 
 ---
 
-### Coach conversacional
+### Plan de 30 días
+
+#### `GET /api/plan/{session_id}` 🚧 _(contrato acordado — pendiente backend Carlos)_
+
+Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil previo (`POST /profile`).
+
+**Response 200:**
+
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "semanas": [
+    {
+      "numero": 1,
+      "titulo": "Pon tu portfolio en línea",
+      "tareas": [
+        "Sube 3 proyectos a Behance",
+        "Conecta tu LinkedIn",
+        "Reescribe tu bio"
+      ]
+    },
+    {
+      "numero": 2,
+      "titulo": "Aplica a 10 vacantes (con cariño)",
+      "tareas": [
+        "Carta personalizada cada una",
+        "Sigue a 5 reclutadores en LinkedIn"
+      ]
+    }
+  ]
+}
+```
+
+| Campo | Notas |
+|-------|-------|
+| `semanas` | 4 semanas típicas; cada una con `titulo` + `tareas[]` |
+| `numero` | 1–4, usado en UI como "Semana N" |
+
+**Errores:** `404` sin perfil · `500` error interno.
+
+**Frontend:** `getPlan()` en `api.js` → store `plan` → `ThirtyDayPlan.jsx`. Fallback: `mockPlan.js` (personalizado con nombre/ciudad si hay perfil).
+
+---
 
 #### `POST /api/coach/chat` ✅
 

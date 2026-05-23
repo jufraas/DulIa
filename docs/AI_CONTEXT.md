@@ -91,6 +91,7 @@ backend/
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
 | GET | `/api/market/dashboard` | ✅ |
 | POST | `/api/coach/chat` | ✅ |
+| GET | `/api/plan/{session_id}` | 🚧 contrato listo; backend pendiente |
 
 ## Archivos clave
 

@@ -51,8 +51,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |------|-----------|---------|
 | Fallback mock en `createProfile` | — | ✅ `mockProfileFromPayload.js` |
 | Termómetro mercado no visible en UI | Baja | Datos van al PDF; `MarketThermometer.jsx` huérfano |
-| Plan 30 días estático | Baja | `ThirtyDayPlan.jsx` — copy fijo |
-| ESLint ruidoso | Baja | Excluir `.vite/**` y `ReBrand/**` |
+| Plan 30 días dinámico | — | ✅ front listo (`getPlan`); backend Carlos pendiente |
+| ESLint ruidoso | — | ✅ Ignora `.vite/**`, `ReBrand/**`, `node_modules/**` |
 
 ## Backend — fases
 

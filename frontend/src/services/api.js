@@ -1,6 +1,10 @@
 import axios from 'axios'
+import { mockCoachChatResponse } from './mockCoachChat'
 import { mockJobs, mockMarket } from './mockData'
+import { buildMockPlanFromProfile, mockPlan } from './mockPlan'
 import { buildMockProfileFromPayload } from './mockProfileFromPayload'
+import { MOCK_CV_PREFILL } from './mockCvPrefill'
+import { normalizePlanOut } from '../utils/planDisplay'
 import { getOrCreateSessionId } from '../utils/session'
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
@@ -65,11 +69,59 @@ export async function parseCvPdf(file) {
     })
     return data
   } catch (err) {
-    if (axios.isAxiosError(err) && err.response?.data?.detail) {
-      throw new Error(String(err.response.data.detail))
+    if (axios.isAxiosError(err) && err.response?.status === 400) {
+      throw new Error(String(err.response.data?.detail ?? 'Archivo inválido'))
     }
-    throw err
+    if (axios.isAxiosError(err) && err.response?.status === 422) {
+      throw new Error(String(err.response.data?.detail ?? 'No pudimos leer el PDF'))
+    }
+    if (import.meta.env.DEV) {
+      console.warn('[DulIA] parseCvPdf: usando prefill mock local', err)
+    }
+    return MOCK_CV_PREFILL
   }
+}
+
+/**
+ * @param {string} mensaje
+ * @param {string} [sessionId]
+ * @returns {Promise<import('../store/useProfileStore').CoachChatResponse>}
+ */
+export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId()) {
+  try {
+    const { data } = await api.post('/coach/chat', {
+      session_id: sessionId,
+      mensaje,
+    })
+    return data
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn('[DulIA] postCoachChat: usando respuesta mock local', err)
+    }
+    return mockCoachChatResponse(mensaje)
+  }
+}
+
+/**
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @returns {Promise<import('../store/useProfileStore').ThirtyDayPlan>}
+ */
+export async function getPlan(
+  sessionId = getOrCreateSessionId(),
+  profile = null,
+) {
+  try {
+    const { data } = await api.get(`/plan/${sessionId}`)
+    const normalized = normalizePlanOut(data)
+    if (normalized) return normalized
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn('[DulIA] getPlan: usando plan mock local', err)
+    }
+  }
+
+  return profile ? buildMockPlanFromProfile(profile) : mockPlan
 }
 
 /**

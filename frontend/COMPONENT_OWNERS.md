@@ -15,6 +15,9 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/services/api.js` | Cliente Axios |
 | `src/services/sessionHydration.js` | Lógica rehidratación (cache + GET profile) |
 | `src/services/mockCvPrefill.js` | Fallback parse-cv offline |
+| `src/services/mockCoachChat.js` | Fallback coach offline |
+| `src/services/mockPlan.js` | Fallback plan 30d offline |
+| `src/utils/planDisplay.js` | Normaliza plan API → UI |
 | `src/store/useProfileStore.js` | Estado global + persistencia cache |
 | `src/utils/sessionCache.js` | Lectura/escritura localStorage sesión |
 

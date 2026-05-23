@@ -83,12 +83,33 @@ import {
  * @property {string|null} [sector_filtro]
  */
 
+/**
+ * Semana del plan de 30 días — contrato GET /api/plan/{session_id}
+ * @typedef {Object} PlanWeek
+ * @property {number} numero
+ * @property {string} titulo
+ * @property {string[]} tareas
+ */
+
+/**
+ * @typedef {Object} ThirtyDayPlan
+ * @property {string} session_id
+ * @property {PlanWeek[]} semanas
+ */
+
+/**
+ * @typedef {Object} CoachChatResponse
+ * @property {string} respuesta
+ * @property {string[]} sugerencias_rapidas
+ */
+
 export const useProfileStore = create((set, get) => ({
   sessionId: null,
   savedProfile: null,
   formSnapshot: null,
   jobs: [],
   market: null,
+  plan: null,
   apiUsesMock: true,
   sessionHydrated: false,
 
@@ -110,6 +131,10 @@ export const useProfileStore = create((set, get) => ({
     set({ market })
     persistSessionCacheFromState(get())
   },
+  setPlan: (plan) => {
+    set({ plan })
+    persistSessionCacheFromState(get())
+  },
   setApiUsesMock: (apiUsesMock) => set({ apiUsesMock }),
 
   reset: () => {
@@ -120,6 +145,7 @@ export const useProfileStore = create((set, get) => ({
       formSnapshot: null,
       jobs: [],
       market: null,
+      plan: null,
     })
   },
 }))

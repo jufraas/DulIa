@@ -8,6 +8,7 @@ const WIZARD_DRAFT_KEY = 'dulia_wizard_draft'
  * @property {import('../store/useProfileStore').OnboardingFormState | null} [formSnapshot]
  * @property {import('../store/useProfileStore').Job[]} [jobs]
  * @property {import('../store/useProfileStore').MarketDashboard | null} [market]
+ * @property {import('../store/useProfileStore').ThirtyDayPlan | null} [plan]
  * @property {number} [updatedAt]
  */
 
@@ -43,6 +44,7 @@ export function clearSessionCache() {
  *   formSnapshot: import('../store/useProfileStore').OnboardingFormState | null
  *   jobs: import('../store/useProfileStore').Job[]
  *   market: import('../store/useProfileStore').MarketDashboard | null
+ *   plan: import('../store/useProfileStore').ThirtyDayPlan | null
  * }} state
  */
 export function persistSessionCacheFromState(state) {
@@ -57,6 +59,7 @@ export function persistSessionCacheFromState(state) {
     formSnapshot: state.formSnapshot,
     jobs: state.jobs,
     market: state.market,
+    plan: state.plan,
   })
 }
 

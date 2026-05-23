@@ -1,30 +1,12 @@
 import { Calendar, Check } from 'lucide-react'
+import { useProfileStore } from '../../store/useProfileStore'
+import { planToDisplayWeeks } from '../../utils/planDisplay'
 
-const weeks = [
-  {
-    w: 'Semana 1',
-    title: 'Pon tu portfolio en línea',
-    tasks: ['Sube 3 proyectos a Behance', 'Conecta tu LinkedIn', 'Reescribe tu bio'],
-  },
-  {
-    w: 'Semana 2',
-    title: 'Aplica a 10 vacantes (con cariño)',
-    tasks: ['Carta personalizada cada una', 'Sigue a 5 reclutadores en LinkedIn'],
-  },
-  {
-    w: 'Semana 3',
-    title: 'Sube tu nivel técnico',
-    tasks: ['Curso gratuito en tu stack', 'Reto: mejora un proyecto real'],
-  },
-  {
-    w: 'Semana 4',
-    title: 'Entrevistas + cierre',
-    tasks: ['Prepara tu storytelling', 'Practica con el coach DulIA'],
-  },
-]
-
-/** Plan de 30 días — kit ReBrand Results.jsx */
+/** Plan de 30 días — datos desde store (GET /api/plan) con fallback mock */
 export default function ThirtyDayPlan() {
+  const plan = useProfileStore((s) => s.plan)
+  const weeks = planToDisplayWeeks(plan)
+
   return (
     <div className="card-dl p-7">
       <div className="eyebrow-dl">
@@ -37,7 +19,7 @@ export default function ThirtyDayPlan() {
 
       <div className="flex flex-col gap-3.5">
         {weeks.map((w, i) => (
-          <div key={w.w} className="flex gap-3.5">
+          <div key={`${w.w}-${w.title}`} className="flex gap-3.5">
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-[family-name:var(--font-display)] text-[15px] font-extrabold text-white"
               style={{

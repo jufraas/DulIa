@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import {
   createProfile,
   getMarketDashboard,
+  getPlan,
   getRecommendedJobs,
   parseCvPdf,
 } from '../services/api'
-import { mergeCvPrefillIntoForm, MOCK_CV_PREFILL } from '../services/mockCvPrefill'
+import { mergeCvPrefillIntoForm } from '../services/mockCvPrefill'
 import { EMPTY_ONBOARDING_FORM } from '../constants/emptyForm'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
 import { buildProfilePayload } from '../utils/buildProfilePayload'
@@ -25,6 +26,7 @@ export function useOnboardingForm() {
   const setFormSnapshot = useProfileStore((s) => s.setFormSnapshot)
   const setJobs = useProfileStore((s) => s.setJobs)
   const setMarket = useProfileStore((s) => s.setMarket)
+  const setPlan = useProfileStore((s) => s.setPlan)
   const setSessionId = useProfileStore((s) => s.setSessionId)
   const savedProfile = useProfileStore((s) => s.savedProfile)
   const sessionHydrated = useProfileStore((s) => s.sessionHydrated)
@@ -103,20 +105,9 @@ export function useOnboardingForm() {
         const result = await parseCvPdf(file)
         applyCvResult(result, file.name)
       } catch (err) {
-        const useMock =
-          err instanceof Error &&
-          (err.message.includes('Network Error') ||
-            err.message.includes('ERR_CONNECTION') ||
-            err.message.includes('timeout'))
-
-        if (useMock) {
-          applyCvResult(MOCK_CV_PREFILL, file.name)
-          setCvSuccessMessage(MOCK_CV_PREFILL.message)
-        } else {
-          setCvError(
-            err instanceof Error ? err.message : 'No pudimos leer tu CV. Intenta de nuevo.',
-          )
-        }
+        setCvError(
+          err instanceof Error ? err.message : 'No pudimos leer tu CV. Intenta de nuevo.',
+        )
       } finally {
         setCvParsing(false)
       }
@@ -167,15 +158,17 @@ export function useOnboardingForm() {
         const payload = buildProfilePayload(form)
         const savedProfile = await createProfile(payload)
 
-        const [jobs, market] = await Promise.all([
+        const [jobs, market, plan] = await Promise.all([
           getRecommendedJobs(sessionId),
           getMarketDashboard({ city: savedProfile.ciudad || form.city.trim() }),
+          getPlan(sessionId, savedProfile),
         ])
 
         setSavedProfile(savedProfile)
         setFormSnapshot(form)
         setJobs(jobs)
         setMarket(market)
+        setPlan(plan)
         clearWizardDraft()
         navigate('/resultados')
       } catch (err) {
@@ -191,6 +184,7 @@ export function useOnboardingForm() {
       setFormSnapshot,
       setJobs,
       setMarket,
+      setPlan,
       setSessionId,
       navigate,
     ],
