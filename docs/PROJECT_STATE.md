@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Frontend migrado al contrato real de Carlos (session_id, JSON, jobs + market).
+2026-05-23 — Frontend migrado al contrato Carlos; documentación alineada (ENDPOINTS, ARCHITECTURE, ADRs).
 
 ## Estado por módulo
 

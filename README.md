@@ -49,6 +49,7 @@ uvicorn main:app --reload
 cd frontend
 npm install
 npm run dev
+# Opcional: frontend/.env.local → VITE_API_URL=http://localhost:8000/api
 
 # 4. Pipeline (en otra terminal)
 cd pipeline
@@ -82,3 +83,4 @@ python main.py
 | [ENDPOINTS.md](docs/ENDPOINTS.md) | Contrato de endpoints de la API |
 | [DECISIONS.md](docs/DECISIONS.md) | Log de decisiones técnicas |
 | [PROMPTS.md](docs/PROMPTS.md) | System prompts de Gemini |
+| [frontend/COMPONENT_OWNERS.md](frontend/COMPONENT_OWNERS.md) | División de trabajo frontend |

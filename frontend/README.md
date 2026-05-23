@@ -1,16 +1,70 @@
-# React + Vite
+# DulIA — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA React + Vite para el coach de carrera DulIA (Barranqui-IA 2026).
 
-Currently, two official plugins are available:
+## Arrancar
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # verificar antes de push
+```
 
-## React Compiler
+## Variables de entorno
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Variable | Default dev |
+|----------|-------------|
+| `VITE_API_URL` | `http://localhost:8000/api` |
 
-## Expanding the ESLint configuration
+Crear `frontend/.env.local` si el backend corre en otro puerto:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+VITE_API_URL=http://localhost:8000/api
+```
+
+## Flujo de la app
+
+1. **Landing** (`/`) — pitch y CTA
+2. **Onboarding** (`/comenzar`) — wizard 4 pasos
+3. **POST** `/api/profile` con `session_id` (UUID en `localStorage`)
+4. **GET** jobs recomendados + dashboard de mercado (en paralelo)
+5. **Resultados** (`/resultados`) — vacantes, termómetro, perfil
+6. **PDF** — descarga con jsPDF
+
+Si el backend no responde, el frontend usa mocks en `src/services/mockData.js`.
+
+## Estructura relevante
+
+```
+src/
+├── components/
+│   ├── onboarding/   # Wizard
+│   ├── results/        # Vacantes, mercado, perfil
+│   ├── welcome/        # Landing
+│   └── layout/         # Header, footer
+├── hooks/
+│   ├── useOnboardingForm.js
+│   ├── useResultsData.js
+│   └── usePdfDownload.js
+├── services/
+│   ├── api.js          # Cliente Axios
+│   └── mockData.js     # Fallback offline
+├── store/
+│   └── useProfileStore.js
+└── utils/
+    ├── session.js
+    ├── buildProfilePayload.js
+    └── generateAnalysisPdf.js
+```
+
+## División de trabajo
+
+Ver [COMPONENT_OWNERS.md](./COMPONENT_OWNERS.md).
+
+## Documentación del proyecto
+
+| Archivo | Contenido |
+|---------|-----------|
+| [ENDPOINTS.md](../docs/ENDPOINTS.md) | Contrato API |
+| [ARCHITECTURE.md](../docs/ARCHITECTURE.md) | Arquitectura |
+| [PROJECT_STATE.md](../docs/PROJECT_STATE.md) | Estado del proyecto |

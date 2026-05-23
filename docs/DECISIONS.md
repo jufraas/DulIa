@@ -6,8 +6,9 @@
 
 | Fecha | Área | Decisión | Archivo |
 |-------|------|----------|---------|
-| 2026-05-23 | general | Sin login — flujo anónimo | [decisions/2026-05-23-sin-login-flujo-anonimo.md](./decisions/2026-05-23-sin-login-flujo-anonimo.md) |
-| 2026-05-23 | full-stack | CV PDF + MarkItDown → IA | [decisions/2026-05-23-cv-pdf-markitdown.md](./decisions/2026-05-23-cv-pdf-markitdown.md) |
+| 2026-05-23 | general | Sin login — session_id anónimo | [decisions/2026-05-23-sin-login-flujo-anonimo.md](./decisions/2026-05-23-sin-login-flujo-anonimo.md) |
+| 2026-05-23 | full-stack | API session_id + jobs + market | [decisions/2026-05-23-api-session-jobs-market.md](./decisions/2026-05-23-api-session-jobs-market.md) |
+| 2026-05-23 | full-stack | CV PDF + MarkItDown (diferida) | [decisions/2026-05-23-cv-pdf-markitdown.md](./decisions/2026-05-23-cv-pdf-markitdown.md) |
 | 2026-05-23 | backend | FastAPI | Tabla abajo |
 | 2026-05-23 | frontend | React + Vite + Tailwind | Tabla abajo |
 | 2026-05-23 | ia | Google Gemini | Tabla abajo |

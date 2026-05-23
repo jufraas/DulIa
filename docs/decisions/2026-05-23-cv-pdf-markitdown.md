@@ -2,47 +2,52 @@
 
 - **Fecha:** 2026-05-23
 - **Área:** frontend + backend + ia
-- **Estado:** activa
+- **Estado:** **diferida** — módulo backend listo; no en contrato MVP frontend
 - **Autor/es:** Equipo DulIA
 
 ## Contexto
 
 El wizard captura perfil manualmente, pero muchos jóvenes ya tienen hoja de vida en PDF. Queremos enriquecer el análisis de IA con ese contenido sin pedirles reescribir todo.
 
-## Decisión
+## Decisión original
 
-1. **Frontend:** en onboarding, opción de **importar CV en PDF** (opcional, junto al formulario).
-2. **Backend:** recibe el archivo, lo convierte a Markdown con **[MarkItDown](https://github.com/microsoft/markitdown)** (Python).
-3. **IA:** Gemini recibe el JSON del formulario + `cv_markdown` (si existe) + ofertas de BD.
+1. **Frontend:** opción de importar CV en PDF (multipart).
+2. **Backend:** MarkItDown → `cv_markdown` → Gemini.
+3. Un solo `POST /api/profile` con `multipart/form-data`.
 
-Un solo endpoint: `POST /api/profile` con `multipart/form-data` cuando hay CV.
+## Cambio (2026-05-23 — migración API Carlos)
 
-## Por qué
+El **frontend MVP** migró a contrato JSON-only con endpoints separados (perfil, jobs, market). La subida de CV **no está en el flujo actual** del frontend.
 
-- MarkItDown es Python nativo → encaja con FastAPI.
-- Markdown es ideal para prompts de LLM (estructurado, compacto).
-- Frontend solo sube el archivo; no convierte ni parsea PDF.
+El módulo `backend/markitdown/` **sigue implementado** y puede integrarse cuando:
+- Backend exponga multipart o endpoint dedicado de CV, y
+- El equipo decida priorizarlo sobre el wizard solo.
 
-## Alternativas descartadas
+## Por qué se difiere
+
+- Contrato acordado con backend: `session_id` + JSON + jobs/market separados.
+- Menor complejidad para demo del hackathon con wizard de 4 pasos.
+- MarkItDown ya está listo; integración es incremental.
+
+## Alternativas descartadas (original)
 
 | Alternativa | Por qué no |
 |-------------|------------|
 | PyPDF2 / extracción manual | Más código; peor estructura para IA |
-| Conversión en frontend | PDF parsing en browser es frágil; duplica lógica |
-| Endpoint separado solo para CV | Dos round-trips; más complejo para demo |
+| Conversión en frontend | PDF parsing en browser es frágil |
+| Endpoint separado solo para CV | Dos round-trips; posible en fase 2 |
 
-## Consecuencias
+## Consecuencias actuales
 
-- **Frontend:** input file, validación `.pdf` + tamaño max (~5 MB), `FormData`.
-- **Backend:** `pip install markitdown`; no persistir PDF tras análisis (MVP hackathon).
-- **ENDPOINTS.md:** documentar multipart. Ver contrato actualizado.
-- Si solo sube CV sin formulario completo: backend extrae lo posible del markdown (fase 2).
+- **Frontend:** sin `CvUpload` ni multipart en el submit.
+- **Backend stub (`main.py`):** aún multipart legacy — debe alinearse a [ENDPOINTS.md](../ENDPOINTS.md).
+- **MarkItDown:** ver [backend/markitdown/README.md](../../backend/markitdown/README.md).
+- **PROMPTS.md:** `{cv_markdown}` documentado para fase posterior.
 
-## Límites acordados (MVP)
+## Límites acordados (cuando se reactive)
 
 | Regla | Valor |
 |-------|-------|
 | Formatos | Solo `.pdf` |
-| Tamaño máximo | 5 MB (ajustable) |
-| Archivos por request | 1 |
+| Tamaño máximo | 5 MB |
 | Persistencia del PDF | No en hackathon |
