@@ -276,24 +276,10 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 
 ---
 
-## Mensaje corto para copiar al equipo
-
-> Backend Plan 2 listo en local. Contrato en `docs/ENDPOINTS.md` y guía en `docs/FRONTEND_INTEGRATION.md`.
->
-> Tras el wizard: `POST /profile` → `POST .../analyze` → `POST .../action-plan` → en paralelo `GET jobs`, `market`, `radar-data`, `timeline-data`.
->
-> Radar: 5 dimensiones 0–100, usuario vs mercado — ver mapeo recharts en FRONTEND_INTEGRATION.
-> Timeline: fases día 0/30/60/90 desde el plan de acción.
->
-> Dev: `USE_MOCK_DATA=true` + `VITE_API_URL=http://localhost:8000/api`. Deploy después.
-
----
-
 ## Referencias
 
 | Doc | Contenido |
 |-----|-----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | Contrato JSON completo |
-| [PLAN2_BACKEND.md](PLAN2_BACKEND.md) | Diseño Plan 2 |
 | [SCHEMA.md](SCHEMA.md) | Tablas Supabase |
 | [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md) | Dueños por pantalla |
