@@ -11,7 +11,7 @@ DulIA es una plataforma web que usa inteligencia artificial para orientar a jóv
 | Capa | Tecnología |
 |------|-----------|
 | Backend API | Python 3.12 · FastAPI · Uvicorn |
-| Frontend | React 18 · Vite · Tailwind CSS |
+| Frontend | React 19 · Vite · Tailwind CSS |
 | Data Pipeline | Python · scrapers async |
 | IA | Google Gemini API |
 | Base de datos | Por definir (ver [SCHEMA.md](docs/SCHEMA.md)) |
@@ -45,10 +45,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 
-# 3. Frontend (en otra terminal)
+# 3. Frontend (en otra terminal — debe ser desde frontend/)
 cd frontend
 npm install
-npm run dev
+npm run dev    # http://localhost:5173
 # Opcional: frontend/.env.local → VITE_API_URL=http://localhost:8000/api
 
 # 4. Pipeline (en otra terminal)
@@ -66,7 +66,8 @@ python main.py
 | Nombre | Rol |
 |--------|-----|
 | Carlos (krl0s) | Backend — FastAPI, integración IA |
-| Compa 1 | Frontend — React, Vite, Tailwind |
+| Migue | Frontend — Sobre DulIA (`/sobre`), onboarding/API |
+| Compa 1 | Frontend — Landing, resultados, vacantes |
 | Compa 2 | Data Pipeline — scrapers Python |
 | Otros | IA + integración general |
 

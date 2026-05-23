@@ -134,10 +134,16 @@ Query params opcionales: `city`, `sector`.
 
 ## Flujo frontend
 
-1. `GET /health` → detectar `mock_data`.
-2. `POST /profile` con `session_id`.
-3. En paralelo: `GET /jobs/recommended/{session_id}` + `GET /market/dashboard?city=...`.
-4. Pantalla de resultados + PDF con jobs y termómetro.
+1. (Opcional) `GET /health` → detectar `mock_data`.
+2. Usuario completa wizard en `/comenzar` (**3 pasos**).
+3. `POST /profile` con `session_id`.
+4. En paralelo: `GET /jobs/recommended/{session_id}` + `GET /market/dashboard?city=...`.
+5. Estado en Zustand → `/resultados` (score, perfil, top jobs) y `/vacantes` (semáforo).
+6. PDF con jobs + datos de mercado (market se usa en PDF; termómetro en UI aún no expuesto en resultados).
+
+### Recuperación de sesión (pendiente)
+
+`GET /profile/{session_id}` está en el contrato para rehidratar perfil tras refresh. El frontend aún no lo consume; hoy un refresh en `/resultados` sin estado en Zustand redirige a `/comenzar`.
 
 ---
 

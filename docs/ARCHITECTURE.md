@@ -26,16 +26,28 @@
 
 ### `frontend/`
 
-- SPA **sin login**: landing → onboarding (4 pasos) → resultados → PDF.
+SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
+
+| Ruta | Contenido |
+|------|-----------|
+| `/` | Landing — pitch, features, CTA |
+| `/sobre` | Sobre DulIA — problema, audiencia, modelo, equipo |
+| `/comenzar` | Wizard onboarding (3 pasos) |
+| `/resultados` | Score, resumen perfil, preview vacantes, plan 30d, PDF |
+| `/vacantes` | Panel de vacantes con semáforo de confianza |
+
+**Flujo de datos:**
+
 - Genera `session_id` (UUID) en `localStorage` (`dulia_session_id`).
-- Envía `POST /api/profile` (JSON, campos en español).
-- Tras guardar perfil, consulta en paralelo:
+- Envía `POST /api/profile` (JSON, campos en español) al completar el wizard.
+- Consulta en paralelo:
   - `GET /api/jobs/recommended/{session_id}`
   - `GET /api/market/dashboard?city=...`
-- Muestra vacantes con `score_compatibilidad` y semáforo; termómetro de mercado.
-- Genera PDF descargable (jsPDF) con jobs + mercado + perfil.
+- Estado de UI en **Zustand** (`useProfileStore`): perfil, jobs, market.
 - Fallback a `mockData.js` si jobs/market no responden.
+- PDF (jsPDF) incluye perfil, vacantes y datos de mercado si están en store.
 - **No** llama a Gemini directamente.
+- Referencia visual: `frontend/ReBrand/DulIA Design System (1)/` (no es código de producción).
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
 ### `backend/`
@@ -58,15 +70,14 @@
 
 ## Flujo principal (happy path)
 
-0. Usuario ve **landing** (sin registro).
-1. Usuario completa **onboarding** (wizard 4 pasos).
+0. Usuario ve **landing** (`/`) o lee **Sobre DulIA** (`/sobre`) — sin registro.
+1. Usuario completa **onboarding** (`/comenzar`, wizard 3 pasos).
 2. Frontend genera/reutiliza `session_id` y envía `POST /api/profile` (JSON).
 3. Backend guarda perfil asociado al `session_id`.
-4. Frontend consulta en paralelo:
-   - `GET /api/jobs/recommended/{session_id}` → array con scores
-   - `GET /api/market/dashboard?city=...` → termómetro
-5. Frontend muestra **resultados** (vacantes, mercado, resumen perfil).
-6. Usuario descarga **PDF** con plan de acción.
+4. Frontend consulta en paralelo jobs + market y guarda en Zustand.
+5. Usuario ve **resultados** (`/resultados`): score, perfil, top vacantes, plan 30d.
+6. Usuario puede ir a **vacantes** (`/vacantes`) — listado completo con semáforo.
+7. Usuario descarga **PDF** con plan de acción (incluye mercado si hay datos).
 
 ## Comunicación entre módulos
 
@@ -82,10 +93,11 @@
 
 | Dato | Frontend | Backend |
 |------|----------|---------|
-| Formulario wizard | Captura + valida | Recibe JSON (`nombre`, `ciudad`, …) |
+| Formulario wizard | Captura + valida (3 pasos) | Recibe JSON (`nombre`, `ciudad`, …) |
 | session_id | Genera en localStorage | Clave de persistencia anónima |
-| Matching vacantes | Muestra scores | Calcula `score_compatibilidad` |
-| Termómetro mercado | Muestra dashboard | Agrega datos de BD |
+| Matching vacantes | Muestra scores y semáforo | Calcula `score_compatibilidad` |
+| Termómetro mercado | PDF (UI opcional / pendiente) | Agrega datos de BD |
+| Plan 30 días | Copy estático en UI | Futuro: Gemini |
 | Coach / chat | UI futura | Gemini — Fase 8 |
 | PDF plan de acción | Genera (jsPDF) | — |
 
@@ -93,22 +105,40 @@
 
 ```
 frontend/src/
+├── pages/
+│   ├── WelcomePage.jsx      # / — Landing
+│   ├── AboutPage.jsx        # /sobre
+│   ├── OnboardingPage.jsx   # /comenzar
+│   ├── ResultsPage.jsx      # /resultados
+│   └── VacanciesPage.jsx    # /vacantes
 ├── components/
-│   ├── onboarding/     # Wizard (4 pasos)
-│   ├── results/        # Vacantes, mercado, perfil
-│   ├── welcome/        # Landing
-│   └── layout/         # Header, footer
+│   ├── about/               # Secciones Sobre DulIA
+│   ├── welcome/             # Hero, Features (landing)
+│   ├── onboarding/          # Wizard (3 pasos)
+│   ├── results/             # Score, perfil, PDF, plan 30d
+│   ├── vacancies/           # Panel semáforo
+│   ├── layout/              # SiteHeader, SiteFooter, LandingFooter
+│   ├── brand/               # Logo, ScoreRing, IconBox
+│   └── ui/                  # Button, Input, Container, …
 ├── hooks/
 │   ├── useOnboardingForm.js
 │   ├── useResultsData.js
 │   └── usePdfDownload.js
 ├── services/
-│   ├── api.js          # Cliente Axios
-│   └── mockData.js     # Fallback
+│   ├── api.js               # Cliente Axios
+│   └── mockData.js          # Fallback
 ├── store/
-│   └── useProfileStore.js
+│   └── useProfileStore.js   # Zustand: perfil, jobs, market
+├── styles/
+│   ├── dulia-tokens.css
+│   └── dulia-kit.css
 └── utils/
     ├── session.js
     ├── buildProfilePayload.js
     └── generateAnalysisPdf.js
 ```
+
+## Limitaciones conocidas
+
+- **Refresh en `/resultados`:** si Zustand no tiene perfil, redirige a `/comenzar`. Recuperación vía `GET /profile/{session_id}` pendiente de implementar en frontend.
+- **Estado en memoria:** jobs/market se pierden al recargar si no se re-fetchan (hooks lo intentan si hay perfil en store).

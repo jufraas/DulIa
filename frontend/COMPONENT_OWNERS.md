@@ -14,15 +14,17 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/services/api.js` | Cliente Axios |
 | `src/store/useProfileStore.js` | Estado global (coordinar cambios) |
 
-## Compañero — landing, wizard UI, resultados, vacantes
+## Compañero — landing, resultados, vacantes
 
 | Archivo | Descripción |
 |---------|-------------|
 | `src/components/welcome/*` | Pantalla 01 — Landing (kit ReBrand) |
+| `src/components/layout/LandingFooter.jsx` | Footer landing |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — Panel vacantes |
-| `src/components/results/*` | Pantalla 03 — Resultados |
+| `src/components/vacancies/*` | Semáforo, filtros, filas |
+| `src/components/results/*` | Pantalla 03 — Resultados (ScoreCard, PdfDownloadCard, …) |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
-| `src/components/layout/SiteFooter.jsx` | Footer |
+| `src/components/layout/SiteFooter.jsx` | Footer global |
 
 ## Compartido (avisar antes de tocar)
 
@@ -32,7 +34,15 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/pages/OnboardingPage.jsx` | Wizard |
 | `src/pages/ResultsPage.jsx` | Resultados |
 | `src/App.jsx` | Rutas (`/sobre` = Migue) |
-| `src/index.css` / `src/styles/*` | Design system |
+| `src/index.css` / `src/styles/*` | Design system (`dulia-tokens.css`, `dulia-kit.css`) |
+| `ReBrand/` | Referencia visual — no editar para producción |
+
+## Archivos huérfanos (limpieza pendiente)
+
+Contenido movido al kit ReBrand o a `/sobre`; no importados en la app:
+
+- `src/components/welcome/ProblemSection.jsx`, `AudienceSection.jsx`, `BusinessModelSection.jsx`
+- `src/components/results/ResultsHeader.jsx`, `ResultsHeroTitle.jsx`, `ResultsBottomCta.jsx`, `OpportunitiesList.jsx`, `MarketThermometer.jsx`, `UserProfileCard.jsx`
 
 ## Rutas del kit
 
