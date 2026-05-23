@@ -30,16 +30,35 @@
 - Lee datos de la BD (ofertas scrapeadas + perfiles de usuario).
 - **Responsable:** Carlos
 
+#### Estructura interna del backend
+
+```
+backend/
+├── main.py              → entrada: carga .env, registra routers, configura CORS
+├── requirements.txt
+├── .env                 → credenciales reales (NO en repo)
+├── .env.example         → plantilla pública
+└── app/
+    ├── routes/          → endpoints FastAPI (un archivo por dominio)
+    ├── services/        → lógica de negocio (matching, scoring, coach)
+    ├── models/          → schemas Pydantic (request/response)
+    ├── db/
+    │   ├── supabase.py  → cliente Supabase singleton
+    │   └── gemini.py    → cliente Gemini singleton
+    └── utils/
+        └── logger.py    → logger centralizado
+```
+
 ### `frontend/`
 - SPA con flujo: onboarding del usuario → llamada a la API → visualización de resultados.
 - No contiene lógica de negocio; todo va al backend.
-- **Responsable:** Compa 1
+- **Responsable:** Migue
 
 ### `pipeline/`
 - Corre de forma independiente (puede ser un cron job o script manual).
 - Scrapea portales de empleo colombianos y escribe resultados en la BD.
 - No depende del backend para funcionar.
-- **Responsable:** Compa 2
+- **Responsable:** Jose
 
 ### `docs/`
 - Documentación compartida. Fuente de verdad del equipo.

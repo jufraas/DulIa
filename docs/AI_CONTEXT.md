@@ -22,7 +22,7 @@ Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos
 
 ## Estado actual
 
-Estructura del repositorio inicializada. Ningún módulo implementado aún. Ver [PROJECT_STATE.md](PROJECT_STATE.md).
+**Fase 1 completa.** Backend con estructura profesional: `app/{routes,services,models,db,utils}`. CORS configurado (open en dev). Logger centralizado en `app/utils/logger.py`. Clientes Supabase y Gemini como singletons en `app/db/`. El endpoint `GET /api/health` responde. Swagger en `/docs`. Siguiente: Fase 2 — crear tablas en Supabase vía MCP.
 
 ## Principios de diseño
 

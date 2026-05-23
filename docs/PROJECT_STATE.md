@@ -4,14 +4,14 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Estructura del repositorio inicializada.
+2026-05-23 — Fase 0 completada: entorno backend funcional.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Estructura creada, primer commit hecho |
-| Backend (FastAPI) | 🔲 No iniciado | — |
+| Backend (FastAPI) | 🚧 Fase 1 ✅ / Fase 2 siguiente | Estructura profesional completa, CORS, logging, conexiones a Supabase y Gemini listas |
 | Frontend (React+Vite) | 🔲 No iniciado | — |
 | Pipeline (scrapers) | 🔲 No iniciado | — |
 | Integración Gemini | 🔲 No iniciado | — |
