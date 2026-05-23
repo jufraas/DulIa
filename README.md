@@ -1,0 +1,84 @@
+# DulIA — Coach de Carrera con IA para Jóvenes Colombianos
+
+> Hackathon Barranqui-IA 2026 · 48 horas
+
+DulIA es una plataforma web que usa inteligencia artificial para orientar a jóvenes colombianos en su desarrollo profesional: sugiere rutas de carrera, conecta con oportunidades laborales reales y entrega feedback personalizado sobre su perfil.
+
+---
+
+## Stack tecnológico
+
+| Capa | Tecnología |
+|------|-----------|
+| Backend API | Python 3.12 · FastAPI · Uvicorn |
+| Frontend | React 18 · Vite · Tailwind CSS |
+| Data Pipeline | Python · scrapers async |
+| IA | Google Gemini API |
+| Base de datos | Por definir (ver [SCHEMA.md](docs/SCHEMA.md)) |
+
+---
+
+## Estructura del repositorio
+
+```
+DulIa/
+├── backend/     → API REST (FastAPI), lógica de negocio e integración con Gemini
+├── frontend/    → SPA en React+Vite, UI y consumo de la API
+├── pipeline/    → Scrapers de ofertas laborales y procesamiento de datos
+├── docs/        → Documentación compartida del proyecto
+└── LICENSE
+```
+
+---
+
+## Clonar y arrancar
+
+```bash
+# 1. Clonar
+git clone <URL-del-repo>
+cd DulIa
+
+# 2. Backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# 3. Frontend (en otra terminal)
+cd frontend
+npm install
+npm run dev
+
+# 4. Pipeline (en otra terminal)
+cd pipeline
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+---
+
+## Equipo
+
+| Nombre | Rol |
+|--------|-----|
+| Carlos (krl0s) | Backend — FastAPI, integración IA |
+| Compa 1 | Frontend — React, Vite, Tailwind |
+| Compa 2 | Data Pipeline — scrapers Python |
+| Otros | IA + integración general |
+
+---
+
+## Documentación
+
+| Archivo | Contenido |
+|---------|-----------|
+| [AI_CONTEXT.md](docs/AI_CONTEXT.md) | Resumen rápido del proyecto para contexto de IA |
+| [PROJECT_STATE.md](docs/PROJECT_STATE.md) | Estado actual del proyecto |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitectura y conexión entre módulos |
+| [SCHEMA.md](docs/SCHEMA.md) | Esquema de la base de datos |
+| [ENDPOINTS.md](docs/ENDPOINTS.md) | Contrato de endpoints de la API |
+| [DECISIONS.md](docs/DECISIONS.md) | Log de decisiones técnicas |
+| [PROMPTS.md](docs/PROMPTS.md) | System prompts de Gemini |
