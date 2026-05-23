@@ -66,12 +66,12 @@ class ActionPlanService:
         plan_record = {
             "session_id": session_id,
             "resumen_ejecutivo": plan["resumen_ejecutivo"],
-            "fase_30": json.dumps(plan["fase_30"]),
-            "fase_60": json.dumps(plan["fase_60"]),
-            "fase_90": json.dumps(plan["fase_90"]),
-            "recursos_recomendados": json.dumps(plan["recursos_recomendados"]),
-            "milestones": json.dumps(plan["milestones"]),
-            "raw_gemini_response": json.dumps(plan, ensure_ascii=False)
+            "fase_30": plan["fase_30"],
+            "fase_60": plan["fase_60"],
+            "fase_90": plan["fase_90"],
+            "recursos_recomendados": plan["recursos_recomendados"],
+            "milestones": plan["milestones"],
+            "raw_gemini_response": json.dumps(plan, ensure_ascii=False),
         }
         
         # Upsert

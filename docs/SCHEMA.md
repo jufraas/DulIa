@@ -78,7 +78,47 @@ Vacantes laborales (schema **inglés**, compatible Adzuna/pipeline). El pipeline
 
 **Índices:** `unique_hash` (único), `city`, `sector`, `status`, `active`, `company`
 
-> El backend filtra `status != 'red'` y `active = true`. Si solo hay `location`, infiere `city`/`department` del texto.
+> El backend filtra `status != 'red'` y `active = true`. Si `city` es null, el dashboard usa todas las vacantes activas como fallback (ver migración 004).
+
+---
+
+## Tabla: `profile_analysis`
+
+Análisis enriquecido generado por Gemini (`POST /profile/{id}/analyze`).
+
+| Columna | Tipo | Nulable | Descripción |
+|---------|------|---------|-------------|
+| `id` | `uuid` | NO | PK |
+| `session_id` | `text` | NO | FK → `profiles.session_id` (UNIQUE) |
+| `fortalezas` | `jsonb` | SÍ | Array de objetos `{ area, descripcion, nivel }` |
+| `debilidades` | `jsonb` | SÍ | Array de objetos `{ area, descripcion, impacto }` |
+| `gaps_mercado` | `jsonb` | SÍ | Habilidades con brecha vs mercado |
+| `oportunidades` | `jsonb` | SÍ | Sectores y acciones inmediatas |
+| `nivel_preparacion` | `jsonb` | SÍ | `{ overall, descripcion, comparativa }` |
+| `recomendaciones` | `jsonb` | SÍ | Lista de strings |
+| `raw_gemini_response` | `text` | SÍ | JSON crudo para debug |
+| `created_at` / `updated_at` | `timestamptz` | — | Auditoría |
+
+**RLS:** desactivado en hackathon (migración `004_plan2_backend_fixes.sql`).
+
+---
+
+## Tabla: `action_plans`
+
+Plan 30-60-90 días (`POST /profile/{id}/action-plan`).
+
+| Columna | Tipo | Nulable | Descripción |
+|---------|------|---------|-------------|
+| `id` | `uuid` | NO | PK |
+| `session_id` | `text` | NO | FK → `profiles.session_id` (UNIQUE) |
+| `resumen_ejecutivo` | `text` | SÍ | Resumen IA para UI |
+| `fase_30` / `fase_60` / `fase_90` | `jsonb` | SÍ | Objetivos, acciones por semana, métricas |
+| `recursos_recomendados` | `jsonb` | SÍ | Cursos, prácticas, comunidades |
+| `milestones` | `jsonb` | SÍ | Hitos día 30/60/90 |
+| `raw_gemini_response` | `text` | SÍ | JSON crudo |
+| `created_at` | `timestamptz` | — | |
+
+**RLS:** desactivado en hackathon (migración `004_plan2_backend_fixes.sql`).
 
 ---
 
@@ -144,7 +184,7 @@ El score 0-100 se calcula así:
 - **`jobs.habilidades_requeridas` como `text[]`**: más simple que JSONB para el matching. El pipeline normaliza los skills a minúsculas sin acentos.
 - **`companies` es opcional para el MVP**: si el tiempo no alcanza, el termómetro del mercado puede calcular todo con queries sobre `jobs` directamente.
 - **Salarios en COP entero**: muchos portales colombianos no publican salario. Dejamos `null`, no inventamos.
-- **RLS**: en el hackathon desactivamos RLS para simplificar. En producción real habilitaría por `session_id`.
+- **RLS**: desactivado en `profiles`, `jobs`, `profile_analysis` y `action_plans` (hackathon, backend con anon key). Migración: `backend/migrations/004_plan2_backend_fixes.sql`.
 
 ---
 

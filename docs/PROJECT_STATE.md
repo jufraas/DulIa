@@ -4,18 +4,18 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — FRONT: Plan 2 integrado (action-plan, radar API), termómetro en UI, ubicaciones DANE (1.119 municipios), mocks personalizados offline.
+2026-05-23 — **Backend Fase 1 Plan 2:** analyze/action-plan/radar/timeline OK en Supabase+Gemini (migración 004, RLS, dashboard). Front Fase 2 pendiente (UI IA vs mocks).
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
-| Backend (FastAPI) | 🚧 Fases 0–10 + Plan 2 F3 | `parse-cv`, coach, analyze/action-plan, radar/timeline API; deploy pendiente |
-| Frontend (React+Vite) | 🚧 En progreso | Kit ReBrand (5 rutas), RadarMatch UI, rehidratación; pulido Joufra pendiente |
-| Pipeline | 🔁 En progreso | Insertar vacantes en `jobs` (mock / Adzuna) |
-| Integración Gemini | ✅ | Profile, coach, CV parse; rate limit 10/min |
-| Base de datos | 🚧 Schema listo | Tablas en Supabase; datos pendientes pipeline |
+| Backend (FastAPI) | 🚧 Fase 1 Plan 2 ✅ | Cadena real verificada; deploy pendiente |
+| Frontend (React+Vite) | 🚧 En progreso | Mocks silenciosos si API falla — Fase 2 conectar `analysis` a UI |
+| Pipeline | 🔁 En progreso | Poblar `jobs.city` (muchas filas null) |
+| Integración Gemini | ✅ | Profile, analyze, plan, coach, CV parse |
+| Base de datos | 🚧 Datos + schema | Tablas Plan 2 + migración 004 aplicada |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
@@ -77,8 +77,8 @@ Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | 9–10 | Seguridad + smoke tests | ✅ |
 | 11 | Deploy | 🔲 |
 | — | `GET /api/plan/{session_id}` | ⚠️ Legacy — front usa `POST .../action-plan` |
-| P2-F3 | Gráficas radar + timeline (API) | ✅ Backend |
-| P2-F1 | Análisis + plan IA | ✅ Servicios, rutas y prompts |
+| P2-F1 | Análisis + plan IA | ✅ Real verificado (migración 004) |
+| P2-F3 | Gráficas radar + timeline (API) | ✅ Real verificado |
 | P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
 
 ## Leyenda
@@ -94,11 +94,12 @@ Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 ## Próximos pasos inmediatos
 
 ### Pitch / demo
-1. Probar flujo wizard → resultados → vacantes → refresh (rehidratación + mock o backend real)
-2. Joufra: burbuja coach en UI
-3. UI timeline (store ya tiene datos)
-4. Jose: vacantes reales en `jobs`
-5. Deploy (backend + front): **pospuesto** — `VITE_API_URL` + `CORS_ORIGINS`
+1. **Backend:** `USE_MOCK_DATA=false`, migraciones 002+004, uvicorn `:8000` — smoke Plan 2 en [ENDPOINTS.md](ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse)
+2. Probar flujo wizard → resultados (Network: todos 200 en Plan 2)
+3. **Front Fase 2:** conectar `analysis` a resumen + skills; reducir mocks silenciosos
+4. Joufra: burbuja coach en UI
+5. Pipeline: enriquecer `jobs.city` al insertar
+6. Deploy: **pospuesto**
 
 ### Post-MVP (no bloquean pitch)
 - Login opcional + timeline del plan con progreso → [post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md)
@@ -108,7 +109,8 @@ Ver detalle y fase 2: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 
 | Doc | Contenido |
 |-----|-----------|
-| [ENDPOINTS.md](ENDPOINTS.md) | Contrato API |
+| [ENDPOINTS.md](ENDPOINTS.md) | Contrato API + troubleshooting Plan 2 |
+| [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md) | Fixes RLS, dashboard, JSONB |
 | [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | Handoff Plan 2 (analyze, radar, timeline) |
 | [EXTRA_IDEAS/README.md](EXTRA_IDEAS/README.md) | Ideas fuera del MVP |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Roadmap fase 2 + guion pitch |

@@ -46,4 +46,5 @@ Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_
 
 | Fecha | Archivo | Resumen |
 |-------|---------|---------|
+| 2026-05-23 | [2026-05-23-backend-plan2-phase1-fixes.md](./2026-05-23-backend-plan2-phase1-fixes.md) | RLS Plan 2, dashboard sin `location`, JSONB nativo |
 | — | Ver [DECISIONS.md](../DECISIONS.md) | pydantic 3.14, slowapi, jobs en inglés, mock data |

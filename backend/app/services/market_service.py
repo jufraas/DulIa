@@ -31,13 +31,22 @@ async def obtener_dashboard(
 
     if ciudad:
         c = ciudad.strip()
-        # city explícito o location tipo "Barranquilla, Atlántico"
-        query = query.or_(f"city.ilike.%{c}%,location.ilike.%{c}%")
+        # Filtrar solo por city (location es opcional y puede no existir en BD)
+        query = query.ilike("city", f"%{c}%")
     if sector:
         query = query.ilike("sector", sector.strip())
 
     jobs_res = query.execute()
     raw_jobs = jobs_res.data or []
+
+    # Pipeline puede dejar city null — no devolver dashboard vacío en demo
+    if ciudad and not raw_jobs:
+        logger.warning(
+            f"Dashboard: 0 vacantes con city~={ciudad!r}; usando todas las activas"
+        )
+        jobs_res = supabase.table("jobs").select("*").eq("active", True).execute()
+        raw_jobs = jobs_res.data or []
+
     jobs = [normalize_job_row(j) for j in raw_jobs]
     logger.info(f"Dashboard: {len(jobs)} vacantes activas — ciudad={ciudad}, sector={sector}")
 
