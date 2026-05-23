@@ -102,7 +102,7 @@ export default function ResultsPage() {
                 Llévate tu plan completo
               </h3>
               <p className="mt-2 text-[15px] text-[color:var(--fg-2)]">
-                Tu score, perfil y plan de 30 días en un PDF que puedes compartir.
+                Score, análisis IA, plan, radar y vacantes en un PDF listo para compartir.
               </p>
             </div>
             <Button
