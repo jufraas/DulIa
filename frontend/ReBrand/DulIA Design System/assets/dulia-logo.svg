@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 88" fill="none">
+  <defs>
+    <linearGradient id="dulia-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"></stop>
+      <stop offset="50%" stop-color="#A855F7"></stop>
+      <stop offset="100%" stop-color="#C084FC"></stop>
+    </linearGradient>
+    <linearGradient id="dulia-spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EC4899"></stop>
+      <stop offset="100%" stop-color="#C084FC"></stop>
+    </linearGradient>
+  </defs>
+  <text x="0" y="68" font-family="Poppins, Inter, system-ui" font-weight="900" font-size="72" letter-spacing="-3" fill="#FAFAFC">Dul</text>
+  <text x="139" y="68" font-family="Poppins, Inter, system-ui" font-weight="900" font-size="72" letter-spacing="-3" fill="url(#dulia-brand)">IA</text>
+  <circle cx="244" cy="22" r="6" fill="url(#dulia-spark)"></circle>
+</svg>

@@ -1,6 +1,6 @@
 # ENDPOINTS — Contrato de la API
 
-> Estado: **Pendiente** — definir junto con el frontend antes de implementar.
+> Última actualización: 2026-05-23 — incluye importación de CV (PDF).
 
 ## Base URL
 
@@ -9,24 +9,40 @@ http://localhost:8000/api   ← desarrollo local
 https://<dominio>/api       ← producción (por definir)
 ```
 
-## Endpoints previstos
+## Autenticación
+
+**Sin auth en el MVP.** El usuario no inicia sesión; envía perfil (+ CV opcional) y recibe análisis en la misma visita.
+
+## Endpoints
 
 | Método | Ruta | Descripción | Estado |
 |--------|------|-------------|--------|
 | GET | `/health` | Health check del servidor | 🔲 |
-| POST | `/profile` | Enviar perfil del usuario | 🔲 |
-| GET | `/recommendations/{id}` | Obtener recomendaciones | 🔲 |
+| POST | `/profile` | Enviar perfil (+ CV PDF opcional) | 🔲 |
+| GET | `/recommendations/{id}` | Obtener recomendaciones (fase 2) | 🔲 |
 | GET | `/jobs` | Listar ofertas laborales | 🔲 |
 
 ## Convenciones
 
-- Todos los cuerpos en JSON (`Content-Type: application/json`).
-- Errores siguen el formato: `{ "detail": "mensaje de error" }`.
-- Autenticación: por definir (probablemente sin auth en el hackathon).
+- Errores: `{ "detail": "mensaje de error" }`.
+- Sin persistencia de PDF en hackathon (procesar en memoria y descartar).
 
-## Cuerpo de `POST /profile` (borrador frontend)
+---
 
-> Implementado en `frontend/src/pages/OnboardingPage.jsx` (wizard 3 pasos). Backend debe confirmar o ajustar.
+## `POST /profile`
+
+Recibe el perfil del usuario y opcionalmente un **CV en PDF**. El backend convierte el PDF a Markdown (MarkItDown) y lo incluye en el prompt de Gemini.
+
+### Modo A — Solo formulario (JSON)
+
+Cuando el usuario **no** sube CV.
+
+```
+POST /api/profile
+Content-Type: application/json
+```
+
+**Body:**
 
 ```json
 {
@@ -49,9 +65,43 @@ https://<dominio>/api       ← producción (por definir)
 }
 ```
 
-## Respuesta prevista de `POST /profile` (borrador frontend)
+> Implementado en frontend: `frontend/src/pages/OnboardingPage.jsx` (wizard 3 pasos).
 
-> Shape en `frontend/src/Mock_Response.js`. Si el backend no responde, el frontend usa mock.
+### Modo B — Formulario + CV (multipart)
+
+Cuando el usuario **importa CV en PDF**.
+
+```
+POST /api/profile
+Content-Type: multipart/form-data
+```
+
+| Campo | Tipo | Obligatorio | Descripción |
+|-------|------|-------------|-------------|
+| `profile` | string | ✅ | JSON stringificado (mismo objeto que Modo A) |
+| `cv` | file | ❌ | Archivo PDF, max 5 MB |
+
+**Ejemplo curl:**
+
+```bash
+curl -X POST http://localhost:8000/api/profile \
+  -F 'profile={"name":"María","city":"Barranquilla",...};type=application/json' \
+  -F "cv=@/ruta/hoja_de_vida.pdf;type=application/pdf"
+```
+
+### Procesamiento backend (referencia)
+
+1. Parsear `profile` (JSON).
+2. Si hay `cv`: MarkItDown → `cv_markdown`.
+3. Construir prompt: perfil JSON + `cv_markdown` + ofertas BD.
+4. Llamar Gemini.
+5. Responder JSON de recomendaciones.
+
+---
+
+## Respuesta de `POST /profile`
+
+> Shape en `frontend/src/Mock_Response.js`. Frontend usa mock si backend no responde.
 
 ```json
 {
@@ -65,10 +115,19 @@ https://<dominio>/api       ← producción (por definir)
     "Crear portafolio",
     "Publicar en LinkedIn",
     "Buscar clientes locales"
-  ]
+  ],
+  "cv_parsed": true
 }
 ```
 
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| `profile` | string | Perfil sugerido por IA |
+| `score` | number | Encaje 0–100 |
+| `opportunities` | string[] | Oportunidades alineadas |
+| `roadmap` | string[] | Pasos accionables |
+| `cv_parsed` | boolean | Opcional; `true` si se procesó CV |
+
 ---
 
-_Actualizar este archivo cuando backend confirme el contrato._
+_Actualizar cuando backend confirme implementación._

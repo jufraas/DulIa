@@ -5,8 +5,8 @@
 ```
 ┌─────────────┐     HTTP/REST      ┌─────────────────────┐
 │   Frontend  │ ◄────────────────► │      Backend        │
-│ React+Vite  │                    │  FastAPI + Uvicorn  │
-│  Tailwind   │                    │                     │
+│ React+Vite  │   JSON o multipart │  FastAPI + Uvicorn  │
+│  Tailwind   │                    │  + MarkItDown (CV)  │
 └─────────────┘                    └────────┬────────────┘
                                             │
                               ┌─────────────┼──────────────┐
@@ -24,44 +24,57 @@
 
 ## Módulos
 
+### `frontend/`
+- SPA **sin login**: landing → onboarding → resultados → PDF.
+- Captura perfil (wizard 3 pasos) y **opcionalmente CV PDF**.
+- Envía `POST /api/profile` (JSON o multipart).
+- Muestra resultados; genera PDF descargable (jsPDF).
+- Mock local si backend no está listo.
+- **No** convierte PDF, **no** llama a Gemini.
+- **Responsable:** Equipo frontend
+
 ### `backend/`
-- Expone la API REST que consume el frontend.
-- Orquesta llamadas a Gemini con los prompts de `docs/PROMPTS.md`.
-- Lee datos de la BD (ofertas scrapeadas + perfiles de usuario).
+- API REST; orquesta Gemini (`docs/PROMPTS.md`).
+- Si recibe CV: **MarkItDown** (Python) → markdown para el prompt.
+- Lee ofertas de BD (cuando pipeline esté activo).
 - **Responsable:** Carlos
 
-### `frontend/`
-- SPA con flujo: **landing (bienvenida)** → onboarding del usuario → llamada a la API → visualización de resultados (+ PDF).
-- Mobile first, Tailwind 4, componentes reutilizables en `src/components/`.
-- No contiene lógica de negocio; todo va al backend.
-- Mock local: `src/Mock_Response.js` (fallback si backend no está listo).
-- **Responsable:** Compa 1
-
 ### `pipeline/`
-- Corre de forma independiente (puede ser un cron job o script manual).
-- Scrapea portales de empleo colombianos y escribe resultados en la BD.
-- No depende del backend para funcionar.
+- Scrapers de portales laborales colombianos → BD.
+- Independiente del backend.
 - **Responsable:** Compa 2
-
-### `docs/`
-- Documentación compartida. Fuente de verdad del equipo.
-- Cada módulo debe actualizar los archivos relevantes al hacer cambios de contrato.
 
 ## Flujo principal (happy path)
 
-0. Usuario ve **landing** con propuesta de valor y modelo de negocio.
-1. Usuario llena formulario de perfil en el **frontend** (onboarding).
-2. Frontend hace `POST /api/profile` al **backend**.
-3. Backend construye prompt con el perfil + ofertas de la **BD**.
-4. Backend llama a **Gemini** y recibe recomendaciones.
-5. Backend responde con JSON de recomendaciones.
-6. Frontend muestra resultados al usuario (score, oportunidades, roadmap, PDF).
+0. Usuario ve **landing** (sin registro).
+1. Usuario en **onboarding**:
+   - Completa wizard (datos laborales), y/o
+   - **Importa CV en PDF** (opcional).
+2. Frontend envía `POST /api/profile`:
+   - JSON solo, o
+   - `multipart`: `profile` + `cv`.
+3. Backend:
+   - Si hay CV → MarkItDown → `cv_markdown`.
+   - Arma prompt: formulario + cv_markdown + ofertas BD.
+4. Backend llama **Gemini**.
+5. Backend responde JSON (score, oportunidades, roadmap).
+6. Frontend muestra **resultados** + botón **descargar PDF**.
 
 ## Comunicación entre módulos
 
 | De | A | Protocolo |
 |----|---|-----------|
-| Frontend | Backend | HTTP REST (JSON) |
-| Backend | Gemini | HTTPS (SDK de Google) |
+| Frontend | Backend | HTTP REST (JSON o multipart/form-data) |
+| Backend | MarkItDown | Librería Python (in-process) |
+| Backend | Gemini | HTTPS (SDK Google) |
 | Backend | BD | Driver nativo (por definir) |
 | Pipeline | BD | Driver nativo (por definir) |
+
+## Responsabilidades: datos del usuario
+
+| Dato | Frontend | Backend |
+|------|----------|---------|
+| Formulario wizard | Captura + valida | Recibe JSON |
+| CV PDF | Sube archivo | Convierte a MD |
+| Análisis IA | Muestra resultado | Gemini |
+| PDF plan de acción | Genera (jsPDF) | — |

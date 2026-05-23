@@ -4,39 +4,51 @@
 
 ## ¿Qué es DulIA?
 
-Plataforma web con IA que actúa como coach de carrera para jóvenes colombianos. El usuario describe su perfil (estudios, habilidades, intereses) y DulIA:
-1. Sugiere rutas de carrera personalizadas.
-2. Conecta con ofertas laborales reales (scrapeadas de portales colombianos).
-3. Da feedback accionable sobre el perfil del usuario usando Gemini.
+Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin login:** el usuario entra, da su información y recibe análisis + PDF en la misma visita.
+
+DulIA:
+1. Captura perfil (formulario y/o **CV en PDF**).
+2. Backend convierte CV → Markdown (MarkItDown) y llama a **Gemini**.
+3. Sugiere rutas, oportunidades (scrapers → BD) y roadmap accionable.
+4. Frontend muestra resultados y PDF descargable.
 
 ## Contexto del hackathon
 
 - **Evento:** Barranqui-IA 2026
 - **Duración:** 48 horas
-- **Fecha de inicio:** 2026-05-23
-- **Equipo:** 4-5 personas trabajando en paralelo
+- **Equipo:** 4-5 personas en paralelo
 
-## Stack en una línea
+## Stack
 
-`FastAPI` (backend) + `React/Vite/Tailwind` (frontend) + `Python scrapers` (pipeline) + `Gemini API` (IA)
+`FastAPI` + `MarkItDown` + `React/Vite/Tailwind` + scrapers Python + `Gemini API`
+
+## Modelo de uso (sin sesión)
+
+```
+Landing → Onboarding (form ± CV PDF) → POST /profile → Resultados → PDF
+```
+
+No hay registro ni cuentas. Estado en memoria (Zustand) en frontend.
 
 ## Estado actual
 
-Frontend en progreso: **landing page responsive** implementada (`frontend/src/pages/WelcomePage.jsx`). Mock de respuesta IA en `frontend/src/Mock_Response.js`. Backend, pipeline y BD aún no iniciados. Ver [PROJECT_STATE.md](PROJECT_STATE.md).
+Frontend: landing, wizard, resultados, PDF, mock API. **Pendiente:** upload CV, deploy.
 
-## Principios de diseño
+Backend: no iniciado. Ver [PROJECT_STATE.md](PROJECT_STATE.md).
 
-- API REST simple, sin over-engineering dado el tiempo del hackathon.
-- Frontend en SPA con flujo lineal: **bienvenida → onboarding → resultados** (mobile first).
-- Pipeline desacoplado: corre independiente y alimenta la BD.
-- Prompts de Gemini centralizados en [PROMPTS.md](PROMPTS.md).
-- Prioridad demo: lo visual y demostrable antes que arquitectura compleja.
+## Principios
 
-## Archivos clave para entender el proyecto
+- API REST simple; sin over-engineering.
+- SPA mobile first, flujo lineal.
+- Frontend captura y muestra; backend procesa IA y CV.
+- Prompts en [PROMPTS.md](PROMPTS.md).
+
+## Archivos clave
 
 | Archivo | Para qué |
 |---------|----------|
-| ARCHITECTURE.md | Cómo se conectan los módulos |
-| SCHEMA.md | Estructura de datos |
-| ENDPOINTS.md | Contrato de la API |
-| DECISIONS.md | Por qué se tomó cada decisión importante |
+| ARCHITECTURE.md | Módulos y flujo con CV |
+| ENDPOINTS.md | Contrato JSON + multipart |
+| PROJECT_STATE.md | Qué está hecho |
+| decisions/ | Una decisión por archivo |
+| PROMPTS.md | Prompts Gemini |

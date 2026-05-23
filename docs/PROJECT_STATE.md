@@ -4,17 +4,17 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — PDF de resultados implementado en frontend (jsPDF).
+2026-05-23 — Documentación actualizada: sin login, importación CV PDF + MarkItDown.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| Repositorio | ✅ Listo | Estructura creada, primer commit hecho |
-| Backend (FastAPI) | 🔲 No iniciado | — |
-| Frontend (React+Vite) | 🚧 En progreso | Flujo demo completo con mock; falta formulario ampliado y deploy |
+| Repositorio | ✅ Listo | Estructura creada |
+| Backend (FastAPI) | 🔲 No iniciado | Pendiente: `/profile`, MarkItDown, Gemini |
+| Frontend (React+Vite) | 🚧 En progreso | Flujo demo con mock; falta upload CV + deploy |
 | Pipeline (scrapers) | 🔲 No iniciado | — |
-| Integración Gemini | 🔲 No iniciado | — |
+| Integración Gemini | 🔲 No iniciado | Ver PROMPTS.md |
 | Base de datos | 🔲 No definida | Ver SCHEMA.md |
 | Deploy | 🔲 No iniciado | — |
 
@@ -23,14 +23,26 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Pantalla / pieza | Estado |
 |------------------|--------|
 | Landing (bienvenida) | ✅ |
-| Header + nav mobile | ✅ |
-| Secciones: problema, cómo funciona, audiencia, modelo de negocio | ✅ |
-| Onboarding (formulario perfil) | ✅ |
+| Footer (contacto, copyright) | ✅ |
+| Wizard formulario (3 pasos) | ✅ |
 | Pantalla de resultados | ✅ |
-| Integración Axios → backend (fallback mock) | ✅ |
 | Descarga PDF (jsPDF) | ✅ |
-| Formulario ampliado (wizard 3 pasos) | ✅ |
-| Deploy producción | 🔲 |
+| Integración Axios → backend (fallback mock) | ✅ |
+| **Importar CV (PDF) — UI upload** | 🔲 |
+| **Envío multipart (profile + cv)** | 🔲 |
+| Resumen perfil del usuario en resultados | 🔲 |
+| Deploy producción (Vercel) | 🔲 |
+
+## Backend — pendiente (referencia para coordinación)
+
+| Pieza | Estado |
+|-------|--------|
+| `GET /health` | 🔲 |
+| `POST /profile` (JSON) | 🔲 |
+| `POST /profile` (multipart + CV) | 🔲 |
+| MarkItDown PDF → markdown | 🔲 |
+| Prompt Gemini con cv_markdown | 🔲 |
+| CORS para frontend | 🔲 |
 
 ## Leyenda
 
@@ -43,5 +55,13 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Próximos pasos inmediatos
 
-1. Frontend: commit en rama `FRONT` + deploy (Vercel/Netlify)
-2. Backend: implementar `POST /profile` con contrato en ENDPOINTS.md
+### Frontend
+1. UI importar CV (PDF) en onboarding
+2. `submitProfile` con FormData cuando hay archivo
+3. Sección “Tu perfil” en resultados
+4. Commit rama `FRONT` + deploy Vercel
+
+### Backend (Carlos)
+1. `POST /profile` según ENDPOINTS.md
+2. Integrar MarkItDown
+3. Conectar Gemini con PROMPTS.md
