@@ -88,8 +88,20 @@ import {
  */
 
 /**
+ * @typedef {Object} MarketSkillDemand
+ * @property {string} skill
+ * @property {number} count
+ * @property {boolean} tienes
+ */
+
+/**
  * @typedef {Object} MarketDashboard
  * @property {number} [total_vacantes_activas]
+ * @property {number} [vacantes_locales]
+ * @property {number} [vacantes_remotas]
+ * @property {number} [vacantes_nacionales]
+ * @property {string[]} [sectores_filtro]
+ * @property {MarketSkillDemand[]} [top_skills_demandadas]
  * @property {{ sector: string, count: number }[]} [top_sectores]
  * @property {number|null} [salario_promedio]
  * @property {string[]} [top_empresas_verdes]

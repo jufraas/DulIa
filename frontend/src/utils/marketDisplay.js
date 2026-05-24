@@ -64,3 +64,43 @@ export function getSourceEntries(porFuente) {
       count,
     }))
 }
+
+/** @param {import('../store/useProfileStore').MarketDashboard | null | undefined} market */
+export function formatGeographicBreakdown(market) {
+  if (!market) return null
+
+  const city = market.ciudad_filtro
+  const { vacantes_locales: local, vacantes_remotas: remote, vacantes_nacionales: national } =
+    market
+
+  if (local == null && remote == null && national == null) return null
+
+  const parts = []
+  if (local != null && local > 0) {
+    parts.push(city ? `${local.toLocaleString('es-CO')} en ${city}` : `${local.toLocaleString('es-CO')} locales`)
+  }
+  if (remote != null && remote > 0) {
+    parts.push(`${remote.toLocaleString('es-CO')} remoto`)
+  }
+  if (national != null && national > 0) {
+    parts.push(`${national.toLocaleString('es-CO')} en otras ciudades CO`)
+  }
+
+  return parts.length > 0 ? parts.join(' · ') : null
+}
+
+/** @param {import('../store/useProfileStore').MarketDashboard | null | undefined} market */
+export function formatScopeHeadline(market) {
+  if (!market) return 'Vacantes en tu campo'
+  const city = market.ciudad_filtro
+  return city ? `Vacantes en tu campo · ${city}` : 'Vacantes en tu campo'
+}
+
+/** @param {import('../store/useProfileStore').MarketDashboard | null | undefined} market */
+export function formatScopeSectors(market) {
+  const sectors = market?.sectores_filtro?.filter(Boolean).slice(0, 3) ?? []
+  return sectors.length > 0 ? sectors.join(' · ') : null
+}
+
+export const MARKET_GROWTH_HINT =
+  'Nuevas vacantes indexadas esta semana en tu campo'

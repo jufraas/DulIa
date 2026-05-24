@@ -231,7 +231,7 @@ export async function loadResultsBundle(sessionId, profile = null) {
   const analysis = await postProfileAnalyze(sessionId, profile)
 
   const jobs = await getRecommendedJobs(sessionId, profile)
-  const market = await getMarketDashboard(city ? { city } : {}, profile)
+  const market = await getMarketDashboard(city ? { city } : {}, profile, sessionId)
   const plan = await postActionPlan(sessionId, profile)
   const radar = await getRadarData(sessionId, profile, jobs)
   const timeline = await getTimelineData(sessionId, profile, plan, jobs)
@@ -279,10 +279,15 @@ export async function getRecommendedJobs(
 /**
  * @param {{ city?: string, sector?: string }} [filters]
  * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @param {string | null} [sessionId]
  * @returns {Promise<import('../store/useProfileStore').MarketDashboard>}
  */
-export async function getMarketDashboard(filters = {}, profile = null) {
+export async function getMarketDashboard(filters = {}, profile = null, sessionId = null) {
   try {
+    if (sessionId) {
+      const { data } = await api.get(`/market/dashboard/${sessionId}`)
+      return data
+    }
     const { data } = await api.get('/market/dashboard', { params: filters })
     return data
   } catch (err) {

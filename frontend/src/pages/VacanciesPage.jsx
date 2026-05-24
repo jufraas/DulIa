@@ -29,44 +29,53 @@ export default function VacanciesPage() {
   const setJobs = useProfileStore((s) => s.setJobs)
   const setMarket = useProfileStore((s) => s.setMarket)
   const [filter, setFilter] = useState('all')
-  const [loading, setLoading] = useState(!jobs.length)
+  const [loadingMarket, setLoadingMarket] = useState(true)
+  const [loadingJobs, setLoadingJobs] = useState(true)
 
   useEffect(() => {
-    if (market) return undefined
+    if (!savedProfile) return undefined
     let cancelled = false
 
     ;(async () => {
-      const data = await getMarketDashboard(
-        { city: savedProfile?.ciudad },
-        savedProfile,
-      )
-      if (!cancelled) setMarket(data)
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [market, savedProfile, setMarket])
-
-  useEffect(() => {
-    if (jobs.length) return undefined
-    let cancelled = false
-
-    ;(async () => {
-      setLoading(true)
+      setLoadingMarket(true)
       try {
-        const data = await getRecommendedJobs(getOrCreateSessionId(), savedProfile)
-        if (!cancelled) setJobs(data)
+        const sessionId = getOrCreateSessionId()
+        const data = await getMarketDashboard(
+          { city: savedProfile?.ciudad },
+          savedProfile,
+          sessionId,
+        )
+        if (!cancelled) setMarket(data)
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) setLoadingMarket(false)
       }
     })()
 
     return () => {
       cancelled = true
     }
-  }, [jobs.length, savedProfile, setJobs])
+  }, [savedProfile, setMarket])
 
+  useEffect(() => {
+    if (!savedProfile) return undefined
+    let cancelled = false
+
+    ;(async () => {
+      setLoadingJobs(true)
+      try {
+        const data = await getRecommendedJobs(getOrCreateSessionId(), savedProfile)
+        if (!cancelled) setJobs(data)
+      } finally {
+        if (!cancelled) setLoadingJobs(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [savedProfile, setJobs])
+
+  const loading = loadingMarket || loadingJobs
   const rows = useMemo(() => jobs.map(mapJobToVacancyRow), [jobs])
 
   const counts = useMemo(
@@ -122,7 +131,11 @@ export default function VacanciesPage() {
           </div>
 
           <div className="anim-in-delay-1 mb-6">
-            <MarketThermometer market={market} />
+            {loadingMarket && !market ? (
+              <p className="text-sm text-[color:var(--fg-3)]">Actualizando termómetro del mercado…</p>
+            ) : (
+              <MarketThermometer market={market} />
+            )}
           </div>
 
           <div className="anim-in-delay-1 mb-6 grid gap-4 md:grid-cols-3">

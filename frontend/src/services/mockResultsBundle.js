@@ -51,12 +51,23 @@ export function buildMockJobsFromProfile(profile) {
  */
 export function buildMockMarketFromProfile(profile) {
   const city = profile?.ciudad?.trim() || mockMarket.ciudad_filtro || 'Barranquilla'
-  const sector = profile?.sectores_interes?.[0] ?? null
+  const sectors = profile?.sectores_interes?.filter(Boolean).slice(0, 3) ?? []
+  const sector = sectors[0] ?? null
+  const userSkills = new Set(
+    (profile?.habilidades ?? []).map((s) => String(s).toLowerCase()),
+  )
+
+  const topSkills = (mockMarket.top_skills_demandadas ?? []).map((item) => ({
+    ...item,
+    tienes: userSkills.has(item.skill.toLowerCase()),
+  }))
 
   return {
     ...mockMarket,
     ciudad_filtro: city,
     sector_filtro: sector,
+    sectores_filtro: sectors.length > 0 ? sectors : mockMarket.sectores_filtro,
+    top_skills_demandadas: topSkills,
     top_sectores: sector
       ? [{ sector, count: 42 }, ...mockMarket.top_sectores.filter((s) => s.sector !== sector)]
       : mockMarket.top_sectores,
