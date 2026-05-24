@@ -1,10 +1,10 @@
-import json
 import os
 
 from fastapi import HTTPException
 
 from app.db.gemini import get_gemini_model
 from app.models.cv import CvParseOut, CvWizardPrefill
+from app.utils.llm_json import parse_json_from_llm
 from app.utils.logger import get_logger
 from cv_parser import CvConversionError, CvValidationError, cv_file_to_markdown
 
@@ -83,24 +83,23 @@ async def parse_cv_pdf(file_bytes: bytes, filename: str, content_type: str | Non
 
 
 async def _extraer_cv_con_gemini(cv_markdown: str) -> dict:
-    model = get_gemini_model("gemini-1.5-flash")
+    model = get_gemini_model()
     prompt = PROMPT_CV.format(cv_markdown=cv_markdown[:12000])
 
     try:
         respuesta = model.generate_content(prompt)
-        texto = respuesta.text.strip()
-        if texto.startswith("```"):
-            texto = texto.split("```")[1]
-            if texto.startswith("json"):
-                texto = texto[4:]
-        data = json.loads(texto)
+        if not respuesta.text:
+            raise ValueError("Gemini devolvió respuesta vacía")
+        data = parse_json_from_llm(respuesta.text)
         return _apply_wizard_defaults(data)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error extrayendo CV con Gemini: {e}")
-        raise HTTPException(
-            status_code=422,
-            detail="No pudimos interpretar tu CV. Completa el formulario manualmente.",
-        ) from e
+        logger.error(f"Error extrayendo CV con Gemini: {e}", exc_info=True)
+        detail = "No pudimos interpretar tu CV. Completa el formulario manualmente."
+        if os.getenv("APP_ENV", "development") == "development":
+            detail = f"No pudimos interpretar tu CV: {e}"
+        raise HTTPException(status_code=422, detail=detail) from e
 
 
 def _apply_wizard_defaults(data: dict) -> dict:
