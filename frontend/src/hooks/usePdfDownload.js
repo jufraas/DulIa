@@ -15,7 +15,7 @@ export function usePdfDownload() {
     setDownloading(true)
     try {
       const { generateAnalysisPdf } = await import('../utils/generateAnalysisPdf')
-      generateAnalysisPdf({
+      await generateAnalysisPdf({
         profile: savedProfile,
         jobs,
         market,

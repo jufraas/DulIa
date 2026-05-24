@@ -22,6 +22,7 @@
 | 2026-05-23 | frontend | Plan 2 + termómetro + mocks | [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](./decisions/2026-05-23-frontend-plan2-locations-thermometer.md) |
 | 2026-05-23 | frontend | Ubicaciones DANE wizard | [decisions/2026-05-23-frontend-colombia-locations-wizard.md](./decisions/2026-05-23-frontend-colombia-locations-wizard.md) |
 | 2026-05-23 | frontend | Animaciones landing (splash + Framer Motion) | [decisions/2026-05-23-frontend-landing-animations.md](./decisions/2026-05-23-frontend-landing-animations.md) |
+| 2026-05-24 | frontend | PDF html2canvas + layout análisis | [decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md](./decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md) |
 
 ## Decisiones stack (resumen)
 

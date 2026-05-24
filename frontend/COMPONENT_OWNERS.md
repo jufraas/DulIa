@@ -27,7 +27,9 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/utils/radarApi.js` | Parser radar API |
 | `src/utils/marketDisplay.js` | Labels modalidad/fuente (Get on Board, Remotive) para termómetro y PDF |
 | `src/components/shared/ProcessStatusBar.jsx` | Barra fija inferior — CV, submit wizard, PDF |
-| `src/utils/generateAnalysisPdf.js` | PDF completo (analyze, plan, radar, mercado modalidad/fuente, …) |
+| `src/utils/generateAnalysisPdf.jsx` | PDF — React + html2canvas → jsPDF (lazy desde `usePdfDownload`) |
+| `src/components/pdf/*` | `AnalysisPdfDocument`, `PdfSection`, `pdf-document.css` |
+| `src/components/results/AnalysisOverviewGrid.jsx` | Grid score+PDF vs resumen (580px desktop) |
 | `src/store/useProfileStore.js` | Estado global + persistencia cache |
 | `src/utils/coachSuggestions.js` | Bienvenida coach + chips iniciales desde perfil |
 | `src/context/CoachProvider.jsx` | Provider coach en `/resultados` |
@@ -45,7 +47,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — semáforo; **Volver a mi análisis** → `/resultados` |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Resultados: `ResultsSectionNav`, `CoachPromptBanner`, `CoachAskLink`, `OpportunitiesAndPlan`, `MarketThermometer`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
+| `src/components/results/*` | Resultados: `AnalysisOverviewGrid`, `ResultsSectionNav`, `CoachPromptBanner`, `CoachAskLink`, `OpportunitiesAndPlan`, `MarketThermometer`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 

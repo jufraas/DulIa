@@ -2,17 +2,15 @@ import { Navigate } from 'react-router-dom'
 import { Download, Sparkles } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
+import AnalysisOverviewGrid from '../components/results/AnalysisOverviewGrid'
 import CareerTimeline from '../components/results/CareerTimeline'
 import CoachChatBubble from '../components/results/CoachChatBubble'
 import CoachPromptBanner from '../components/results/CoachPromptBanner'
 import MarketThermometer from '../components/results/MarketThermometer'
 import OpportunitiesAndPlan from '../components/results/OpportunitiesAndPlan'
-import PdfDownloadCard from '../components/results/PdfDownloadCard'
-import ProfileSummary from '../components/results/ProfileSummary'
 import RadarMatch from '../components/results/RadarMatch'
 import ResultsSection from '../components/results/ResultsSection'
 import ResultsSectionNav from '../components/results/ResultsSectionNav'
-import ScoreCard from '../components/results/ScoreCard'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import SessionLoading from '../components/shared/SessionLoading'
@@ -77,21 +75,15 @@ export default function ResultsPage() {
 
               <div className="results-page-sections min-w-0 flex-1">
                 <ResultsSection id="resultados-analisis" className="anim-in-delay-1 mb-12">
-                  <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-                    <div className="flex h-full min-h-0 flex-col gap-4 lg:min-h-[580px]">
-                      <ScoreCard score={topScore} comparativa={insights?.comparativa} />
-                      <PdfDownloadCard onDownload={downloadPdf} downloading={downloading} />
-                    </div>
-                    <div className="flex h-full min-h-0 flex-col lg:min-h-[580px]">
-                      <ProfileSummary
-                        profile={savedProfile}
-                        topScore={topScore}
-                        topJobTitle={topJob?.titulo}
-                        insights={insights}
-                        className="h-full flex-1"
-                      />
-                    </div>
-                  </div>
+                  <AnalysisOverviewGrid
+                    topScore={topScore}
+                    comparativa={insights?.comparativa}
+                    profile={savedProfile}
+                    topJobTitle={topJob?.titulo}
+                    insights={insights}
+                    onDownloadPdf={downloadPdf}
+                    downloadingPdf={downloading}
+                  />
                 </ResultsSection>
 
                 <ResultsSection id="resultados-mercado" className="anim-in-delay-2 mb-6">

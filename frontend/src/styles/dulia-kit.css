@@ -567,3 +567,38 @@ button { font-family: inherit; cursor: pointer; }
     gap: 2rem;
   }
 }
+
+/* Tu análisis — score+PDF y resumen: misma fila, misma altura */
+.analysis-overview-grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.analysis-overview-grid__left {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.analysis-overview-grid__left .pdf-card-anim {
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 1rem;
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .analysis-overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .analysis-overview-grid__left,
+  .analysis-overview-grid .profile-summary-card {
+    height: 580px;
+    min-height: 580px;
+    max-height: 580px;
+  }
+}

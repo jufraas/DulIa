@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Resultados:** nav por secciones + presencia coach (banner, CTAs, teaser) · bloque análisis con columnas alineadas.
+2026-05-24 — **Resultados:** PDF React+html2canvas · `AnalysisOverviewGrid` (score+PDF vs resumen, 580px desktop).
 
 ## Estado por módulo
 
@@ -48,7 +48,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
 | Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
-| Layout `/resultados` | ✅ | Score+PDF vs resumen misma altura (580px desktop); `OpportunitiesAndPlan` (altura sync + scroll plan) |
+| Layout `/resultados` | ✅ | `AnalysisOverviewGrid` — contenedor único izq. (score+PDF) = resumen (580px desktop, scroll interno); `OpportunitiesAndPlan` |
 | Nav secciones `/resultados` | ✅ | `ResultsSectionNav` — vertical sticky (desktop) / chips (móvil); 6 anclas agrupadas |
 | Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
 | Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
@@ -60,7 +60,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
 | Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |
 | Links `url` en vacantes | ✅ | Preview + panel semáforo; mock con URLs demo |
-| Descarga PDF (jsPDF) | ✅ | Score, análisis, plan 30d, radar, jobs, mercado, perfil |
+| Descarga PDF | ✅ | React + html2canvas → jsPDF multipágina (`AnalysisPdfDocument`, lazy en `usePdfDownload`) |
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
 

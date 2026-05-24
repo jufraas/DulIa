@@ -9,7 +9,7 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 1. Captura perfil en wizard (**3 pasos**, campos en español).
 2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
 3. Backend calcula matching con vacantes y expone dashboard de mercado.
-4. Frontend muestra resultados completos: análisis IA, termómetro, plan 30-60-90, radar, timeline, vacantes con semáforo y PDF (jsPDF).
+4. Frontend muestra resultados completos: análisis IA, termómetro, plan 30-60-90, radar, timeline, vacantes con semáforo y PDF (React + html2canvas → jsPDF).
 5. Coach: `CoachChatBubble` → `postCoachChat()` → `POST /api/coach/chat` (UI ✅).
 6. Plan 2: `loadResultsBundle()` → analyze + action-plan + radar/timeline (front ✅).
 

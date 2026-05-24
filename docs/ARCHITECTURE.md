@@ -46,7 +46,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 - **Persistencia:** cache en `dulia_session_data` (incluye plan, radar, timeline); borrador wizard en `dulia_wizard_draft`.
 - **Rehidratación** al cargar app (`sessionHydration.js`): cache → `GET /profile` → `loadResultsBundle` si faltan datos.
 - Fallbacks: `mockResultsBundle.js` (personalizado al perfil) + `mockData`, `mockCvPrefill`, `mockProfileFromPayload`, `mockPlan`, `mockCoachChat`.
-- PDF (jsPDF): score, análisis IA, plan 30d, radar, vacantes, mercado, perfil.
+- PDF: documento React (`AnalysisPdfDocument`) capturado con html2canvas → jsPDF multipágina (`generateAnalysisPdf.jsx`, lazy).
 - **Coach:** `CoachChatBubble` → `postCoachChat()`.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 - **Motion landing:** `framer-motion` vía `components/motion/RevealOnScroll.jsx`; splash orquestado en `WelcomePage` (ver [decisión landing animations](decisions/2026-05-23-frontend-landing-animations.md)).
@@ -112,7 +112,7 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | Termómetro mercado | `MarketThermometer` en `/resultados` y `/vacantes` | Agrega sobre `jobs` |
 | Plan 30 días | `ThirtyDayPlan` ← `POST .../action-plan` o mock por perfil (1 curso por habilidad) | Plan 2 + Gemini |
 | Coach / chat | `CoachChatBubble` → `postCoachChat()` | Gemini + perfil |
-| PDF plan de acción | `generateAnalysisPdf.js` (score, analyze, plan, radar, jobs, market) | — |
+| PDF plan de acción | `generateAnalysisPdf.jsx` + `components/pdf/*` (html2canvas → jsPDF) | — |
 
 ## Estructura frontend relevante
 
@@ -125,7 +125,8 @@ frontend/src/
 ├── services/        # api.js, mockResultsBundle.js, mock*.js, sessionHydration.js
 ├── store/           # useProfileStore.js (profile, jobs, market, plan, radar, timeline, analysis)
 ├── constants/       # colombiaLocations.js (DANE)
-└── utils/           # session, sessionCache, planDisplay, radarApi, analysisDisplay, timelineDisplay, generateAnalysisPdf
+├── components/pdf/  # AnalysisPdfDocument, PdfSection
+└── utils/           # session, sessionCache, planDisplay, radarApi, analysisDisplay, timelineDisplay, generateAnalysisPdf.jsx
 ```
 
 ## Roadmap post-MVP

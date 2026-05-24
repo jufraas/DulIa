@@ -26,7 +26,8 @@ Completar la integración visual en tres sprints sin cambiar contratos API.
 
 ### Sprint 3 — PDF y pulido
 
-- `generateAnalysisPdf.js`: score, análisis IA, plan 30d, radar, jobs (con URL), mercado, perfil.
+- PDF: `generateAnalysisPdf.jsx` + `AnalysisPdfDocument` (React → html2canvas → jsPDF). Reemplaza jsPDF imperativo.
+- Layout análisis: `AnalysisOverviewGrid` — contenedor único score+PDF alineado con resumen (580px desktop).
 - `OpportunitiesPreview`: copy dinámico desde `market.total_vacantes_activas`.
 - Campo `url` en vacantes (preview + panel); mocks con URLs demo.
 

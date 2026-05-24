@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Nav secciones resultados + presencia coach + layout análisis alineado.
+**Última actualización:** 2026-05-24 · PDF React+html2canvas · `AnalysisOverviewGrid` (columnas alineadas).
 
 ---
 
@@ -29,7 +29,7 @@
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
-| PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
+| PDF export | ✅ | `generateAnalysisPdf.jsx` — `AnalysisPdfDocument` + html2canvas + jsPDF (lazy) |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
 

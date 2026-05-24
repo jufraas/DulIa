@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Frontend: nav secciones `/resultados`, presencia coach, layout análisis.
+**Última actualización:** 2026-05-24 · Frontend: PDF html2canvas, `AnalysisOverviewGrid`, nav/coach resultados.
 
 ## Base URL
 
@@ -377,7 +377,7 @@ Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil pre
 
 **Errores:** `404` sin perfil · `500` error interno.
 
-**Frontend:** `loadResultsBundle()` → store → UI (`ProfileSummary`, `ThirtyDayPlan`, `RadarMatch`, `CareerTimeline`, `CoachChatBubble`) + `generateAnalysisPdf.js`.
+**Frontend:** `loadResultsBundle()` → store → UI (`AnalysisOverviewGrid`, `ProfileSummary`, `ThirtyDayPlan`, `RadarMatch`, `CareerTimeline`, `CoachChatBubble`) + `generateAnalysisPdf.jsx` (React + html2canvas).
 
 ---
 

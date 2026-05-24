@@ -46,7 +46,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
 6. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
-7. PDF (`generateAnalysisPdf.js`): score, análisis, plan, radar, vacantes, mercado, perfil.
+7. PDF (`generateAnalysisPdf.jsx`): documento React off-screen → html2canvas → jsPDF multipágina (lazy).
 
 Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
 
@@ -68,7 +68,7 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 ```
 src/
 ├── pages/
-├── components/         # about/, welcome/, onboarding/, results/, vacancies/, motion/, …
+├── components/         # about/, welcome/, onboarding/, results/, pdf/, vacancies/, motion/, …
 ├── components/motion/
 │   └── RevealOnScroll.jsx   # Framer Motion: mount (hero) | scroll (secciones)
 ├── hooks/              # useOnboardingForm, useResultsSectionNav, useCoachContext, …
@@ -115,7 +115,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Nav (6 ítems) | Contenido |
 |---------------|-----------|
-| Tu análisis | `ScoreCard` + `PdfDownloadCard` + `ProfileSummary` (misma altura en desktop) |
+| Tu análisis | `AnalysisOverviewGrid` — contenedor único izq. (score + PDF) = resumen (580px desktop) |
 | Mercado | `MarketThermometer` |
 | Vacantes y plan | `OpportunitiesAndPlan` |
 | Radar match | `RadarMatch` |
@@ -140,13 +140,12 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Sección | Componente |
 |---------|------------|
-| Score + PDF | `ScoreCard` (`flex-1`) + `PdfDownloadCard` — columna izq. |
-| Resumen IA | `ProfileSummary` — `h-full`, scroll interno |
+| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` embedded + `PdfDownloadCard`) vs `ProfileSummary` |
 | Termómetro mercado | `MarketThermometer` — modalidad/fuente (`marketDisplay.js`) |
 | Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
 | Match radar | `RadarMatch` |
 | Timeline + coach FAB | `CareerTimeline`, `CoachChatBubble` |
-| PDF | `generateAnalysisPdf.js` + banner descarga |
+| PDF | `components/pdf/AnalysisPdfDocument` + `generateAnalysisPdf.jsx` (lazy) |
 | Carga larga | `ProcessStatusBar` — generación PDF |
 
 ## División de trabajo
