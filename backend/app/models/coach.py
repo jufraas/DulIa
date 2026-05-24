@@ -1,11 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
+
+
+class HistorialTurno(BaseModel):
+    """Un turno previo del chat coach (para continuidad conversacional)."""
+    role: str = Field(..., description="'usuario' o 'coach'")
+    texto: str
 
 
 class ChatMessage(BaseModel):
     """Mensaje del usuario al coach conversacional."""
     session_id: str
     mensaje: str
+    historial: list[HistorialTurno] = Field(default_factory=list)
 
 
 class ChatResponse(BaseModel):

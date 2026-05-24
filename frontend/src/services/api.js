@@ -150,13 +150,19 @@ export async function parseCvPdf(file) {
  * @param {string} [sessionId]
  * @returns {Promise<import('../store/useProfileStore').CoachChatResponse>}
  */
-export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId()) {
+/**
+ * @param {string} mensaje
+ * @param {string} [sessionId]
+ * @param {{ role: 'usuario' | 'coach', texto: string }[]} [historial]
+ */
+export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId(), historial = []) {
   try {
     const { data } = await api.post(
       '/coach/chat',
       {
         session_id: sessionId,
         mensaje,
+        historial,
       },
       { timeout: 60000 },
     )

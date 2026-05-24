@@ -460,7 +460,11 @@ Coach con contexto del perfil (`profiles`). System prompt en `docs/PROMPTS.md` (
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
-  "mensaje": "¿Qué debería aprender para mejorar mi perfil en logística?"
+  "mensaje": "¿Qué debería aprender para mejorar mi perfil en logística?",
+  "historial": [
+    { "role": "usuario", "texto": "¿Cómo subo mi score de 65?" },
+    { "role": "coach", "texto": "Para subir ese 65, enfócate en..." }
+  ]
 }
 ```
 
@@ -468,6 +472,7 @@ Coach con contexto del perfil (`profiles`). System prompt en `docs/PROMPTS.md` (
 |-------|------|-------|
 | `session_id` | string | **Requerido.** Mismo UUID del onboarding |
 | `mensaje` | string | **Requerido.** Pregunta del usuario |
+| `historial` | array | Opcional. Turnos previos `{ role: "usuario"\|"coach", texto }` para continuidad (evita saludos repetidos) |
 
 **Response 200:**
 ```json
