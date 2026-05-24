@@ -75,6 +75,7 @@ export default function RegisterPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!supabase) return undefined
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate('/', { replace: true })
     })
@@ -85,6 +86,10 @@ export default function RegisterPage() {
   }
 
   async function handleGoogleRegister() {
+    if (!supabase) {
+      setError('Registro no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
+      return
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
@@ -95,6 +100,10 @@ export default function RegisterPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
+    if (!supabase) {
+      setError('Registro no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
+      return
+    }
     const { error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,

@@ -81,6 +81,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function load() {
+      if (!supabase) {
+        navigate('/login', { replace: true })
+        return
+      }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate('/login', { replace: true }); return }
 
@@ -113,6 +117,7 @@ export default function ProfilePage() {
   async function savePersonal(e) {
     e.preventDefault()
     setPersonalMsg(null)
+    if (!supabase) return
     const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('profiles').upsert({ id: user.id, nombre, apellido, telefono })
     setPersonalMsg(error ? { ok: false, text: error.message } : { ok: true, text: '¡Guardado!' })
@@ -121,12 +126,14 @@ export default function ProfilePage() {
   async function saveSocial(e) {
     e.preventDefault()
     setSocialMsg(null)
+    if (!supabase) return
     const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('profiles').upsert({ id: user.id, linkedin, instagram, whatsapp })
     setSocialMsg(error ? { ok: false, text: error.message } : { ok: true, text: '¡Guardado!' })
   }
 
   async function handleSignOut() {
+    if (!supabase) return
     await supabase.auth.signOut()
     navigate('/')
   }
