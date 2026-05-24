@@ -41,8 +41,8 @@ export default function InterviewPage() {
   const [finishing, setFinishing] = useState(false)
 
   useEffect(() => {
-    void fetchHistory(user?.id)
-  }, [fetchHistory, user?.id])
+    void fetchHistory()
+  }, [fetchHistory])
 
   async function handleStart(skill, rol) {
     setResultado(null)
@@ -69,7 +69,7 @@ export default function InterviewPage() {
           : MOCK_INTERVIEW_RESULT
       setResultado(display)
       setView('resultados')
-      await fetchHistory(user?.id)
+      await fetchHistory()
     } finally {
       setFinishing(false)
     }

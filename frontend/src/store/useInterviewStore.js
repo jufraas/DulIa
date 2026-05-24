@@ -25,10 +25,12 @@ export const useInterviewStore = create((set, get) => ({
   dataSource: /** @type {InterviewDataSource} */ ('api'),
   dataSourceDetail: '',
 
-  fetchHistory: async (userId) => {
+  fetchHistory: async () => {
+    const sessionId =
+      useProfileStore.getState().savedProfile?.session_id ?? getOrCreateSessionId()
     set({ loading: true, error: '' })
     try {
-      const result = await interviewHistoryApi(userId ?? 'demo-user')
+      const result = await interviewHistoryApi(sessionId)
       set({
         history: result.data,
         dataSource: result.dataSource,
@@ -104,7 +106,7 @@ export const useInterviewStore = create((set, get) => ({
         dataSourceDetail: result.fallbackDetail ?? '',
         loading: false,
       })
-      await get().fetchHistory(userId)
+      await get().fetchHistory()
       return result.data
     } catch (err) {
       set({

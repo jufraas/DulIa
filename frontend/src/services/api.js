@@ -27,10 +27,66 @@ import {
 import {
   finishMockInterview,
   getMockInterviewHistory,
-  normalizeInterviewSession,
   startMockInterview,
   submitMockAnswer,
 } from '../mocks/mockInterview'
+
+/** Estado local de entrevistas API (B5) — el backend no devuelve sesión completa en cada answer. */
+/** @type {Map<string, { sessionId: string, skill: string, role: string | null, questions: Array<{ texto?: string }>, answersCount: number, feedback: Array<{ question_index: number, question: string, answer: string, feedback: string, score: number }> }>} */
+const apiInterviewRuntime = new Map()
+
+/** @param {string} interviewId */
+function buildApiInterviewSession(interviewId) {
+  const rt = apiInterviewRuntime.get(interviewId)
+  if (!rt) return null
+  const total = rt.questions.length || 5
+  const idx = Math.min(rt.answersCount, total - 1)
+  const current = rt.questions[idx]
+  return {
+    id: interviewId,
+    session_id: rt.sessionId,
+    skill: rt.skill,
+    role: rt.role,
+    current_question: {
+      index: rt.answersCount + 1,
+      text: String(current?.texto ?? current?.text ?? ''),
+      total,
+    },
+    answers_count: rt.answersCount,
+    status: rt.answersCount >= total ? /** @type {'finished'} */ ('finished') : /** @type {'active'} */ ('active'),
+  }
+}
+
+/** @param {unknown} items */
+function normalizeInterviewHistoryItems(items) {
+  if (!Array.isArray(items)) return []
+  return items.map((item) => {
+    const row = /** @type {Record<string, unknown>} */ (item)
+    return {
+      id: String(row.id ?? ''),
+      skill: String(row.target_skill ?? row.skill ?? ''),
+      score: Number(row.global_score ?? row.score ?? 0),
+      finished_at: String(row.completed_at ?? row.created_at ?? row.finished_at ?? ''),
+      role: row.target_role != null ? String(row.target_role) : row.role != null ? String(row.role) : null,
+    }
+  })
+}
+
+/** @param {unknown} data @param {string} interviewId */
+function normalizeInterviewFinish(data, interviewId) {
+  const raw = /** @type {Record<string, unknown>} */ (data ?? {})
+  const rt = apiInterviewRuntime.get(interviewId)
+  const result = {
+    id: String(raw.interview_id ?? interviewId),
+    skill: rt?.skill ?? '',
+    score: Number(raw.global_score ?? raw.score ?? 0),
+    feedback: rt?.feedback ?? [],
+    weak_skills: Array.isArray(raw.weak_skills) ? raw.weak_skills.map(String) : [],
+    finished_at: new Date().toISOString(),
+  }
+  apiInterviewRuntime.delete(interviewId)
+  return result
+}
 
 const baseURL = import.meta.env.VITE_API_URL || '/api'
 
@@ -530,10 +586,24 @@ export async function startInterview(skill, role = null, sessionId = getOrCreate
     async () => {
       const { data } = await api.post('/interview/start', {
         session_id: sessionId,
-        skill,
-        role,
+        target_skill: skill,
+        target_role: role,
       })
-      const normalized = normalizeInterviewSession(data)
+      const raw = /** @type {Record<string, unknown>} */ (data ?? {})
+      const interviewId = String(raw.interview_id ?? raw.id ?? '')
+      const questions = Array.isArray(raw.questions) ? raw.questions : []
+      if (!interviewId || questions.length === 0) {
+        throw new Error('Respuesta entrevista inválida')
+      }
+      apiInterviewRuntime.set(interviewId, {
+        sessionId,
+        skill,
+        role: role ?? null,
+        questions,
+        answersCount: 0,
+        feedback: [],
+      })
+      const normalized = buildApiInterviewSession(interviewId)
       if (!normalized) throw new Error('Respuesta entrevista inválida')
       return normalized
     },
@@ -550,8 +620,24 @@ export async function startInterview(skill, role = null, sessionId = getOrCreate
 export async function submitAnswer(interviewId, answer) {
   return withProgressFallback(
     async () => {
-      const { data } = await api.post(`/interview/${interviewId}/answer`, { answer })
-      const normalized = normalizeInterviewSession(data)
+      const rt = apiInterviewRuntime.get(interviewId)
+      if (!rt) throw new Error('Sesión de entrevista no encontrada')
+      const question_idx = rt.answersCount
+      const { data } = await api.post(`/interview/${interviewId}/answer`, {
+        question_idx,
+        answer,
+      })
+      const evalRow = /** @type {Record<string, unknown>} */ (data ?? {})
+      const questionText = String(rt.questions[question_idx]?.texto ?? rt.questions[question_idx]?.text ?? '')
+      rt.feedback.push({
+        question_index: question_idx + 1,
+        question: questionText,
+        answer,
+        feedback: String(evalRow.feedback ?? ''),
+        score: Number(evalRow.score ?? 0),
+      })
+      rt.answersCount += 1
+      const normalized = buildApiInterviewSession(interviewId)
       if (!normalized) throw new Error('Respuesta parcial inválida')
       return normalized
     },
@@ -572,8 +658,8 @@ export async function submitAnswer(interviewId, answer) {
 export async function finishInterview(interviewId, userId = 'demo-user') {
   return withProgressFallback(
     async () => {
-      const { data } = await api.post(`/interview/${interviewId}/finish`, { user_id: userId })
-      return data
+      const { data } = await api.post(`/interview/${interviewId}/finish`)
+      return normalizeInterviewFinish(data, interviewId)
     },
     () => {
       const result = finishMockInterview(interviewId, userId)
@@ -585,16 +671,16 @@ export async function finishInterview(interviewId, userId = 'demo-user') {
 }
 
 /**
- * @param {string} [userId]
+ * @param {string} [sessionId]
  * @returns {Promise<ProgressApiResult<import('../mocks/mockInterview').InterviewHistoryItem[]>>}
  */
-export async function interviewHistory(userId = 'demo-user') {
+export async function interviewHistory(sessionId = getOrCreateSessionId()) {
   return withProgressFallback(
     async () => {
-      const { data } = await api.get('/interview/history', { params: { user_id: userId } })
-      return Array.isArray(data) ? data : data?.items ?? []
+      const { data } = await api.get(`/interview/history/${sessionId}`)
+      return normalizeInterviewHistoryItems(data)
     },
-    () => getMockInterviewHistory(userId),
+    () => getMockInterviewHistory(sessionId),
     'interviewHistory',
   )
 }
