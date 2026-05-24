@@ -4,12 +4,19 @@ import { findProgressTaskByLabel } from '../../mocks/mockProgress'
 import { useProfileStore } from '../../store/useProfileStore'
 import { useProgressStore } from '../../store/useProgressStore'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../../utils/planDisplay'
+import { ActivePhaseProgressStrip } from './ProgressOverview'
 
 const TABS = [
   { id: '30', label: '30 días' },
   { id: '60', label: '60 días' },
   { id: '90', label: '90 días' },
 ]
+
+const TAB_PHASE_LABELS = {
+  30: 'Progreso fase 30 días',
+  60: 'Progreso fase 60 días',
+  90: 'Progreso fase 90 días',
+}
 
 /**
  * @param {import('../../mocks/mockProgress').PlanPhase} phase
@@ -94,6 +101,11 @@ export default function PlanTimeline() {
             </button>
           ))}
         </div>
+
+        <ActivePhaseProgressStrip
+          phase={phaseMeta(activeTab)}
+          label={TAB_PHASE_LABELS[activeTab] ?? `Fase ${activeTab}`}
+        />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-7 py-5">
