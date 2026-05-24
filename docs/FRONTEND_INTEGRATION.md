@@ -24,8 +24,9 @@
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
 | Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
-| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; PDF en grid sin `flex-1` (evita recorte); `.cursor/rules/results-layout-frozen.mdc` |
-| Nav secciones resultados | ✅ | 6 secciones; label **Oportunidades** (antes «Vacantes y plan»); `RegisterProgressButton` en análisis + PDF |
+| Layout `/resultados` | ✅ | **Congelado** — `compactGrid` + `pdf-card-in-grid` + 580px; ver `.cursor/rules/results-layout-frozen.mdc` |
+| Nav secciones resultados | ✅ | 6 secciones; label **Oportunidades**; `RegisterProgressButton` compact en análisis + PDF |
+| PDF export | ✅ | Bloques `[data-pdf-block]`, `scrollHeight`, timeline/skills, `exportMode`; ver decisión PDF |
 | Nav global (`SiteHeader`) | ✅ | «Oportunidades» → `/vacantes`; **sin** link Entrevistas en header (acceso vía `/progreso`) |
 | Copy orientado al usuario | ✅ | Sin `session_id` en UI; banners offline/progreso sin jerga de backend; `PrivacyNotice` según auth |
 | Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
@@ -35,8 +36,7 @@
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch jobs** al montar (sin cache stale) |
-| PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
-| Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro`, `/perfil` protegida, `linkSession` |
+| Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro` (← historial), `/perfil` protegida, `linkSession` |
 | Mi Progreso — M2.4 timeline | ✅ | `PlanTimeline.jsx`; `ThirtyDayPlan` en resultados **sin cambios** |
 | Mi Progreso — M2.5 barras | ✅ | `ProgressOverview` + hooks animación |
 | Mi Progreso — M2.6 lock overlay | ✅ | `PhaseLockOverlay` en fases 60/90 bloqueadas |

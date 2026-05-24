@@ -25,13 +25,21 @@ El export PDF usaba jsPDF imperativo (~230 líneas) difícil de mantener y desal
 - Nuevo `AnalysisOverviewGrid.jsx`: grid 2 columnas en desktop.
 - Columna izquierda: **un solo** `card-dl` con `ScoreCard` (`embedded`, compacto) + `PdfDownloadCard` (`pdf-card-in-grid`, altura natural) + `RegisterProgressButton` (compacto).
 - Columna derecha: `ProfileSummary` (`profile-summary-card`).
-- CSS en `dulia-kit.css`: ambas columnas **580px** en `lg+`; scroll interno solo en el resumen.
+- CSS en `dulia-kit.css`: ambas columnas **580px** en `lg+`; columna izq. con **`ScoreCard compactGrid`**, **`pdf-card-in-grid`**, **`RegisterProgressButton` compact** — **congelado** (2026-05-24).
+- Columna derecha: scroll interno en `ProfileSummary`.
 
 ### 3. Layout `/resultados` congelado
 
-- Diseño visual aprobado — **no modificar** tamaños/grid/alturas de componentes existentes sin pedido explícito.
+- Diseño visual aprobado — **no modificar** `.analysis-overview-grid*`, `compactGrid`, `pdf-card-in-grid` sin pedido explícito.
 - Nuevos bloques: insertar entre secciones o al final en `ResultsPage.jsx`.
 - Regla Cursor: `.cursor/rules/results-layout-frozen.mdc` · nota en `COMPONENT_OWNERS.md`.
+
+### 4. Contenido y captura PDF (2026-05-24)
+
+- Bloques separados: header, intro (+ skills), score, análisis, plan, radar, timeline, oportunidades, mercado, perfil.
+- Captura con `scrollHeight` (evita recorte de texto).
+- `ScoreRing exportMode` — número visible en html2canvas (sin `background-clip: text`).
+- Datos alineados a pantalla: intro tipo `ProfileSummary`, timeline 90d, top job fallback.
 
 ## Consecuencias
 
@@ -39,7 +47,7 @@ El export PDF usaba jsPDF imperativo (~230 líneas) difícil de mantener y desal
 |---------|---------|
 | Bundle PDF | Chunk lazy ~600KB (html2canvas) al descargar |
 | Mantenimiento | Misma estructura visual que pantalla; cambios en JSX del PDF |
-| Desktop | Score fijo arriba; PDF + CTA progreso apilados sin estirar (`flex: 0 0 auto`) para evitar recorte en 580px |
+| Desktop | Score `compactGrid` arriba; PDF + CTA progreso en `__actions` (scroll si overflow); **580px fijos** |
 | Móvil | Columnas apiladas; resumen con `max-height` y scroll |
 
 ## Referencias

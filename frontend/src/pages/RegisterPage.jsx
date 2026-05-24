@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import DuliaLogo from '../components/brand/DuliaLogo'
 import AuthDisabledBanner from '../components/auth/AuthDisabledBanner'
@@ -96,6 +96,7 @@ export default function RegisterPage() {
 
 function RegisterPageContent() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, isConfigured } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ nombre: '', apellido: '', email: '', telefono: '', password: '' })
@@ -171,6 +172,14 @@ function RegisterPageContent() {
     ...(isConfigured ? {} : disabledBtn),
   }
 
+  function handleGoBack() {
+    if (location.key !== 'default') {
+      navigate(-1)
+      return
+    }
+    navigate('/')
+  }
+
   return (
     <div
       style={{ minHeight: '100vh', backgroundColor: '#0F0F17', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}
@@ -187,22 +196,27 @@ function RegisterPageContent() {
           position: 'relative',
         }}
       >
-        <Link
-          to="/"
+        <button
+          type="button"
+          onClick={handleGoBack}
+          aria-label="Volver"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 6,
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: 14,
-            fontWeight: 600,
-            textDecoration: 'none',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
             marginBottom: 20,
+            padding: 0,
+            border: 'none',
+            borderRadius: 10,
+            background: 'rgba(255,255,255,0.06)',
+            color: 'rgba(255,255,255,0.55)',
+            cursor: 'pointer',
           }}
         >
-          <ArrowLeft width={16} height={16} aria-hidden />
-          Volver al inicio
-        </Link>
+          <ArrowLeft width={18} height={18} aria-hidden />
+        </button>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
           <DuliaLogo height={36} />

@@ -102,13 +102,28 @@ async function buildPdfFromBlocks(pdf, blocks, filename) {
   const layout = { yMm: PAGE_MARGIN_MM, pageOpen: false }
 
   for (const block of blocks) {
+    const captureWidth = block.scrollWidth || block.offsetWidth
+    const captureHeight = Math.max(block.scrollHeight, block.offsetHeight)
+
     const canvas = await html2canvas(block, {
       scale: CAPTURE_SCALE,
       backgroundColor: '#0D0D0D',
       useCORS: true,
       logging: false,
-      width: block.offsetWidth,
-      height: block.offsetHeight,
+      width: captureWidth,
+      height: captureHeight,
+      windowWidth: captureWidth,
+      windowHeight: captureHeight,
+      onclone: (doc) => {
+        doc.querySelectorAll('.score-ring-export-value').forEach((el) => {
+          if (!(el instanceof HTMLElement)) return
+          el.style.background = 'none'
+          el.style.backgroundClip = 'border-box'
+          el.style.webkitBackgroundClip = 'border-box'
+          el.style.color = '#C084FC'
+          el.style.webkitTextFillColor = '#C084FC'
+        })
+      },
     })
 
     if (canvas.width === 0 || canvas.height === 0) continue
@@ -128,6 +143,8 @@ async function buildPdfFromBlocks(pdf, blocks, filename) {
  *   analysis?: unknown,
  *   plan?: import('../store/useProfileStore').ActionPlan | null,
  *   radar?: import('./radarApi').RadarChartData | null,
+ *   timeline?: unknown,
+ *   topJob?: import('../store/useProfileStore').Job | null,
  * }} data
  */
 export async function generateAnalysisPdf(data) {

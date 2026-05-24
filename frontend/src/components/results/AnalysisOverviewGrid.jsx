@@ -27,7 +27,7 @@ export default function AnalysisOverviewGrid({
   return (
     <div className="analysis-overview-grid">
       <div className="card-dl analysis-overview-grid__left">
-        <ScoreCard score={topScore} comparativa={comparativa} embedded />
+        <ScoreCard score={topScore} comparativa={comparativa} embedded compactGrid />
         <div className="analysis-overview-grid__actions">
           <PdfDownloadCard
             onDownload={onDownloadPdf}

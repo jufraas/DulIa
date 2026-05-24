@@ -12,6 +12,7 @@ import {
   MARKET_GROWTH_HINT,
 } from '../../utils/marketDisplay'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../../utils/planDisplay'
+import { parseTimelineResponse } from '../../utils/timelineDisplay'
 import { RADAR_DIMENSION_KEYS, RADAR_DIMENSION_LABELS } from '../../utils/radarApi'
 import '../../styles/pdf-document.css'
 
@@ -23,6 +24,8 @@ import '../../styles/pdf-document.css'
  *   analysis?: unknown,
  *   plan?: import('../../store/useProfileStore').ActionPlan | null,
  *   radar?: import('../../utils/radarApi').RadarChartData | null,
+ *   timeline?: unknown,
+ *   topJob?: import('../../store/useProfileStore').Job | null,
  * }} props
  */
 export default function AnalysisPdfDocument({
@@ -32,6 +35,8 @@ export default function AnalysisPdfDocument({
   analysis = null,
   plan = null,
   radar = null,
+  timeline = null,
+  topJob = null,
 }) {
   const insights = parseAnalysisResponse(analysis)
   const score = resolveEmployabilityScore({ insights, jobs, radar })
@@ -54,6 +59,30 @@ export default function AnalysisPdfDocument({
   const scoreLabel =
     score >= 70 ? 'Buen nivel' : score >= 50 ? 'En camino' : 'Hay margen de mejora'
 
+  const skills = profile.habilidades ?? []
+  const timelineData = parseTimelineResponse(timeline)
+
+  const introParts = []
+  if (name) {
+    introParts.push(
+      `Hola ${name}${city ? ` de ${city}` : ''}.`,
+    )
+  }
+  if (insights?.descripcion) {
+    introParts.push(insights.descripcion)
+  } else if (topJob?.titulo) {
+    introParts.push(
+      `Tu mejor match es ${topJob.titulo} con un score de ${score} sobre 100.`,
+    )
+  } else {
+    introParts.push(`Tu score de empleabilidad es ${score} sobre 100.`)
+  }
+  if (!insights?.descripcion) {
+    introParts.push(
+      'Aplica a las vacantes verdes primero y refuerza las habilidades que te faltan.',
+    )
+  }
+
   return (
     <div className="pdf-capture-root">
       <div className="pdf-block pdf-block--first" data-pdf-block>
@@ -65,24 +94,32 @@ export default function AnalysisPdfDocument({
             <span>{dateStr}</span>
           </div>
         </header>
+      </div>
 
-        <p className="pdf-intro">
-          <strong>{city ? `${name} · ${city}` : name}</strong>
-          {insights?.descripcion ? (
-            <>
-              {' '}
-              — {insights.descripcion}
-            </>
-          ) : null}
-        </p>
+      <div className="pdf-block pdf-block--intro" data-pdf-block>
+        <p className="pdf-intro">{introParts.join(' ')}</p>
+        {skills.length > 0 && (
+          <div className="pdf-skills">
+            <p className="pdf-skills__label">Habilidades clave</p>
+            <div className="pdf-skills__chips">
+              {skills.slice(0, 8).map((skill) => (
+                <span key={skill} className="pdf-skills__chip">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="pdf-block" data-pdf-block>
         <div className="card-dl pdf-score-row">
-          <ScoreRing value={score} size={108} stroke={10} animate={false} />
+          <div className="pdf-score-row__ring">
+            <ScoreRing value={score} size={108} stroke={10} animate={false} exportMode />
+          </div>
           <div className="pdf-score-row__info">
             <h3>Score de empleabilidad</h3>
-            <p>
+            <p className="pdf-score-row__score-line">
               {score}/100 · {scoreLabel}
             </p>
             {insights?.comparativa ? (
@@ -230,8 +267,34 @@ export default function AnalysisPdfDocument({
         </PdfSection>
       )}
 
+      {timelineData && (
+        <PdfSection eyebrow="Proyección" title="Tu proyección 90 días">
+          {timelineData.proyeccion ? (
+            <p className="pdf-timeline-proyeccion">{timelineData.proyeccion}</p>
+          ) : null}
+          <div className="pdf-timeline">
+            {timelineData.fases.map((fase) => (
+              <div key={`${fase.dia}-${fase.titulo}`} className="pdf-timeline__item">
+                <div className="pdf-timeline__marker">{fase.dia === 0 ? '●' : `D${fase.dia}`}</div>
+                <div className="pdf-timeline__body">
+                  <p className="pdf-timeline__title">
+                    {fase.dia === 0 ? 'Hoy' : `Día ${fase.dia}`} — {fase.titulo}
+                  </p>
+                  {fase.descripcion ? (
+                    <p className="pdf-timeline__desc">{fase.descripcion}</p>
+                  ) : null}
+                  {fase.score != null && (
+                    <p className="pdf-timeline__metric">Score proyectado: {Math.round(fase.score)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </PdfSection>
+      )}
+
       {sortedJobs.length > 0 && (
-        <PdfSection eyebrow="Vacantes" title="Recomendadas para ti">
+        <PdfSection eyebrow="Oportunidades" title="Recomendadas para ti">
           {sortedJobs.slice(0, 8).map((job) => {
             const semClass =
               job.semaforo === 'green'

@@ -4,9 +4,9 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Layout análisis:** tarjeta PDF sin recorte en columna izquierda (`pdf-card-in-grid`, CTA progreso compacto, score embedded más ajustado).
+2026-05-24 — **Layout análisis congelado** + PDF export (timeline, skills, captura score) + auth volver con historial.
 
-2026-05-24 — **UX polish (nav, copy, progreso):** sección «Oportunidades» en resultados, CTA «Registrar mi progreso», entrevista V2 desde `/progreso`, copy orientado al usuario, login/registro con volver.
+2026-05-24 — **UX polish (nav, copy, progreso):** sección «Oportunidades», CTA «Registrar mi progreso», entrevista V2, login/registro.
 
 2026-05-24 — **Entrevista V2 (Plan F M4):** chat conversacional en `/entrevistas` + mock fallback; backend B8 pendiente.
 
@@ -32,7 +32,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
 | `/resultados` | Score, perfil, **termómetro**, jobs, plan 30-60-90, **RadarMatch**, timeline, **coach**, PDF completo | Joufra / Migue | ✅ |
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
-| `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ (volver al inicio) |
+| `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ (botón ← historial) |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
 | `/progreso` | Plan checkeable + fases + CTA entrevista (protegida) | Migue + Jufra | ✅ |
 | `/entrevistas` | Entrevista **V2 chat** (default) o quiz V1 (`?legacy=1`) | Migue | ✅ UI · mock |
@@ -48,13 +48,14 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `MarketThermometer` | ✅ | Solo `/resultados`; endpoint `GET /market/dashboard/{session_id}` |
 | `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
-| Layout `/resultados` | ✅ | **Congelado** — regla `.cursor/rules/results-layout-frozen.mdc` |
+| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px, `compactGrid`, `pdf-card-in-grid`; regla `.cursor/rules/results-layout-frozen.mdc` |
+| PDF export resultados | ✅ | html2canvas por bloques; intro alineada a UI; timeline + skills; `ScoreRing exportMode` |
 | Integración Axios → API | ✅ | `services/api.js` + fallbacks mock |
-| Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `link-session` |
+| Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `link-session`; login/registro ← historial |
 | Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
 | Mi Progreso — M3 E2E | ✅ | Backend Supabase (`progress_m3_service`); banner `dataSource`; tests |
 | Integración J1–J3 | ✅ | Auth redirect, nav, entrevista quiz V1 + store |
-| UX polish resultados/nav | ✅ | Nav «Oportunidades», `RegisterProgressButton`, copy usuario; PDF card sin recorte en grid |
+| UX polish resultados/nav | ✅ | Nav «Oportunidades», `RegisterProgressButton`, copy usuario |
 | Entrevista V2 — M4 | ✅ | `InterviewV2Page`, `useInterviewV2Store`, mock + `interviewV2Api`; espera B8 |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 

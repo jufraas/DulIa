@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 
 /**
- * @param {{ value?: number, size?: number, stroke?: number, animate?: boolean }} props
+ * @param {{ value?: number, size?: number, stroke?: number, animate?: boolean, exportMode?: boolean }} props
  */
 export default function ScoreRing({
   value = 0,
   size = 240,
   stroke = 18,
   animate = true,
+  exportMode = false,
 }) {
   const [animatedValue, setAnimatedValue] = useState(animate ? 0 : value)
   const displayValue = animate ? animatedValue : value
@@ -60,13 +61,17 @@ export default function ScoreRing({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
-          className="font-[family-name:var(--font-display)] font-black leading-none tracking-[-0.05em] text-transparent"
-          style={{
-            fontSize: size * 0.32,
-            background: 'linear-gradient(135deg,#C084FC 0%,#EC4899 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-          }}
+          className={`font-[family-name:var(--font-display)] font-black leading-none tracking-[-0.05em] ${exportMode ? 'score-ring-export-value text-[#C084FC]' : 'text-transparent'}`}
+          style={
+            exportMode
+              ? { fontSize: size * 0.32 }
+              : {
+                  fontSize: size * 0.32,
+                  background: 'linear-gradient(135deg,#C084FC 0%,#EC4899 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                }
+          }
         >
           {displayValue}
         </div>
