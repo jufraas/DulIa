@@ -56,10 +56,7 @@ export default function SiteHeader() {
           <a href={featuresHref}>Cómo funciona</a>
           <Link to="/vacantes">Oportunidades</Link>
           {userInfo && (
-            <>
-              <Link to="/progreso">Mi progreso</Link>
-              <Link to="/entrevistas">Entrevistas</Link>
-            </>
+            <Link to="/progreso">Mi progreso</Link>
           )}
           <Link to="/sobre">Sobre DulIA</Link>
         </nav>
@@ -134,15 +131,6 @@ export default function SiteHeader() {
                       Mi progreso
                     </Link>
                     <Link
-                      to="/entrevistas"
-                      onClick={() => setDropdownOpen(false)}
-                      style={{ display: 'block', padding: '10px 12px', borderRadius: 10, color: 'rgba(255,255,255,0.8)', fontSize: 14, textDecoration: 'none' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                    >
-                      Entrevistas
-                    </Link>
-                    <Link
                       to="/perfil"
                       onClick={() => setDropdownOpen(false)}
                       style={{ display: 'block', padding: '10px 12px', borderRadius: 10, color: 'rgba(255,255,255,0.8)', fontSize: 14, textDecoration: 'none' }}
@@ -213,26 +201,15 @@ export default function SiteHeader() {
               </Link>
             </li>
             {userInfo && (
-              <>
-                <li>
-                  <Link
-                    to="/progreso"
-                    className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
-                    onClick={() => setOpen(false)}
-                  >
-                    Mi progreso
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/entrevistas"
-                    className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
-                    onClick={() => setOpen(false)}
-                  >
-                    Entrevistas
-                  </Link>
-                </li>
-              </>
+              <li>
+                <Link
+                  to="/progreso"
+                  className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
+                  onClick={() => setOpen(false)}
+                >
+                  Mi progreso
+                </Link>
+              </li>
             )}
             <li>
               <Link

@@ -49,7 +49,7 @@ export default function InterviewSummaryV2({
                 key={s}
                 className="rounded-full border border-yellow-500/35 bg-yellow-500/12 px-3 py-1 text-sm font-semibold text-yellow-300"
               >
-                ⚠️ {s}
+                ⚠ {s}
               </span>
             ))}
           </div>

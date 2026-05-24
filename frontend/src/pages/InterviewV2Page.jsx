@@ -12,6 +12,7 @@ import TypingIndicator from '../components/interview/v2/TypingIndicator'
 import InterviewSummaryV2 from '../components/interview/v2/InterviewSummaryV2'
 import InterviewHistory from '../components/interview/InterviewHistory'
 import ProgressDataSourceBanner from '../components/progress/ProgressDataSourceBanner'
+import ProcessStatusBar from '../components/shared/ProcessStatusBar'
 import { useInterviewV2Store } from '../store/useInterviewV2Store'
 import { useProfileStore } from '../store/useProfileStore'
 import { mapV2HistoryToDisplay } from '../utils/interviewV2Display'
@@ -319,6 +320,13 @@ export default function InterviewV2Page() {
             </div>
           </div>
         </div>
+      )}
+
+      {starting && (
+        <ProcessStatusBar
+          title="Preparando tu entrevista"
+          message="Conectando con la entrevistadora y armando la conversación…"
+        />
       )}
     </PageShell>
   )

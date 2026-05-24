@@ -267,7 +267,7 @@ export default function InterviewSession({ skill, rol, questions, onFinish }) {
           boxShadow: habil ? '0 4px 20px rgba(236,72,153,0.35)' : 'none',
         }}
       >
-        {esUltima ? 'Ver mis resultados 🎉' : 'Siguiente pregunta →'}
+        {esUltima ? 'Ver mis resultados' : 'Siguiente pregunta →'}
       </button>
     </div>
   )

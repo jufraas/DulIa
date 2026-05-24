@@ -184,7 +184,7 @@ export default function PlanTimeline() {
               phaseKey="60"
               phase={phase60}
               locked={isPhaseLocked('60')}
-              emptyMessage="La fase de 60 días se generará cuando el backend complete tu plan."
+              emptyMessage="La fase de 60 días aparecerá cuando completes la primera etapa de tu plan."
               progressTasks={progress.tasks}
               togglingTaskId={togglingTaskId}
               highlightedTaskId={highlightedTaskId}
@@ -203,7 +203,7 @@ export default function PlanTimeline() {
                 phaseKey="90"
                 phase={phase90}
                 locked={isPhaseLocked('90')}
-                emptyMessage="La fase de 90 días se generará cuando el backend complete tu plan."
+                emptyMessage="La fase de 90 días aparecerá cuando avances en la etapa de 60 días."
                 progressTasks={progress.tasks}
                 togglingTaskId={togglingTaskId}
                 highlightedTaskId={highlightedTaskId}

@@ -19,8 +19,8 @@ export default function UserProfileCard({ profile }) {
       </div>
 
       <p className="body mb-5 mt-0">
-        Perfil registrado con tu <strong className="text-[color:var(--fg-1)]">session_id</strong>.
-        En modo mock el GET no persiste — usamos la respuesta del POST en memoria.
+        Resumen de tu wizard: nombre, ubicación, habilidades y preferencias laborales que usamos
+        para el score y las oportunidades.
       </p>
 
       <dl className="grid gap-3 sm:grid-cols-2">

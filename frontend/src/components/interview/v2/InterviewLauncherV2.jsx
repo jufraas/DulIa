@@ -61,7 +61,7 @@ export default function InterviewLauncherV2({ onStart, starting = false }) {
 
       <div className="mb-7 grid grid-cols-3 gap-2.5">
         {[
-          { label: '~4 min', sub: 'Demo fluida' },
+          { label: '~4 min', sub: 'Conversación breve' },
           { label: '4', sub: 'Etapas' },
           { label: 'IA', sub: 'Repreguntas en vivo' },
         ].map((card) => (
@@ -85,7 +85,7 @@ export default function InterviewLauncherV2({ onStart, starting = false }) {
           boxShadow: skill && !starting ? '0 4px 20px rgba(236,72,153,0.35)' : 'none',
         }}
       >
-        {starting ? 'Conectando con Andrea…' : '💬 Iniciar conversación'}
+        {starting ? 'Conectando…' : 'Iniciar conversación'}
       </button>
     </div>
   )

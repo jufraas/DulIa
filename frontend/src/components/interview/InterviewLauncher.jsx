@@ -148,7 +148,7 @@ export default function InterviewLauncher({ onStart }) {
           boxShadow: skill ? '0 4px 20px rgba(236,72,153,0.35)' : 'none',
         }}
       >
-        🎯 Iniciar entrevista
+        Iniciar entrevista
       </button>
     </div>
   )

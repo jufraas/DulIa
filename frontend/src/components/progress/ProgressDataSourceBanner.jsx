@@ -9,8 +9,10 @@ export default function ProgressDataSourceBanner({ dataSource, detail }) {
 
   const message =
     detail?.includes('VITE_FORCE_PROGRESS_MOCK') || detail?.includes('demo forzado')
-      ? 'Modo demo: los cambios se guardan solo en este navegador.'
-      : detail || 'Sin conexión al backend. Mostramos datos de demostración locales.'
+      ? 'Los cambios se guardan solo en este navegador hasta que vuelvas a conectarte.'
+      : detail?.includes('backend') || detail?.includes('demostración')
+        ? 'No pudimos sincronizar con tu cuenta. Mostramos una copia local de tu progreso.'
+        : detail || 'Sin conexión. Mostramos una copia local de tu progreso.'
 
   return (
     <div
@@ -19,11 +21,11 @@ export default function ProgressDataSourceBanner({ dataSource, detail }) {
     >
       <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" aria-hidden />
       <div>
-        <p className="m-0 font-semibold text-amber-50">Datos locales</p>
+        <p className="m-0 font-semibold text-amber-50">Modo sin conexión</p>
         <p className="mt-0.5 m-0 text-[13px] leading-snug text-amber-100/90">{message}</p>
         <p className="mt-1.5 m-0 flex items-center gap-1 text-[12px] text-amber-200/80">
           <AlertTriangle className="h-3 w-3" aria-hidden />
-          Inicia el backend en :8000 para sincronizar con la API.
+          Cuando recuperes la conexión, tus cambios se sincronizarán automáticamente.
         </p>
       </div>
     </div>

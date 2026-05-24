@@ -6,8 +6,8 @@ import AnalysisPdfDocument from '../components/pdf/AnalysisPdfDocument'
 
 const PAGE_BG_RGB = [13, 13, 13]
 const CAPTURE_SCALE = 2
-const BLOCK_GAP_MM = 3
-const PAGE_MARGIN_MM = 10
+const BLOCK_GAP_MM = 5
+const PAGE_MARGIN_MM = 12
 
 /** @param {import('jspdf').jsPDF} pdf */
 function fillPageBackground(pdf) {

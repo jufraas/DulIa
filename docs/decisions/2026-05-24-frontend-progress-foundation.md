@@ -104,7 +104,7 @@ GET    /api/interview/history?user_id=
 | J2 Entrevista UI | `InterviewPage.jsx`, `components/interview/*`, cableado a `useInterviewStore` |
 | J2 Loader | `GeminiThinkingLoader.jsx` en submit/finish |
 | J2 → plan | `addTasksFromWeakSkills` desde `InterviewResults` |
-| J3 Nav | `SiteHeader.jsx` — Mi progreso + Entrevistas (logueado) |
+| J3 Nav | `SiteHeader.jsx` — Mi progreso (logueado); Entrevistas **fuera** del header → CTA en `/progreso` |
 | J3 Empty states | `ProgressPage` (sin plan), `InterviewHistory` (sin historial) |
 | Adaptadores | `utils/interviewDisplay.js`, `utils/apiErrors.js` |
 | Rutas | `/progreso`, `/entrevistas` en `App.jsx` |

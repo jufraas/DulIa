@@ -104,7 +104,7 @@ export default function InterviewResults({ resultado, onAddToPlan, onNewIntervie
                   borderRadius: 999,
                 }}
               >
-                ⚠️ {s}
+                ⚠ {s}
               </span>
             ))}
           </div>

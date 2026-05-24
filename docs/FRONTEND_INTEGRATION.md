@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Entrevista V2 conversacional (M4) + Mi Progreso (M2/M3).
+**Última actualización:** 2026-05-24 · UX polish (nav, copy, CTA progreso) + Entrevista V2 (M4) + Mi Progreso (M2/M3).
 
 ---
 
@@ -25,7 +25,9 @@
 | `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
 | Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
-| Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
+| Nav secciones resultados | ✅ | 6 secciones; label **Oportunidades** (antes «Vacantes y plan»); `RegisterProgressButton` en análisis + PDF |
+| Nav global (`SiteHeader`) | ✅ | «Oportunidades» → `/vacantes`; **sin** link Entrevistas en header (acceso vía `/progreso`) |
+| Copy orientado al usuario | ✅ | Sin `session_id` en UI; banners offline/progreso sin jerga de backend; `PrivacyNotice` según auth |
 | Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
 | Coach global SPA | ✅ | `AppCoachShell` + `coachPageContext.js`; FAB en landing, wizard, vacantes |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
@@ -471,7 +473,7 @@ GET  /interview/v2/{id}               → rehidratar tras refresh (localStorage:
 GET  /interview/v2/history/{session_id}
 ```
 
-**Frontend:** `services/interviewV2Api.js` + `store/useInterviewV2Store.js`. Si el backend B8 no responde → `mocks/mockInterviewV2.js` (banner “Modo demo”).
+**Frontend:** `services/interviewV2Api.js` + `store/useInterviewV2Store.js`. Si el backend B8 no responde → `mocks/mockInterviewV2.js` (banner “Modo demo”). Al iniciar: `ProcessStatusBar` (“Preparando tu entrevista”). `/progreso` usa historial V2 en el CTA.
 
 **Tests:** `cd frontend && npm run test:interview-v2` (5 smoke tests, sin Vitest).
 
