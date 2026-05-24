@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-05-24
 - **Área:** frontend
-- **Estado:** activa — Bloque 2 ✅ (M2.4–M2.8); **M3 E2E backend ✅**
+- **Estado:** activa — Bloque 2 ✅ · M3 ✅ · **Integración Jufra (J1–J3) ✅** (2026-05-24)
 - **Autor/es:** Migue (foundation + PlanTimeline), Jufra (auth guard + mock interview UI)
 
 ## Contexto
@@ -95,13 +95,27 @@ POST   /api/interview/{id}/finish   { user_id }
 GET    /api/interview/history?user_id=
 ```
 
+### Integración post-merge Jufra (2026-05-24)
+
+| Pieza | Ubicación |
+|-------|-----------|
+| Fix merge | `ProgressPage.jsx` — eliminado mock duplicado; CTA entrevista |
+| J1 Auth guard | `useProfileCheck.js`, `RedirectIfHasProfile.jsx`, `LoginPage`, `RegisterPage` |
+| J2 Entrevista UI | `InterviewPage.jsx`, `components/interview/*`, cableado a `useInterviewStore` |
+| J2 Loader | `GeminiThinkingLoader.jsx` en submit/finish |
+| J2 → plan | `addTasksFromWeakSkills` desde `InterviewResults` |
+| J3 Nav | `SiteHeader.jsx` — Mi progreso + Entrevistas (logueado) |
+| J3 Empty states | `ProgressPage` (sin plan), `InterviewHistory` (sin historial) |
+| Adaptadores | `utils/interviewDisplay.js`, `utils/apiErrors.js` |
+| Rutas | `/progreso`, `/entrevistas` en `App.jsx` |
+
 ### División con Jufra
 
 | Jufra | Migue |
 |-------|-------|
-| `useProfileCheck`, redirect post-login | Stores + mocks + `/progreso` shell |
-| Mock Interview UI (J2) | Timeline checkeable en Bloque 2 (`PlanTimeline`) |
-| Nav “Mi Progreso”, empty states | E2E backend real (Bloque 3) ✅ |
+| `useProfileCheck`, redirect post-login ✅ | Stores + mocks + `/progreso` shell ✅ |
+| Mock Interview UI (J2) ✅ | Timeline checkeable (`PlanTimeline`) ✅ |
+| Nav “Mi Progreso”, empty states ✅ | E2E backend M3 + integración merge ✅ |
 
 ## Por qué
 
@@ -109,8 +123,9 @@ GET    /api/interview/history?user_id=
 - No modifica layout congelado de `/resultados`.
 - Mismo patrón mock fallback que el resto del MVP.
 
-## Pendiente (post-M3)
+## Pendiente (post-merge main)
 
-- Persistencia Supabase de `plan_progress` e historial entrevistas (post-MVP)
-- UI entrevista mock (Jufra — J2) consumiendo API + `GeminiThinkingLoader`
+- Deploy Vercel + backend prod
+- Alinear preguntas entrevista UI (pool por skill) ↔ API backend
+- “Ver feedback” en historial por sesión (endpoint detalle)
 - Gemini real para feedback de entrevista (post-pitch)

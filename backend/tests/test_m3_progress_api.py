@@ -1,4 +1,6 @@
-"""Tests M3 — progreso e entrevista mock API."""
+"""Tests M3 — progreso e entrevista (USE_MOCK_DATA=true vía conftest)."""
+
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
@@ -6,6 +8,11 @@ from app.services import interview_service, progress_m3_service as progress_serv
 from main import app
 
 client = TestClient(app)
+
+ANSWER_TEXT = (
+    "En mi último proyecto usé Canva para crear contenido visual "
+    "con resultados medibles en engagement y alcance orgánico."
+)
 
 
 def setup_function():
@@ -16,7 +23,7 @@ def setup_function():
 
 
 def test_progress_init_get_toggle():
-    sid = "pytest-progress-1"
+    sid = f"pytest-progress-{uuid4()}"
     init = client.post("/api/progress/init", json={"session_id": sid})
     assert init.status_code == 200
     body = init.json()
@@ -41,7 +48,7 @@ def test_progress_init_get_toggle():
 
 
 def test_progress_toggle_not_found():
-    sid = "pytest-progress-missing"
+    sid = f"pytest-progress-missing-{uuid4()}"
     client.post("/api/progress/init", json={"session_id": sid})
     res = client.patch(
         "/api/progress/task",
@@ -51,7 +58,7 @@ def test_progress_toggle_not_found():
 
 
 def test_progress_add_from_skills():
-    sid = "pytest-progress-skills"
+    sid = f"pytest-progress-skills-{uuid4()}"
     client.post("/api/progress/init", json={"session_id": sid})
     res = client.post(
         "/api/progress/add-from-skills",
@@ -64,38 +71,34 @@ def test_progress_add_from_skills():
 
 
 def test_interview_flow():
-    sid = "pytest-interview-1"
+    sid = f"pytest-interview-{uuid4()}"
     start = client.post(
         "/api/interview/start",
-        json={"session_id": sid, "skill": "Canva", "role": "Diseñador"},
+        json={
+            "session_id": sid,
+            "target_skill": "Canva",
+            "target_role": "Diseñador",
+        },
     )
     assert start.status_code == 200
-    interview_id = start.json()["id"]
-    assert start.json()["current_question"]["index"] == 1
+    payload = start.json()
+    interview_id = payload["interview_id"]
+    assert len(payload["questions"]) == 5
 
-    answer_text = (
-        "En mi último proyecto usé Canva para crear contenido visual "
-        "con resultados medibles en engagement y alcance orgánico."
-    )
-    session = start.json()
-    for _ in range(5):
+    for idx in range(5):
         res = client.post(
             f"/api/interview/{interview_id}/answer",
-            json={"answer": answer_text},
+            json={"question_idx": idx, "answer": ANSWER_TEXT},
         )
         assert res.status_code == 200
-        session = res.json()
 
-    finish = client.post(
-        f"/api/interview/{interview_id}/finish",
-        json={"user_id": "pytest-user"},
-    )
+    finish = client.post(f"/api/interview/{interview_id}/finish")
     assert finish.status_code == 200
     result = finish.json()
-    assert isinstance(result["score"], int)
-    assert len(result["feedback"]) == 5
+    assert isinstance(result["global_score"], int)
+    assert result["feedback_general"]
 
-    history = client.get("/api/interview/history", params={"user_id": "pytest-user"})
+    history = client.get(f"/api/interview/history/{sid}")
     assert history.status_code == 200
     assert len(history.json()) >= 1
 
@@ -103,13 +106,14 @@ def test_interview_flow():
 def test_interview_answer_not_found():
     res = client.post(
         "/api/interview/fake-id/answer",
-        json={"answer": "respuesta de prueba suficientemente larga"},
+        json={"question_idx": 0, "answer": ANSWER_TEXT},
     )
     assert res.status_code == 404
 
 
 def test_has_profile_without_supabase():
-    res = client.get("/api/user/has-profile", params={"user_id": "pytest-user"})
+    unknown_user = "00000000-0000-4000-8000-000000000000"
+    res = client.get("/api/user/has-profile", params={"user_id": unknown_user})
     assert res.status_code == 200
     body = res.json()
     assert "has_profile" in body

@@ -1164,6 +1164,7 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/registro` | Registro + upsert `user_accounts` |
 | `/perfil` | Cuenta de usuario (protegida); requiere sesión Supabase |
 | `/progreso` | Mi progreso — plan checkeable (protegida); mock si API cae o `VITE_FORCE_PROGRESS_MOCK` |
+| `/entrevistas` | Simulador entrevista mock (protegida) |
 
 Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`, **`mockProgress.js`**, **`mockInterview.js`**. Persistencia: `sessionCache.js` + `sessionHydration.js`. Tests: `npm run test:progress`, `npm run test:progress:api`.
 

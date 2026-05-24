@@ -65,7 +65,8 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/login` | Login | Email/password; banner demo si faltan envs Supabase |
 | `/registro` | Registro | Upsert a `user_accounts` tras signUp |
 | `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
-| `/progreso` | Mi progreso | Protegida; timeline, barras animadas, TaskList lateral, scroll a tareas |
+| `/progreso` | Mi progreso | Protegida; timeline, TaskList, CTA entrevistas |
+| `/entrevistas` | Simulador entrevista | Protegida; launcher, sesión, resultados, historial |
 
 ## Flujo de datos
 

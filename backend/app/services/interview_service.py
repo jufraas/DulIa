@@ -253,6 +253,11 @@ MOCK_INTERVIEW_CACHE: dict[str, list[dict[str, Any]]] = {
 _mock_interviews: dict[str, dict[str, Any]] = {}
 
 
+def reset_interview_store() -> None:
+    """Solo tests — limpia entrevistas mock en memoria."""
+    _mock_interviews.clear()
+
+
 class ProfileNotFoundError(Exception):
     """No hay profiles para el session_id."""
 

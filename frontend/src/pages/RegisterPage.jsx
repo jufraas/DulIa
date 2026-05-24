@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import DuliaLogo from '../components/brand/DuliaLogo'
 import AuthDisabledBanner from '../components/auth/AuthDisabledBanner'
+import RedirectIfHasProfile from '../components/auth/RedirectIfHasProfile'
 import { useAuth } from '../hooks/useAuth'
+import { checkProfile } from '../hooks/useProfileCheck'
 import { supabase } from '../services/supabase'
 
 function EyeIcon({ open }) {
@@ -84,6 +86,14 @@ async function upsertUserAccount(userId, data) {
 }
 
 export default function RegisterPage() {
+  return (
+    <RedirectIfHasProfile fallbackPath="/progreso">
+      <RegisterPageContent />
+    </RedirectIfHasProfile>
+  )
+}
+
+function RegisterPageContent() {
   const navigate = useNavigate()
   const { user, isConfigured } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
@@ -91,7 +101,14 @@ export default function RegisterPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (user) navigate('/', { replace: true })
+    if (!user) return undefined
+    let cancelled = false
+    void checkProfile(user.id).then((hasCoachProfile) => {
+      if (!cancelled) navigate(hasCoachProfile ? '/progreso' : '/comenzar', { replace: true })
+    })
+    return () => {
+      cancelled = true
+    }
   }, [user, navigate])
 
   function set(field) {
@@ -137,7 +154,7 @@ export default function RegisterPage() {
       }
     }
 
-    navigate('/')
+    navigate('/comenzar')
   }
 
   const inputStyle = {

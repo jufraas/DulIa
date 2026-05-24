@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Loader2, Target } from 'lucide-react'
+import { Loader2, Target, Mic } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
 import Container from '../components/ui/Container'
@@ -11,7 +11,55 @@ import TaskList from '../components/progress/TaskList'
 import ProgressDataSourceBanner from '../components/progress/ProgressDataSourceBanner'
 import { useProfileStore } from '../store/useProfileStore'
 import { useProgressStore } from '../store/useProgressStore'
+import { useInterviewStore } from '../store/useInterviewStore'
+import { useAuth } from '../hooks/useAuth'
 import ProtectedRoute from '../components/auth/ProtectedRoute'
+
+function ProgressInterviewCTA() {
+  const history = useInterviewStore((s) => s.history)
+  const fetchHistory = useInterviewStore((s) => s.fetchHistory)
+  const { user } = useAuth()
+
+  useEffect(() => {
+    void fetchHistory(user?.id)
+  }, [fetchHistory, user?.id])
+
+  const count = history.length
+
+  return (
+    <section className="card-dl anim-in-delay-4 mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div className="mb-2 flex items-center gap-2 text-[color:var(--fg-1)]">
+          <Mic className="h-4 w-4 text-[color:var(--brand-pink)]" aria-hidden />
+          <h2 className="m-0 font-[family-name:var(--font-display)] text-lg font-bold">
+            Practica con IA
+          </h2>
+        </div>
+        <p className="m-0 text-sm text-[color:var(--fg-2)]">
+          Simula entrevistas técnicas por skill y recibe feedback inmediato.
+        </p>
+        <p className="mt-1.5 m-0 text-xs text-[color:var(--fg-3)]">
+          {count === 0
+            ? 'Aún no has realizado entrevistas de práctica.'
+            : `${count} entrevista${count === 1 ? '' : 's'} en tu historial.`}
+        </p>
+      </div>
+      <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+        <Link to="/entrevistas">
+          <Button variant="primary">Iniciar entrevista</Button>
+        </Link>
+        {count > 0 && (
+          <Link
+            to="/entrevistas"
+            className="text-center text-xs font-medium text-[color:var(--brand-violet)] hover:underline sm:text-right"
+          >
+            Ver historial →
+          </Link>
+        )}
+      </div>
+    </section>
+  )
+}
 
 function ProgressPageContent() {
   const savedProfile = useProfileStore((s) => s.savedProfile)
@@ -82,6 +130,8 @@ function ProgressPageContent() {
                 <TaskList />
                 <PlanTimeline />
               </div>
+
+              <ProgressInterviewCTA />
             </>
           )}
 
