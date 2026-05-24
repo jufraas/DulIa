@@ -37,12 +37,17 @@ export default function LoginPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!supabase) return undefined
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate('/', { replace: true })
     })
   }, [navigate])
 
   async function handleGoogleLogin() {
+    if (!supabase) {
+      setError('Inicio de sesión no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
+      return
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
@@ -53,6 +58,10 @@ export default function LoginPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
+    if (!supabase) {
+      setError('Inicio de sesión no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
+      return
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)

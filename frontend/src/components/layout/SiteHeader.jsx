@@ -14,6 +14,7 @@ export default function SiteHeader() {
   const dropdownRef = useRef(/** @type {HTMLDivElement | null} */(null))
 
   useEffect(() => {
+    if (!supabase) return undefined
     supabase.auth.getUser().then(({ data }) => {
       const u = data?.user
       if (!u) return
@@ -36,6 +37,7 @@ export default function SiteHeader() {
   }, [dropdownOpen])
 
   async function handleSignOut() {
+    if (!supabase) return
     await supabase.auth.signOut()
     setUserInfo(null)
     setDropdownOpen(false)
