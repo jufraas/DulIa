@@ -1,9 +1,9 @@
-# Mi Progreso — foundation frontend (Bloque 1)
+# Mi Progreso — foundation frontend (Bloque 1 + timeline M2.4)
 
 - **Fecha:** 2026-05-24
 - **Área:** frontend
-- **Estado:** activa — Bloque 2 (timeline checkeable) pendiente
-- **Autor/es:** Migue (foundation), Jufra (auth guard + mock interview UI)
+- **Estado:** activa — Bloque 2 parcial (M2.4 ✅); M2.5–M2.8 pendientes
+- **Autor/es:** Migue (foundation + PlanTimeline), Jufra (auth guard + mock interview UI)
 
 ## Contexto
 
@@ -20,7 +20,18 @@ Con auth opcional Supabase, usuarios que ya completaron el wizard necesitan **se
 | Stores | `useProgressStore.js`, `useInterviewStore.js` |
 | Ruta | `/progreso` protegida con `ProtectedRoute` |
 | Página | `ProgressPage.jsx` — header + barras fase + lista tareas (sin tocar `ThirtyDayPlan` en `/resultados`) |
-| Tests | `npm run test:progress` → `scripts/test-progress-foundation.mjs` |
+| Tests | `npm run test:progress` → `scripts/test-progress-foundation.mjs` (9 tests) |
+
+### Timeline checkeable (Migue — Bloque 2, M2.4)
+
+| Pieza | Ubicación |
+|-------|-----------|
+| Timeline interactivo | `frontend/src/components/progress/PlanTimeline.jsx` |
+| Resolución tarea | `findProgressTaskByLabel()` en `mockProgress.js` |
+| Integración | `ProgressPage.jsx` — stats + barras fase + `<PlanTimeline />` |
+| Solo lectura en resultados | `ThirtyDayPlan.jsx` **sin cambios** (layout congelado) |
+
+Comportamiento M2.4: tabs 30/60/90, checkbox por tarea, UI optimista vía `useProgressStore.toggleTask`, spinner durante sync, fases bloqueadas con aviso + candado, anclas `timeline-phase-*` / `timeline-week-*` para scroll (M2.8).
 
 ### Reglas de fallback
 
@@ -58,6 +69,8 @@ GET    /api/interview/history?user_id=
 
 ## Pendiente (Bloque 2–3)
 
-- Extraer timeline checkeable; integrar `ThirtyDayPlan` solo lectura en resultados.
-- `TaskList` lateral + scroll a fase.
-- Quitar mocks como primario cuando backend exponga endpoints.
+- M2.5 — barras de progreso animadas en timeline
+- M2.6 — overlay candado más visible en fases bloqueadas
+- M2.7 — `TaskList.jsx` lateral con filtros
+- M2.8 — click en tarea → scroll a fase del timeline
+- M3 — E2E backend real; mocks solo como fallback en demo

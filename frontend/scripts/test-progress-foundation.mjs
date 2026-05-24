@@ -7,6 +7,7 @@ import {
   initMockProgress,
   buildPhaseProgress,
   buildTaskId,
+  findProgressTaskByLabel,
   globalCompletionPct,
   resetMockProgressStore,
   toggleMockTask,
@@ -66,6 +67,14 @@ await test('buildTaskId es estable', () => {
   const a = buildTaskId('30', 0, 'Actualiza tu CV')
   const b = buildTaskId('30', 0, 'Actualiza tu CV')
   assert(a === b, 'ids deben coincidir')
+})
+
+await test('findProgressTaskByLabel resuelve tarea del plan', () => {
+  const tasks = tasksFromPlan(plan)
+  const sample = tasks[0]
+  assert(sample, 'plan debe tener tareas')
+  const found = findProgressTaskByLabel(tasks, sample.phase, sample.label)
+  assert(found?.id === sample.id, 'debe resolver por fase + label')
 })
 
 await test('mock progress calcula % global', () => {

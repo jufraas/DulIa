@@ -1,12 +1,13 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, CheckCircle2, Loader2, Target } from 'lucide-react'
+import { Calendar, Loader2, Target } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
+import PlanTimeline from '../components/progress/PlanTimeline'
 import { useProfileStore } from '../store/useProfileStore'
-import { filterProgressTasks, useProgressStore } from '../store/useProgressStore'
+import { useProgressStore } from '../store/useProgressStore'
 import ProtectedRoute from '../components/auth/ProtectedRoute'
 
 function ProgressPageContent() {
@@ -15,12 +16,8 @@ function ProgressPageContent() {
   const progress = useProgressStore((s) => s.progress)
   const loading = useProgressStore((s) => s.loading)
   const error = useProgressStore((s) => s.error)
-  const taskFilter = useProgressStore((s) => s.taskFilter)
-  const togglingTaskId = useProgressStore((s) => s.togglingTaskId)
   const fetchProgress = useProgressStore((s) => s.fetchProgress)
   const initProgressAction = useProgressStore((s) => s.initProgress)
-  const setTaskFilter = useProgressStore((s) => s.setTaskFilter)
-  const toggleTask = useProgressStore((s) => s.toggleTask)
 
   useEffect(() => {
     void (async () => {
@@ -32,15 +29,6 @@ function ProgressPageContent() {
   }, [fetchProgress, initProgressAction])
 
   const firstName = savedProfile?.nombre?.split(' ')[0] ?? 'Explorador'
-  const filteredTasks = progress
-    ? filterProgressTasks(progress.tasks, taskFilter, progress.current_day)
-    : []
-
-  const filters = [
-    { id: /** @type {const} */ ('week'), label: 'Esta semana' },
-    { id: /** @type {const} */ ('pending'), label: 'Pendientes' },
-    { id: /** @type {const} */ ('completed'), label: 'Completadas' },
-  ]
 
   return (
     <PageShell>
@@ -140,75 +128,8 @@ function ProgressPageContent() {
                 </div>
               </div>
 
-              <div className="anim-in-delay-3 card-dl p-6">
-                <div className="mb-4 flex flex-wrap items-center gap-2">
-                  {filters.map((filter) => (
-                    <button
-                      key={filter.id}
-                      type="button"
-                      onClick={() => setTaskFilter(filter.id)}
-                      className="rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200"
-                      style={
-                        taskFilter === filter.id
-                          ? {
-                              background: 'var(--grad-brand)',
-                              color: '#fff',
-                            }
-                          : {
-                              background: 'rgba(168,85,247,0.08)',
-                              border: '1px solid rgba(168,85,247,0.25)',
-                              color: 'var(--fg-2)',
-                            }
-                      }
-                    >
-                      {filter.label}
-                    </button>
-                  ))}
-                </div>
-
-                <ul className="m-0 flex list-none flex-col gap-2 p-0">
-                  {filteredTasks.map((task) => {
-                    const locked = progress.phases.find((p) => p.phase === task.phase)?.locked
-                    return (
-                      <li key={task.id}>
-                        <label
-                          className={`flex cursor-pointer items-start gap-3 rounded-[14px] px-3 py-2.5 ${
-                            locked && !task.completed ? 'opacity-60' : ''
-                          }`}
-                          style={{
-                            border: '1px solid rgba(168,85,247,0.20)',
-                            background: 'rgba(168,85,247,0.06)',
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            className="mt-1 h-4 w-4 shrink-0 accent-[#8B5CF6]"
-                            checked={task.completed}
-                            disabled={Boolean(locked && !task.completed) || togglingTaskId === task.id}
-                            onChange={() => void toggleTask(task.id)}
-                          />
-                          <span className="min-w-0 flex-1 text-sm text-[color:var(--fg-1)]">
-                            {task.label}
-                            <span className="ml-2 text-xs text-[color:var(--fg-3)]">
-                              Fase {task.phase}
-                            </span>
-                          </span>
-                          {task.completed && (
-                            <CheckCircle2
-                              className="h-4 w-4 shrink-0 text-[color:var(--success,#34d399)]"
-                              aria-hidden
-                            />
-                          )}
-                        </label>
-                      </li>
-                    )
-                  })}
-                  {filteredTasks.length === 0 && (
-                    <li className="py-4 text-center text-sm text-[color:var(--fg-3)]">
-                      No hay tareas en este filtro.
-                    </li>
-                  )}
-                </ul>
+              <div className="anim-in-delay-3">
+                <PlanTimeline />
               </div>
             </>
           )}

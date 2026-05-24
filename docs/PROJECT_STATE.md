@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front:** foundation Mi Progreso (`/progreso`, stores, mocks, API). Auth + coach global previos. **Backend:** progress/interview endpoints pendientes.
+2026-05-24 — **Front:** Mi Progreso M2.4 (`PlanTimeline` checkeable en `/progreso`); landing splash centrado + copy hero. Foundation Bloque 1 previa. **Backend:** progress/interview endpoints pendientes.
 
 ## Estado por módulo
 
@@ -30,7 +30,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
-| `/progreso` | Plan checkeable + fases (protegida) | Migue | 🚧 Bloque 1 ✅ foundation; Bloque 2 timeline |
+| `/progreso` | Plan checkeable + fases (protegida) | Migue | 🚧 M2.4 ✅ `PlanTimeline`; M2.5–M2.8 pendientes |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -68,7 +68,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
-| Mi Progreso — foundation | 🚧 | `/progreso`, stores, mocks, `api.js`; Bloque 2 timeline checkeable pendiente |
+| Mi Progreso — foundation + timeline | 🚧 | `/progreso`, stores, mocks, `PlanTimeline.jsx` (M2.4); `TaskList` lateral pendiente |
 
 ### Pendiente UI (pre-pitch)
 

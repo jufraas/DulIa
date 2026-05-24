@@ -64,7 +64,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/login` | Login | Email/password; banner demo si faltan envs Supabase |
 | `/registro` | Registro | Upsert a `user_accounts` tras signUp |
 | `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
-| `/progreso` | Mi progreso | Protegida; plan checkeable, fases 30/60/90, mock fallback (🚧 Bloque 2 timeline) |
+| `/progreso` | Mi progreso | Protegida; `PlanTimeline` checkeable (tabs 30/60/90), stats, barras fase; mock fallback |
 
 ## Flujo de datos
 
@@ -97,7 +97,7 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `startInterview` / `submitAnswer` / `finishInterview` | Mock interview por skill |
 | `interviewHistory` / `addTasksFromWeakSkills` | Historial + tareas desde skills débiles |
 
-Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`.
+Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`. UI: `components/progress/PlanTimeline.jsx`.
 
 ### Auth (opcional)
 
@@ -111,7 +111,7 @@ Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `u
 ```
 src/
 ├── pages/
-├── components/         # about/, welcome/, onboarding/, results/, pdf/, vacancies/, motion/, …
+├── components/         # about/, welcome/, onboarding/, results/, progress/, pdf/, vacancies/, motion/, …
 ├── components/motion/
 │   └── RevealOnScroll.jsx   # Framer Motion: mount (hero) | scroll (secciones)
 ├── hooks/              # useOnboardingForm, useResultsSectionNav, useCoachContext, …

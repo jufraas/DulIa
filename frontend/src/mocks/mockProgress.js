@@ -69,6 +69,16 @@ export function tasksForPhase(tasks, phase) {
 }
 
 /**
+ * Resuelve tarea de progreso por fase + label (usado por PlanTimeline).
+ * @param {ProgressTask[]} tasks
+ * @param {PlanPhase} phase
+ * @param {string} label
+ */
+export function findProgressTaskByLabel(tasks, phase, label) {
+  return tasks.find((t) => t.phase === phase && t.label === label) ?? null
+}
+
+/**
  * @param {ProgressTask[]} tasks
  * @param {PlanPhase} phase
  */

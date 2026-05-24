@@ -109,7 +109,7 @@ export default function HeroSection({ enter = true }) {
             <RevealOnScroll trigger="mount" enter={enter} className="mb-6 inline-flex">
               <div className="eyebrow-dl">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                Barranqui-IA 2026 · Coach de carrera con IA
+                Coach de carrera impulsado con IA
               </div>
             </RevealOnScroll>
 
