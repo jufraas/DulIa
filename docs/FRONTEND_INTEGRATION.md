@@ -49,6 +49,7 @@
 | Mi Progreso — M3 dataSource | ✅ | Banner mock en `/progreso` |
 | J1 — useProfileCheck | ✅ | Login/registro → `/progreso` o `/comenzar` |
 | J3 — Nav + empty states | ✅ | `SiteHeader`, empty plan e historial vacío |
+| Landing — redirect + splash | ✅ | Sesión → `/progreso`; splash solo carga/refresco en `/` |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md) · Entrevista V2: [INTERVIEW_REDESIGN_PLAN.md](INTERVIEW_REDESIGN_PLAN.md).
 

@@ -4,6 +4,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
+2026-05-23 — **Landing UX:** splash solo en carga/refresco (`landingSplash.js`); `/` redirige a `/progreso` con sesión Supabase.
+
 2026-05-23 — **API-first + progreso dinámico:** mock solo offline (`isBackendUnreachable`); `current_day` desde `started_at`; tests `test:api-fallback` + `test:progress` (13).
 
 2026-05-24 — **Layout análisis congelado** + PDF export (timeline, skills, captura score) + auth volver con historial.
@@ -44,7 +46,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Pieza | Estado | Notas |
 |-------|--------|-------|
 | Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
-| Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
+| Landing — splash + animaciones (Framer Motion) | ✅ | Splash carga/refresco; redirect auth → `/progreso` |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data`; sin radar mock en UI si API no devolvió datos |
 | `MarketThermometer` | ✅ | Solo `/resultados`; endpoint `GET /market/dashboard/{session_id}` |

@@ -15,6 +15,7 @@ import WelcomePage from './pages/WelcomePage'
 import AuthProvider from './context/AuthProvider'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { hydrateSession } from './services/sessionHydration'
+import { markSpaNavigationReady } from './utils/landingSplash'
 
 /**
  * Flujo kit ReBrand:
@@ -23,6 +24,7 @@ import { hydrateSession } from './services/sessionHydration'
 function App() {
   useEffect(() => {
     hydrateSession()
+    markSpaNavigationReady()
   }, [])
 
   return (

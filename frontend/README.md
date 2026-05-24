@@ -13,7 +13,7 @@ npm run dev          # http://localhost:5173
 npm run build        # verificar antes de push
 npm run lint         # ESLint (solo src/ + config; ver abajo)
 npm run test:progress        # progreso + entrevista quiz (13 tests, sin Vitest)
-npm run test:api-fallback    # política API-first / isBackendUnreachable (5 tests)
+npm run test:api-fallback    # política API-first + landing splash (7 tests)
 npm run test:interview-v2    # smoke entrevista conversacional V2 (5 tests)
 npm run test:progress:api    # smoke E2E contra backend :8000 (opcional)
 ```
@@ -59,7 +59,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 
 | Ruta | Pantalla | Descripción |
 |------|----------|-------------|
-| `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
+| `/` | Landing | Splash + hero + features + CTA; sesión Supabase → `/progreso` |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
 | `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
@@ -153,7 +153,8 @@ Referencia de diseño (no producción): `ReBrand/DulIA Design System (1)/`.
 
 | Capa | Implementación |
 |------|------------------|
-| Splash | `LandingSplash.jsx` + CSS (`dulia-kit.css`) — fases en `WelcomePage.jsx` |
+| Splash | `LandingSplash.jsx` + CSS — solo en **carga/refresco** de `/` (`utils/landingSplash.js`); navegación SPA al logo no repite splash |
+| Auth en `/` | Usuario con sesión Supabase → `Navigate` a `/progreso` |
 | Hero al cargar | `RevealOnScroll` con `trigger="mount"`; entra cuando termina el splash |
 | Features / CTA | `RevealOnScroll` con `trigger="scroll"` (`whileInView`) |
 | Dependencia | `framer-motion` — respeta `prefers-reduced-motion` |
