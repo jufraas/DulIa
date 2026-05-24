@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-23 · Plan 2 UI completa (Sprints 1–3): analyze, coach, timeline, tabs plan, PDF.
+**Última actualización:** 2026-05-23 · Plan 2 UI completa + normalización `parse-cv`.
 
 ---
 
@@ -20,6 +20,7 @@
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | `mockResultsBundle.js` |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
+| `POST /profile/parse-cv` | ✅ | `normalizeCvParseResponse` + merge wizard paso 0 |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
 | PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 
@@ -43,6 +44,8 @@ Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026
 
 ```
 /comenzar (wizard)
+    │
+    ├── (opcional) POST /api/profile/parse-cv   ← CV PDF → prefill wizard paso 0
     │
     ▼
 POST /api/profile                    ← guardar perfil
@@ -70,6 +73,7 @@ En **modo real**: orden estricto para timeline → `profile` → `analyze` → `
 
 | Cuándo | Método | Ruta | Qué recibes |
 |--------|--------|------|-------------|
+| Wizard paso 0 (opcional) | POST | `/profile/parse-cv` | `CvParseOut` → prefill formulario |
 | Tras wizard | POST | `/profile` | Perfil (`ProfileOut`) |
 | Recargar perfil | GET | `/profile/{session_id}` | Mismo shape (404 en mock) |
 | Pantalla vacantes | GET | `/jobs/recommended/{session_id}` | Array de vacantes + score |

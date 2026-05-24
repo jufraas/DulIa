@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — FRONT MVP: Sprints 1–3 (Plan 2 UI + PDF); pendiente deploy y pipeline jobs reales.
+2026-05-23 — FRONT MVP: Sprints 1–3 (Plan 2 UI + PDF); normalización `parse-cv`; pendiente deploy y pipeline jobs reales.
 
 ## Estado por módulo
 
@@ -46,7 +46,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Integración Axios → API | ✅ | `services/api.js` + `mockResultsBundle.js` |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
-| Subida CV PDF | ✅ | `POST /profile/parse-cv` + fallback en `api.js` |
+| Subida CV PDF | ✅ | `parseCvPdf` → `normalizeCvParseResponse`; alias DANE en prefill |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |

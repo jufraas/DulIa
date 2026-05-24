@@ -34,7 +34,9 @@ Se adoptó **endpoint dedicado** en lugar de multipart en `POST /profile`:
 | Modelos respuesta | `backend/app/models/cv.py` (`CvParseOut`, `CvWizardPrefill`) |
 | UI paso 0 wizard | `frontend/src/components/onboarding/CvUploadZone.jsx` |
 | Cliente API | `parseCvPdf()` en `frontend/src/services/api.js` |
-| Fallback offline | `frontend/src/services/mockCvPrefill.js` |
+| Normalización respuesta | `normalizeCvParseResponse()` en `mockCvPrefill.js` |
+| Merge wizard | `mergeCvPrefillIntoForm()` + `resolveLocationFields()` (`colombiaLocations.js`) |
+| Fallback offline | `MOCK_CV_PREFILL` en `mockCvPrefill.js` |
 
 Flujo: usuario sube PDF → backend extrae campos → frontend merge en formulario → usuario revisa → `POST /profile` JSON al finalizar.
 

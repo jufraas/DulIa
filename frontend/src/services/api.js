@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { mockCoachChatResponse } from './mockCoachChat'
-import { MOCK_CV_PREFILL } from './mockCvPrefill'
+import { MOCK_CV_PREFILL, normalizeCvParseResponse } from './mockCvPrefill'
 import {
   buildMockJobsFromProfile,
   buildMockMarketFromProfile,
@@ -81,7 +81,7 @@ export async function parseCvPdf(file) {
       headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 60000,
     })
-    return data
+    return normalizeCvParseResponse(data)
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 400) {
       throw new Error(String(err.response.data?.detail ?? 'Archivo inválido'), { cause: err })

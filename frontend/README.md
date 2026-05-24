@@ -38,7 +38,7 @@ VITE_API_URL=http://localhost:8000/api
 
 ## Flujo de datos
 
-1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; opcional: CV → `parseCvPdf`).
+1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; opcional: CV → `parseCvPdf` → `normalizeCvParseResponse` → merge formulario).
 2. **POST** `/api/profile` con `session_id` (UUID en `localStorage`, clave `dulia_session_id`).
 3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
@@ -54,7 +54,7 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 |---------|----------------|
 | `createProfile` | POST `/profile` |
 | `getProfile` | GET `/profile/{session_id}` |
-| `parseCvPdf` | POST `/profile/parse-cv` |
+| `parseCvPdf` | POST `/profile/parse-cv` → `normalizeCvParseResponse` |
 | `loadResultsBundle` | Plan 2: analyze + action-plan + jobs/market/radar/timeline |
 | `getRecommendedJobs` | GET `/jobs/recommended/{session_id}` |
 | `getMarketDashboard` | GET `/market/dashboard` |

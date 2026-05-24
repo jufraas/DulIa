@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-23 · Fases 1–10 + `POST /profile/parse-cv` + rehidratación de sesión en frontend.
+**Última actualización:** 2026-05-23 · Plan 2 UI + normalización respuesta `parse-cv`.
 
 ## Base URL
 
@@ -236,7 +236,7 @@ Convierte un CV en PDF a markdown (MarkItDown) y extrae campos para **prellenar 
 
 **Mock (`USE_MOCK_DATA=true`):** devuelve prefill simulado sin procesar el PDF.
 
-**Frontend:** `CvUploadZone.jsx` → `parseCvPdf()` en `api.js`. Si el backend no responde, fallback a `mockCvPrefill.js`.
+**Frontend:** `CvUploadZone.jsx` → `parseCvPdf()` → `normalizeCvParseResponse()` en `mockCvPrefill.js`. Merge en wizard vía `mergeCvPrefillIntoForm()` + `resolveLocationFields()` (alias ciudad/depto para selects DANE). Si el backend no responde, fallback a `MOCK_CV_PREFILL`.
 
 ---
 
