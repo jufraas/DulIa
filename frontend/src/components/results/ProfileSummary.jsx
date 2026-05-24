@@ -7,9 +7,16 @@ import SkillsChips from './SkillsChips'
  *   topScore: number,
  *   topJobTitle?: string,
  *   insights?: import('../../utils/analysisDisplay').AnalysisInsights | null,
+ *   className?: string,
  * }} props
  */
-export default function ProfileSummary({ profile, topScore, topJobTitle, insights }) {
+export default function ProfileSummary({
+  profile,
+  topScore,
+  topJobTitle,
+  insights,
+  className = '',
+}) {
   const skills = profile?.habilidades ?? []
   const hasInsights =
     insights &&
@@ -19,12 +26,18 @@ export default function ProfileSummary({ profile, topScore, topJobTitle, insight
       insights.oportunidades.length > 0)
 
   return (
-    <div className="card-dl flex-1 p-7">
-      <div className="eyebrow-dl mb-3.5">
-        <Sparkles className="h-3.5 w-3.5" aria-hidden />
-        Resumen — por DulIA
+    <div
+      className={`card-dl flex max-h-[480px] min-h-[320px] flex-col overflow-hidden p-0 sm:max-h-[520px] lg:h-[580px] lg:max-h-none ${className}`}
+    >
+      <div className="shrink-0 border-b border-[rgba(168,85,247,0.12)] px-7 py-5">
+        <div className="eyebrow-dl mb-0">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          Resumen — por DulIA
+        </div>
       </div>
-      <p className="m-0 text-[17px] leading-relaxed text-[color:var(--fg-2)]">
+
+      <div className="results-summary-scroll flex-1 overflow-y-auto px-7 py-5">
+        <p className="m-0 text-[17px] leading-relaxed text-[color:var(--fg-2)]">
         {profile?.nombre && (
           <>
             Hola <strong className="text-[color:var(--fg-1)]">{profile.nombre}</strong>
@@ -122,6 +135,7 @@ export default function ProfileSummary({ profile, topScore, topJobTitle, insight
       )}
 
       <SkillsChips skills={skills} />
+      </div>
     </div>
   )
 }

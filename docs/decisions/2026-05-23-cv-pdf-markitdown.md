@@ -68,3 +68,12 @@ Flujo: usuario sube PDF → backend extrae campos → frontend merge en formular
 | Tamaño máximo | 5 MB |
 | Persistencia del PDF | No — solo se usa para extracción |
 | Rate limit | 10 req/min (mismo bucket Gemini) |
+
+## Fix producción local (2026-05-24)
+
+| Problema | Solución |
+|----------|----------|
+| `422` al subir PDF | Instalar `markitdown[pdf]` (incluye pdfplumber); reiniciar uvicorn |
+| PDF escaneado sin texto | Mensaje 422 claro; usuario completa wizard manual |
+| Gemini modelo CV | `gemini-3.1-flash-lite` en `cv_service.py` |
+| Windows no reconoce MIME PDF | `validateCvFile.js` acepta `.pdf` / `octet-stream` |

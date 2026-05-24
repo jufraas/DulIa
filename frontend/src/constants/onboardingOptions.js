@@ -70,4 +70,4 @@ export const AVAILABILITY_OPTIONS = [
 ]
 
 export const CV_MAX_SIZE_MB = 5
-export const CV_ACCEPT = 'application/pdf'
+export const CV_ACCEPT = 'application/pdf,.pdf'

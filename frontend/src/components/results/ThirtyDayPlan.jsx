@@ -24,7 +24,7 @@ export default function ThirtyDayPlan() {
 
   if (!hasContent) {
     return (
-      <div className="card-dl p-7">
+      <div className="card-dl flex h-full min-h-0 flex-col overflow-hidden p-7">
         <div className="eyebrow-dl">
           <Calendar className="h-3.5 w-3.5" aria-hidden />
           Tu plan de acción
@@ -37,43 +37,46 @@ export default function ThirtyDayPlan() {
   }
 
   return (
-    <div className="card-dl p-7">
-      <div className="eyebrow-dl">
-        <Calendar className="h-3.5 w-3.5" aria-hidden />
-        Tu plan de acción
-      </div>
-      {plan?.resumen_ejecutivo && (
-        <p className="mt-2 text-sm leading-relaxed text-[color:var(--fg-2)]">
-          {plan.resumen_ejecutivo}
-        </p>
-      )}
+    <div className="card-dl flex h-full min-h-0 flex-col overflow-hidden p-0">
+      <div className="shrink-0 border-b border-[rgba(168,85,247,0.12)] px-7 pb-4 pt-7">
+        <div className="eyebrow-dl">
+          <Calendar className="h-3.5 w-3.5" aria-hidden />
+          Tu plan de acción
+        </div>
+        {plan?.resumen_ejecutivo && (
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[color:var(--fg-2)]">
+            {plan.resumen_ejecutivo}
+          </p>
+        )}
 
-      <div className="mb-5 mt-4 flex flex-wrap gap-2">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className="rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200"
-            style={
-              activeTab === tab.id
-                ? {
-                    background: 'var(--grad-brand)',
-                    color: '#fff',
-                    boxShadow: '0 8px 22px rgba(124,58,237,0.40)',
-                  }
-                : {
-                    background: 'rgba(168,85,247,0.08)',
-                    border: '1px solid rgba(168,85,247,0.25)',
-                    color: 'var(--fg-2)',
-                  }
-            }
-          >
-            {tab.label}
-          </button>
-        ))}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className="rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200"
+              style={
+                activeTab === tab.id
+                  ? {
+                      background: 'var(--grad-brand)',
+                      color: '#fff',
+                      boxShadow: '0 8px 22px rgba(124,58,237,0.40)',
+                    }
+                  : {
+                      background: 'rgba(168,85,247,0.08)',
+                      border: '1px solid rgba(168,85,247,0.25)',
+                      color: 'var(--fg-2)',
+                    }
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      <div className="results-summary-scroll min-h-0 flex-1 overflow-y-auto px-7 py-5">
       {activeTab === '30' && (
         <>
           <h3 className="mb-5 text-[22px] font-bold tracking-[-0.015em] text-[color:var(--fg-1)]">
@@ -161,6 +164,7 @@ export default function ThirtyDayPlan() {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }
