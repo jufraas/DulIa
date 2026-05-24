@@ -36,7 +36,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — semáforo; **Volver a mi análisis** → `/resultados` |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Resultados: `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
+| `src/components/results/*` | Resultados: `OpportunitiesAndPlan`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 

@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-23 — Arquitectura híbrida cache-first (`user_interests`, `scrape_queue`, `run_queue.py`). Pipeline getonbrd + remotive operativo. Front MVP Sprints 1–3. Pendiente: deploy.
+2026-05-24 — **Backend:** arquitectura híbrida cache-first (`user_interests`, `scrape_queue`, `run_queue.py`); pipeline getonbrd + remotive (~380 jobs). **Front:** fix CV PDF + layout `/resultados` + timeouts API 120s. Pendiente: deploy.
 
 ## Estado por módulo
 
@@ -14,7 +14,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Backend (FastAPI) | ✅ Fase 1 Plan 2 | Cadena real verificada (migración 004); deploy pendiente |
 | Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mocks si API falla |
 | Pipeline | ✅ Híbrido | getonbrd + remotive; `run_queue.py` + `run_baseline.py`; cache-first en backend |
-| Base de datos | 🚧 Datos + schema | Tablas Plan 2 + migraciones 004, **008**, **009** |
+| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008**, **009**; ~380 jobs activos |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
@@ -45,7 +45,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Integración Axios → API | ✅ | `services/api.js` + `mockResultsBundle.js` |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
-| Subida CV PDF | ✅ | `parseCvPdf` → `normalizeCvParseResponse`; alias DANE en prefill |
+| Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
+| Layout `/resultados` | ✅ | Score+PDF columna izq.; resumen con scroll; `OpportunitiesAndPlan` (altura sync + scroll plan) |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |
@@ -73,7 +74,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | 0–1 | Entorno + estructura + CORS | ✅ |
-| 2 | Schema Supabase | 🚧 Tablas ✅, datos pendientes pipeline |
+| 2 | Schema Supabase | ✅ Tablas + datos pipeline (~380 jobs) |
 | 3–5 | Modelos + perfil + Gemini | ✅ |
 | 6–7 | Jobs recomendados + mercado | ✅ (+ `por_modalidad`, `por_fuente` en dashboard) |
 | 8 | Coach conversacional | ✅ |

@@ -19,7 +19,7 @@ const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
 const api = axios.create({
   baseURL,
-  timeout: 15000,
+  timeout: 120000,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -46,7 +46,7 @@ export async function fetchHealth() {
  */
 export async function createProfile(payload) {
   try {
-    const { data } = await api.post('/profile', payload)
+    const { data } = await api.post('/profile', payload, { timeout: 120000 })
     return data
   } catch (err) {
     logOfflineFallback('createProfile', err)
@@ -148,7 +148,7 @@ export async function postProfileAnalyze(
   profile = null,
 ) {
   try {
-    const { data } = await api.post(`/profile/${sessionId}/analyze`)
+    const { data } = await api.post(`/profile/${sessionId}/analyze`, {}, { timeout: 120000 })
     return data
   } catch (err) {
     logOfflineFallback('postProfileAnalyze', err)
@@ -166,7 +166,7 @@ export async function postActionPlan(
   profile = null,
 ) {
   try {
-    const { data } = await api.post(`/profile/${sessionId}/action-plan`)
+    const { data } = await api.post(`/profile/${sessionId}/action-plan`, {}, { timeout: 120000 })
     const normalized = normalizeActionPlanOut(data)
     if (!normalized) throw new Error('Respuesta de action-plan inválida')
     return normalized

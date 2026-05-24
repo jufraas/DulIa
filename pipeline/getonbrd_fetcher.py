@@ -239,6 +239,52 @@ def fetch_jobs(
     return collected
 
 
+def fetch_all_categories(limit: int = 200, city: str | None = None, per_category: int | None = None) -> list[dict]:
+    """Recorre todas las categorías Get on Board (máxima diversidad sectorial)."""
+    collected: list[dict] = []
+    seen_ids: set[str] = set()
+    cap_each = per_category or max(limit // max(len(CATEGORIES), 1), 15)
+
+    for category in CATEGORIES:
+        if per_category is None and len(collected) >= limit:
+            break
+
+        cat_count = 0
+        page = 1
+        cat_limit = per_category if per_category else min(cap_each, limit - len(collected))
+
+        while cat_count < cat_limit:
+            try:
+                jobs = _fetch_category_page(category, page)
+            except Exception:
+                break
+
+            if not jobs:
+                break
+
+            for job in jobs:
+                if cat_count >= cat_limit:
+                    break
+                job_id = job["id"]
+                if job_id in seen_ids or not _is_relevant(job):
+                    continue
+                row = _map_row(job)
+                if not _matches_city_filter(row, city):
+                    continue
+                seen_ids.add(job_id)
+                collected.append(row)
+                cat_count += 1
+
+            if len(jobs) < 100:
+                break
+            page += 1
+            time.sleep(0.5)
+
+        time.sleep(0.5)
+
+    return collected
+
+
 def upsert_jobs(rows: list[dict]) -> int:
     if not rows:
         return 0
@@ -246,9 +292,12 @@ def upsert_jobs(rows: list[dict]) -> int:
     return len(res.data or [])
 
 
-def run(limit: int = LIMIT, sector: str | None = None, city: str | None = None):
+def run(limit: int = LIMIT, sector: str | None = None, city: str | None = None, all_categories: bool = False):
     print(f"\n=== Get on Board fetcher (limit={limit}) ===")
-    collected = fetch_jobs(limit=limit, sector=sector, city=city)
+    if all_categories or (sector is None and city is None):
+        collected = fetch_all_categories(limit=limit, city=city)
+    else:
+        collected = fetch_jobs(limit=limit, sector=sector, city=city)
     if not collected:
         print("\nNo jobs fetched. Check API connectivity, sector, or credentials.")
         return

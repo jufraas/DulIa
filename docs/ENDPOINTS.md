@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-23 · Fase 1 Plan 2 real verificada + normalización respuesta `parse-cv` + termómetro `por_modalidad` / `por_fuente`.
+**Última actualización:** 2026-05-24 · Plan 2 verificado + parse-cv (`markitdown[pdf]`, pdfplumber) + termómetro `por_modalidad`/`por_fuente` + jobs cache-first (híbrido). Frontend: layout `/resultados`, timeouts API 120s.
 
 ## Base URL
 
@@ -231,12 +231,14 @@ Convierte un CV en PDF a markdown (MarkItDown) y extrae campos para **prellenar 
 | Código | Cuándo |
 |--------|--------|
 | `400` | Archivo inválido (no PDF, supera 5 MB) |
-| `422` | PDF ilegible o sin texto extraíble |
+| `422` | PDF ilegible, escaneado sin texto, o Gemini no interpretó el CV |
 | `500` | Error interno Gemini/conversión |
+
+**Backend (deps):** `markitdown[pdf]>=0.1.5` en `requirements.txt`. Conversión: MarkItDown → tempfile → fallback **pdfplumber**. Modelo Gemini: `gemini-3.1-flash-lite` (alineado al resto de la API).
 
 **Mock (`USE_MOCK_DATA=true`):** devuelve prefill simulado sin procesar el PDF.
 
-**Frontend:** `CvUploadZone.jsx` → `parseCvPdf()` → `normalizeCvParseResponse()` en `mockCvPrefill.js`. Merge en wizard vía `mergeCvPrefillIntoForm()` + `resolveLocationFields()` (alias ciudad/depto para selects DANE). Si el backend no responde, fallback a `MOCK_CV_PREFILL`.
+**Frontend:** `CvUploadZone.jsx` → `parseCvPdf()` → `normalizeCvParseResponse()` en `mockCvPrefill.js`. Acepta PDF con MIME `application/octet-stream` en Windows. Merge en wizard vía `mergeCvPrefillIntoForm()` + `resolveLocationFields()` (alias ciudad/depto para selects DANE). Si el backend no responde, fallback a `MOCK_CV_PREFILL`.
 
 ---
 

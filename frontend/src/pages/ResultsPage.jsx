@@ -5,12 +5,11 @@ import SiteHeader from '../components/layout/SiteHeader'
 import CareerTimeline from '../components/results/CareerTimeline'
 import CoachChatBubble from '../components/results/CoachChatBubble'
 import MarketThermometer from '../components/results/MarketThermometer'
-import OpportunitiesPreview from '../components/results/OpportunitiesPreview'
+import OpportunitiesAndPlan from '../components/results/OpportunitiesAndPlan'
 import PdfDownloadCard from '../components/results/PdfDownloadCard'
 import ProfileSummary from '../components/results/ProfileSummary'
 import RadarMatch from '../components/results/RadarMatch'
 import ScoreCard from '../components/results/ScoreCard'
-import ThirtyDayPlan from '../components/results/ThirtyDayPlan'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import SessionLoading from '../components/shared/SessionLoading'
@@ -54,25 +53,22 @@ export default function ResultsPage() {
             </h1>
           </div>
 
-          <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScoreCard score={topScore} comparativa={insights?.comparativa} />
-            <div className="flex flex-col gap-4">
-              <ProfileSummary
-                profile={savedProfile}
-                topScore={topScore}
-                topJobTitle={topJob?.titulo}
-                insights={insights}
-              />
+          <div className="anim-in-delay-1 mb-12 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+            <div className="flex flex-col gap-4 lg:h-[580px]">
+              <ScoreCard score={topScore} comparativa={insights?.comparativa} />
               <PdfDownloadCard onDownload={downloadPdf} downloading={downloading} />
             </div>
+            <ProfileSummary
+              profile={savedProfile}
+              topScore={topScore}
+              topJobTitle={topJob?.titulo}
+              insights={insights}
+            />
           </div>
 
           <div className="anim-in-delay-2 grid gap-6">
             <MarketThermometer market={market} />
-            <div className="grid gap-6 lg:grid-cols-2">
-              <OpportunitiesPreview jobs={jobs} />
-              <ThirtyDayPlan />
-            </div>
+            <OpportunitiesAndPlan jobs={jobs} />
           </div>
 
           {loading && (
