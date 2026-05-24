@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** PDF por secciones, layout `/resultados` congelado, auth OAuth.
+2026-05-24 — **Auth opcional MVP** (Supabase + link session). **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** PDF por secciones, layout `/resultados` congelado.
 
 ## Estado por módulo
 
@@ -14,7 +14,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Backend (FastAPI) | ✅ Fase 1 Plan 2 | Cadena real verificada (migración 004); deploy pendiente |
 | Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mocks si API falla |
 | Pipeline | ✅ Híbrido | getonbrd + remotive; `run_queue.py` + `run_baseline.py`; cache-first en backend |
-| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008**, **009**; ~380 jobs activos |
+| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008–011**; ~380 jobs activos |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
@@ -28,6 +28,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
 | `/resultados` | Score, perfil, **termómetro**, jobs, plan 30-60-90, **RadarMatch**, timeline, **coach**, PDF completo | Joufra / Migue | ✅ |
 | `/vacantes` | **Termómetro** + semáforo; **Volver → `/resultados`** | Joufra | ✅ |
+| `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
+| `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -61,7 +63,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Links `url` en vacantes | ✅ | Preview + panel semáforo; mock con URLs demo |
 | Descarga PDF | ✅ | Por secciones `[data-pdf-block]` · fondo `#0D0D0D` en cada hoja · PNG · `flushSync` (`react-dom`) · alerta si falla |
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
-| Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
+| Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
+| Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
 
 ### Pendiente UI (pre-pitch)
 

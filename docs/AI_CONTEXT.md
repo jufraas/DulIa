@@ -4,7 +4,7 @@
 
 ## ¿Qué es DulIA?
 
-Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin login:** el visitante completa un wizard, recibe vacantes con score de compatibilidad, explora un panel con semáforo y descarga un PDF con su plan. Incluye coach conversacional vía API.
+Plataforma web con IA — coach de carrera para jóvenes colombianos. **Flujo principal sin login:** el visitante completa un wizard con `session_id`, recibe vacantes con score, explora semáforo y descarga PDF. **Auth opcional** (Supabase) para cuenta y vincular progreso del coach. Coach conversacional vía API.
 
 1. Captura perfil en wizard (**3 pasos**, campos en español).
 2. Backend guarda perfil por `session_id` (UUID en `localStorage`).
@@ -60,6 +60,7 @@ Resultados (/resultados) ──► Vacantes (/vacantes) ──► Volver a anál
 | `/comenzar` | Wizard | Compartido |
 | `/resultados` | Resultados | Joufra |
 | `/vacantes` | Vacantes | Joufra |
+| `/login`, `/registro`, `/perfil` | Auth opcional | Compartido |
 
 Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 
@@ -68,7 +69,7 @@ Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 | Módulo | Estado |
 |--------|--------|
 | Backend | ✅ Fases 0–10 (mock + real); falta deploy |
-| Frontend | ✅ MVP UI completo; falta deploy prod |
+| Frontend | ✅ MVP UI completo; auth opcional MVP | Deploy prod pendiente |
 | Pipeline | ✅ Híbrido | getonbrd + remotive + `run_queue.py`; ver [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md) |
 | Gemini | ✅ Profile extraction + coach |
 

@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · PDF por secciones + layout resultados congelado.
+**Última actualización:** 2026-05-24 · Auth opcional Supabase + PDF por secciones.
 
 ---
 
@@ -30,8 +30,9 @@
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
+| Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro`, `/perfil` protegida, `linkSession` |
 
-Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md).
 
 ---
 
@@ -40,8 +41,10 @@ Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026
 | Variable | Valor dev |
 |----------|-----------|
 | `VITE_API_URL` | `http://localhost:8000/api` |
+| `VITE_SUPABASE_URL` | URL del proyecto (opcional) |
+| `VITE_SUPABASE_ANON_KEY` | Anon key (misma del backend) |
 | Backend | `cd backend && USE_MOCK_DATA=false uvicorn main:app --reload --port 8000` |
-| Migraciones | Ejecutar `002_plan2_tables.sql` + `004_plan2_backend_fixes.sql` en Supabase |
+| Migraciones | `002`, `004`, `008`, `009`, **`010`**, **`011`** en Supabase SQL Editor |
 | Swagger | http://localhost:8000/docs |
 
 **`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.
@@ -325,6 +328,30 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 | Jobs | 2 vacantes ejemplo | Pipeline + Supabase |
 
 **Deploy backend:** Fase 11 pendiente. Cuando exista URL prod, solo cambiar `VITE_API_URL` y configurar `CORS_ORIGINS` en el backend.
+
+---
+
+## Auth (opcional)
+
+El wizard y `/resultados` siguen **100% anónimos** con `dulia_session_id`. Login/registro es capa adicional.
+
+| Pieza | Archivo | Rol |
+|-------|---------|-----|
+| Cliente Supabase | `services/supabase.js` | `null` si faltan envs; app no rompe |
+| Sesión reactiva | `context/AuthProvider.jsx` | `getSession` + `onAuthStateChange` |
+| Hook | `hooks/useAuth.js` | `{ user, session, loading, isConfigured, signOut }` |
+| Ruta protegida | `components/auth/ProtectedRoute.jsx` | Solo `/perfil` → redirect `/login` |
+| Vinculación | `services/api.js` → `linkSession()` | Tras `SIGNED_IN`, best-effort |
+| Cuenta usuario | tabla `user_accounts` | `/perfil` — no usar `profiles` para datos de cuenta |
+
+**Flujo:**
+
+1. Usuario completa wizard anónimo (`profiles.session_id`).
+2. Opcional: registro/login en Supabase.
+3. `AuthProvider` detecta `SIGNED_IN` → `POST /api/auth/link-session`.
+4. Backend setea `profiles.user_id` si el perfil coach existe.
+
+Sin `VITE_SUPABASE_*`: banner informativo en login/registro, botones disabled, header sin link "Iniciar sesión".
 
 ---
 

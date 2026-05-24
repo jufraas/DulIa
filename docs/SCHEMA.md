@@ -1,8 +1,8 @@
 # SCHEMA — Base de datos DulIA
 
-> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009).
+> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009). Auth opcional: `user_accounts` + `profiles.user_id` (migraciones 010–011).
 > **BD:** PostgreSQL 17 vía Supabase (proyecto DulIA)
-> **Última actualización:** 2026-05-23
+> **Última actualización:** 2026-05-24
 
 ---
 
@@ -11,8 +11,11 @@
 ```
 profiles ──< scoring_history >── jobs
     │                              │
-    └── user_interests             companies
+    │ user_id (nullable)           companies
+    └── user_interests             │
 profiles ── (demanda) ──> scrape_queue ──> jobs (pipeline CLI)
+
+user_accounts ── FK auth.users (cuenta opcional, separada del coach)
 ```
 
 ---
@@ -24,7 +27,8 @@ Perfil estructurado del usuario, extraído por Gemini a partir del onboarding co
 | Columna | Tipo | Nulable | Default | Descripción |
 |---------|------|---------|---------|-------------|
 | `id` | `uuid` | NO | `gen_random_uuid()` | PK |
-| `session_id` | `text` | NO | — | ID de sesión del browser (sin auth en el hackathon) |
+| `session_id` | `text` | NO | — | ID de sesión del browser (flujo anónimo del coach) |
+| `user_id` | `uuid` | SÍ | — | FK opcional a `auth.users` — vinculación tras login (migración 011) |
 | `nombre` | `text` | SÍ | — | Nombre del usuario |
 | `edad` | `integer` | SÍ | — | Edad |
 | `ciudad` | `text` | SÍ | — | Ciudad actual (ej: "Barranquilla") |
@@ -41,7 +45,27 @@ Perfil estructurado del usuario, extraído por Gemini a partir del onboarding co
 | `created_at` | `timestamptz` | NO | `now()` | Fecha de creación |
 | `updated_at` | `timestamptz` | NO | `now()` | Fecha de última actualización |
 
-**Índices:** `session_id` (único), `ciudad`, `nivel_educativo`
+**Índices:** `session_id` (único), `ciudad`, `nivel_educativo`, `user_id`
+
+---
+
+## Tabla: `user_accounts`
+
+Datos de cuenta del usuario autenticado (separados del perfil coach en `profiles`). Migración `010_user_accounts.sql`.
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `user_id` | `uuid` | NO | — | PK, FK → `auth.users(id)` ON DELETE CASCADE |
+| `nombre` | `text` | SÍ | — | Nombre |
+| `apellido` | `text` | SÍ | — | Apellido |
+| `telefono` | `text` | SÍ | — | Teléfono |
+| `linkedin` | `text` | SÍ | — | Perfil LinkedIn |
+| `instagram` | `text` | SÍ | — | Usuario Instagram |
+| `whatsapp` | `text` | SÍ | — | WhatsApp |
+| `created_at` | `timestamptz` | NO | `now()` | Fecha de creación |
+| `updated_at` | `timestamptz` | NO | `now()` | Última actualización |
+
+**RLS:** desactivado (MVP hackathon).
 
 ---
 

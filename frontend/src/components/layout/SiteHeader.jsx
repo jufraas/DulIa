@@ -3,27 +3,28 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import DuliaLogo from '../brand/DuliaLogo'
 import Button from '../ui/Button'
-import { supabase } from '../../services/supabase'
+import { useAuth } from '../../hooks/useAuth'
+
+function userDisplayInfo(user) {
+  const nombre = user.user_metadata?.nombre || ''
+  const apellido = user.user_metadata?.apellido || ''
+  const fullName = [nombre, apellido].filter(Boolean).join(' ') || user.email?.split('@')[0] || ''
+  return {
+    initial: fullName.charAt(0).toUpperCase(),
+    fullName,
+    email: user.email || '',
+  }
+}
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [userInfo, setUserInfo] = useState(/** @type {{initial: string, fullName: string, email: string} | null} */(null))
+  const { user, isConfigured, signOut } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const dropdownRef = useRef(/** @type {HTMLDivElement | null} */(null))
 
-  useEffect(() => {
-    if (!supabase) return undefined
-    supabase.auth.getUser().then(({ data }) => {
-      const u = data?.user
-      if (!u) return
-      const nombre = u.user_metadata?.nombre || ''
-      const apellido = u.user_metadata?.apellido || ''
-      const fullName = [nombre, apellido].filter(Boolean).join(' ') || u.email?.split('@')[0] || ''
-      setUserInfo({ initial: fullName.charAt(0).toUpperCase(), fullName, email: u.email || '' })
-    })
-  }, [])
+  const userInfo = user ? userDisplayInfo(user) : null
 
   useEffect(() => {
     if (!dropdownOpen) return
@@ -37,9 +38,7 @@ export default function SiteHeader() {
   }, [dropdownOpen])
 
   async function handleSignOut() {
-    if (!supabase) return
-    await supabase.auth.signOut()
-    setUserInfo(null)
+    await signOut()
     setDropdownOpen(false)
     navigate('/')
   }
@@ -141,11 +140,11 @@ export default function SiteHeader() {
                 </div>
               )}
             </div>
-          ) : (
+          ) : isConfigured ? (
             <Link to="/login" className="hidden sm:block text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)] text-sm font-medium px-3 py-2 transition-colors">
               Iniciar sesión
             </Link>
-          )}
+          ) : null}
           <Link to="/comenzar" className="hidden sm:block">
             <Button variant="primary" size="sm">
               Empezar
@@ -198,6 +197,17 @@ export default function SiteHeader() {
                 Sobre DulIA
               </Link>
             </li>
+            {isConfigured && !userInfo && (
+              <li>
+                <Link
+                  to="/login"
+                  className="block rounded-lg px-3 py-3 text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)]"
+                  onClick={() => setOpen(false)}
+                >
+                  Iniciar sesión
+                </Link>
+              </li>
+            )}
             <li className="pt-2">
               <Link to="/comenzar" onClick={() => setOpen(false)}>
                 <Button variant="primary" className="w-full justify-center">

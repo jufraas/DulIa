@@ -19,8 +19,20 @@ npm run lint         # ESLint (solo src/ + config; ver abajo)
 | Variable | Default dev |
 |----------|-------------|
 | `VITE_API_URL` | `http://localhost:8000/api` |
+| `VITE_SUPABASE_URL` | — (opcional; sin ella auth queda deshabilitada) |
+| `VITE_SUPABASE_ANON_KEY` | — (misma anon key del backend; **nunca** `service_role`) |
 
-Crear `frontend/.env.local` si el backend corre en otro puerto (p. ej. `8001`):
+Crear `frontend/.env` (o `.env.local`) copiando `.env.example`:
+
+```
+VITE_API_URL=http://localhost:8000/api
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
+```
+
+Script opcional: `../scripts/setup-env.sh` copia `.env.example` → `.env` en backend y frontend.
+
+Si el backend corre en otro puerto (p. ej. `8001`):
 
 ```
 VITE_API_URL=http://127.0.0.1:8001/api
@@ -37,6 +49,9 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
 | `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
 | `/vacantes` | Vacantes | Termómetro + semáforo; **Volver a mi análisis** → `/resultados` |
+| `/login` | Login | Email/password; banner demo si faltan envs Supabase |
+| `/registro` | Registro | Upsert a `user_accounts` tras signUp |
+| `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
 
 ## Flujo de datos
 
@@ -62,6 +77,14 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `getMarketDashboard` | GET `/market/dashboard` |
 | `getRadarData` | GET `/profile/{id}/radar-data` |
 | `postCoachChat` | POST `/coach/chat` |
+| `linkSession` | POST `/auth/link-session` (tras login, best-effort) |
+
+### Auth (opcional)
+
+- `services/supabase.js` — cliente null-safe si faltan envs.
+- `context/AuthProvider.jsx` + `hooks/useAuth.js` — sesión reactiva.
+- `components/auth/ProtectedRoute.jsx` — solo `/perfil` protegida.
+- `components/auth/AuthDisabledBanner.jsx` — aviso en login/registro sin envs.
 
 ## Estructura relevante
 

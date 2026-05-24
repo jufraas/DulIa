@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import SiteHeader from '../components/layout/SiteHeader'
+import { useAuth } from '../hooks/useAuth'
+import { useProfileStore } from '../store/useProfileStore'
 import { supabase } from '../services/supabase'
 
 const card = {
@@ -63,7 +65,8 @@ const saveBtn = {
 }
 
 export default function ProfilePage() {
-  const navigate = useNavigate()
+  const { user, signOut } = useAuth()
+  const savedProfile = useProfileStore(s => s.savedProfile)
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [initial, setInitial] = useState('U')
@@ -81,12 +84,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function load() {
-      if (!supabase) {
-        navigate('/login', { replace: true })
+      if (!user || !supabase) {
+        setLoading(false)
         return
       }
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { navigate('/login', { replace: true }); return }
 
       setEmail(user.email || '')
       const n = user.user_metadata?.nombre || ''
@@ -97,45 +98,57 @@ export default function ProfilePage() {
       setFullName(fn)
       setInitial(fn.charAt(0).toUpperCase())
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('telefono, linkedin, instagram, whatsapp')
-        .eq('id', user.id)
-        .single()
+      const { data: account } = await supabase
+        .from('user_accounts')
+        .select('nombre, apellido, telefono, linkedin, instagram, whatsapp')
+        .eq('user_id', user.id)
+        .maybeSingle()
 
-      if (profile) {
-        setTelefono(profile.telefono || '')
-        setLinkedin(profile.linkedin || '')
-        setInstagram(profile.instagram || '')
-        setWhatsapp(profile.whatsapp || '')
+      if (account) {
+        setNombre(account.nombre || n)
+        setApellido(account.apellido || a)
+        setTelefono(account.telefono || '')
+        setLinkedin(account.linkedin || '')
+        setInstagram(account.instagram || '')
+        setWhatsapp(account.whatsapp || '')
+        const loadedName = [account.nombre, account.apellido].filter(Boolean).join(' ')
+        if (loadedName) {
+          setFullName(loadedName)
+          setInitial(loadedName.charAt(0).toUpperCase())
+        }
       }
+
       setLoading(false)
     }
     load()
-  }, [navigate])
+  }, [user])
 
   async function savePersonal(e) {
     e.preventDefault()
     setPersonalMsg(null)
-    if (!supabase) return
-    const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await supabase.from('profiles').upsert({ id: user.id, nombre, apellido, telefono })
+    if (!supabase || !user) return
+    const { error } = await supabase.from('user_accounts').upsert({
+      user_id: user.id,
+      nombre,
+      apellido,
+      telefono,
+      updated_at: new Date().toISOString(),
+    })
     setPersonalMsg(error ? { ok: false, text: error.message } : { ok: true, text: '¡Guardado!' })
   }
 
   async function saveSocial(e) {
     e.preventDefault()
     setSocialMsg(null)
-    if (!supabase) return
-    const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await supabase.from('profiles').upsert({ id: user.id, linkedin, instagram, whatsapp })
+    if (!supabase || !user) return
+    const { error } = await supabase.from('user_accounts').upsert({
+      user_id: user.id,
+      linkedin,
+      instagram,
+      whatsapp,
+      updated_at: new Date().toISOString(),
+    })
     setSocialMsg(error ? { ok: false, text: error.message } : { ok: true, text: '¡Guardado!' })
-  }
-
-  async function handleSignOut() {
-    if (!supabase) return
-    await supabase.auth.signOut()
-    navigate('/')
   }
 
   if (loading) {
@@ -151,7 +164,6 @@ export default function ProfilePage() {
       <SiteHeader />
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '48px 20px 80px' }}>
 
-        {/* Avatar + nombre */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 40 }}>
           <div style={{
             width: 88,
@@ -174,7 +186,22 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Información personal */}
+        {savedProfile && (
+          <div style={{ ...card, marginBottom: 20 }}>
+            <h2 style={sectionTitle}>Tu análisis del coach</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, margin: '0 0 12px' }}>
+              {savedProfile.nombre || 'Perfil guardado'}
+              {savedProfile.ciudad ? ` · ${savedProfile.ciudad}` : ''}
+            </p>
+            <Link
+              to="/resultados"
+              style={{ color: 'var(--violet-300, #C4B5FD)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+            >
+              Ver resultados →
+            </Link>
+          </div>
+        )}
+
         <form onSubmit={savePersonal}>
           <div style={card}>
             <h2 style={sectionTitle}>Información personal</h2>
@@ -220,7 +247,6 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        {/* Redes sociales */}
         <form onSubmit={saveSocial} style={{ marginTop: 20 }}>
           <div style={card}>
             <h2 style={sectionTitle}>Redes sociales</h2>
@@ -258,7 +284,6 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        {/* Seguridad */}
         <div style={{ ...card, marginTop: 20 }}>
           <h2 style={sectionTitle}>Seguridad</h2>
           <p style={{ color: '#F1F0FB', fontSize: 15, margin: '0 0 6px' }}>Contraseña</p>
@@ -273,11 +298,10 @@ export default function ProfilePage() {
           </Link>
         </div>
 
-        {/* Cerrar sesión */}
         <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
           <button
             type="button"
-            onClick={handleSignOut}
+            onClick={signOut}
             style={{
               backgroundColor: 'transparent',
               color: '#F87171',

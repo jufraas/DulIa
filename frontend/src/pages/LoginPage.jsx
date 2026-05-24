@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import DuliaLogo from '../components/brand/DuliaLogo'
+import AuthDisabledBanner from '../components/auth/AuthDisabledBanner'
+import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/supabase'
 
 function EyeIcon({ open }) {
@@ -29,42 +31,37 @@ function GoogleIcon() {
   )
 }
 
+const disabledBtn = { opacity: 0.45, cursor: 'not-allowed' }
+
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { user, isConfigured } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!supabase) return undefined
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate('/', { replace: true })
-    })
-  }, [navigate])
+    if (user) navigate('/', { replace: true })
+  }, [user, navigate])
 
   async function handleGoogleLogin() {
-    if (!supabase) {
-      setError('Inicio de sesión no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
-      return
-    }
-    const { error } = await supabase.auth.signInWithOAuth({
+    if (!supabase || !isConfigured) return
+    setError(null)
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
     })
-    if (error) setError(error.message)
+    if (oauthError) setError(oauthError.message)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
-    if (!supabase) {
-      setError('Inicio de sesión no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
-      return
-    }
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
+    if (!supabase || !isConfigured) return
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) {
+      setError(signInError.message)
     } else {
       navigate('/')
     }
@@ -85,12 +82,10 @@ export default function LoginPage() {
           padding: '40px 36px',
         }}
       >
-        {/* Logo */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
           <DuliaLogo height={36} />
         </div>
 
-        {/* Título */}
         <h1 style={{ textAlign: 'center', color: '#F1F0FB', fontSize: '22px', fontWeight: '700', marginBottom: '28px', lineHeight: '1.3' }}>
           Bienvenido de vuelta,{' '}
           <span style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -98,10 +93,12 @@ export default function LoginPage() {
           </span>
         </h1>
 
-        {/* Botón Google */}
+        <AuthDisabledBanner />
+
         <button
           type="button"
           onClick={handleGoogleLogin}
+          disabled={!isConfigured}
           style={{
             width: '100%',
             display: 'flex',
@@ -115,22 +112,21 @@ export default function LoginPage() {
             padding: '11px 16px',
             fontSize: '15px',
             fontWeight: '600',
-            cursor: 'pointer',
+            cursor: isConfigured ? 'pointer' : 'not-allowed',
             marginBottom: '20px',
+            ...(isConfigured ? {} : disabledBtn),
           }}
         >
           <GoogleIcon />
           Continuar con Google
         </button>
 
-        {/* Divisor */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
           <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
           <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '13px' }}>o</span>
           <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <input
             type="email"
@@ -138,6 +134,7 @@ export default function LoginPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
+            disabled={!isConfigured}
             style={{
               width: '100%',
               backgroundColor: 'rgba(255,255,255,0.06)',
@@ -148,6 +145,7 @@ export default function LoginPage() {
               fontSize: '15px',
               outline: 'none',
               boxSizing: 'border-box',
+              ...(isConfigured ? {} : disabledBtn),
             }}
           />
 
@@ -158,6 +156,7 @@ export default function LoginPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
+              disabled={!isConfigured}
               style={{
                 width: '100%',
                 backgroundColor: 'rgba(255,255,255,0.06)',
@@ -168,11 +167,13 @@ export default function LoginPage() {
                 fontSize: '15px',
                 outline: 'none',
                 boxSizing: 'border-box',
+                ...(isConfigured ? {} : disabledBtn),
               }}
             />
             <button
               type="button"
               onClick={() => setShowPassword(v => !v)}
+              disabled={!isConfigured}
               style={{
                 position: 'absolute',
                 right: '12px',
@@ -180,7 +181,7 @@ export default function LoginPage() {
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: isConfigured ? 'pointer' : 'not-allowed',
                 color: 'rgba(255,255,255,0.4)',
                 display: 'flex',
                 alignItems: 'center',
@@ -200,6 +201,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
+            disabled={!isConfigured}
             style={{
               width: '100%',
               backgroundColor: '#EC4899',
@@ -209,15 +211,15 @@ export default function LoginPage() {
               padding: '13px 16px',
               fontSize: '16px',
               fontWeight: '700',
-              cursor: 'pointer',
+              cursor: isConfigured ? 'pointer' : 'not-allowed',
               marginTop: '4px',
+              ...(isConfigured ? {} : disabledBtn),
             }}
           >
             Iniciar sesión
           </button>
         </form>
 
-        {/* Link a registro */}
         <p style={{ textAlign: 'center', marginTop: '22px', color: 'rgba(255,255,255,0.45)', fontSize: '14px' }}>
           ¿No tienes cuenta?{' '}
           <Link
