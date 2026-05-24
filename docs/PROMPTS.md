@@ -400,6 +400,10 @@ PERFIL DEL CANDIDATO:
 PREGUNTAS CANDIDATAS DEL BANCO:
 {pool_de_8_preguntas}
 
+NOTA: Las preguntas candidatas vienen de bancos curados por la comunidad de developers
+(sudheerj/* en GitHub con +40k stars cada uno) y de datasets HuggingFace. Cuando personalices,
+mantén la calidad técnica de la pregunta original.
+
 TAREA: Selecciona 5 preguntas (3 técnicas + 2 behavioral) para una entrevista realista.
 Puedes:
 - Tomar preguntas del banco tal cual.
@@ -411,6 +415,51 @@ Devuelve SOLO JSON válido sin texto adicional, sin markdown:
   {"texto": "...", "tipo": "tecnica|behavioral", "skill": "...",
    "keywords_esperadas": ["..."], "rubrica": {"keywords_clave": [], "puntos_fuertes_esperados": [], "red_flags": []}}
 ]}
+```
+
+---
+
+## `INTERVIEW_TRANSLATE_BATCH` v1.0
+
+> **Uso:** ETL B7 `translator.traducir_batch` — traducción batch EN→ES de preguntas tech.
+> **Actualizado:** 2026-05-24
+
+```
+Traduce al español las siguientes preguntas de entrevista técnica.
+Mantén terminología técnica en su versión estándar en español latino (ej. "render" → "renderizado", "hook" → "hook" sin traducir).
+Devuelve SOLO un JSON array de strings con exactamente {n} traducciones, en el mismo orden.
+
+Preguntas en inglés:
+{preguntas_json}
+```
+
+---
+
+## `INTERVIEW_CLASSIFY_AND_RUBRIC_BATCH` v1.0
+
+> **Uso:** ETL B7 `classifier.clasificar_y_rubrica_batch` — skill, tipo, nivel y rúbrica específica.
+> **Actualizado:** 2026-05-24
+
+```
+Para cada pregunta de entrevista traducida al español, devuelve un JSON array con exactamente {n} objetos, en el mismo orden.
+Cada objeto debe tener esta estructura:
+{
+  "skill": "<habilidad principal, ej Python, React, JavaScript, SQL...>",
+  "tipo": "tecnica" | "behavioral" | "situacional",
+  "nivel": "junior" | "mid" | "senior",
+  "rubrica": {
+    "keywords_clave": ["3-5 conceptos ESPECÍFICOS que un buen candidato debe mencionar para ESTA pregunta"],
+    "puntos_fuertes_esperados": ["2-3 señales de respuesta excelente ESPECÍFICAS de la pregunta"],
+    "red_flags": ["1-2 señales de respuesta mala ESPECÍFICAS de la pregunta"]
+  }
+}
+
+IMPORTANTE:
+- keywords_clave y red_flags deben ser ESPECÍFICAS del contenido de cada pregunta, NO genéricas.
+- NO uses frases plantilla como "concepto claro", "ejemplo práctico", "pasos concretos".
+
+Preguntas (español):
+{preguntas_json}
 ```
 
 ---

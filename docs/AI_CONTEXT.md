@@ -12,7 +12,7 @@ Plataforma web con IA — **coach de carrera para jóvenes colombianos** (Barran
 
 **Progreso (B1–B3):** persistencia de tareas del plan con desbloqueo automático de fases (80% → fase 60/90). Endpoints bajo `/api/progress/...`.
 
-**Mock Interview (B4–B5):** simulador híbrido — pool curado de 120 preguntas (10 sectores CO) + Gemini para personalizar y evaluar. Flujo: `POST /interview/start` → 5× `answer` → `finish` → `GET /history`.
+**Mock Interview (B4–B7):** simulador híbrido — pool de ~629 preguntas con procedencia real (GitHub sudheerj/*, arialdomartini/*, HuggingFace) para tech + AI para sectores no-tech, + Gemini personaliza y evalúa. Flujo: `POST /interview/start` → 5× `answer` → `finish` → `GET /history`.
 
 **Auth opcional (B2):** `GET /user/has-profile` tras login → redirigir a `/progreso` o `/comenzar`. `POST /auth/link-session` vincula `session_id` ↔ `user_id`.
 

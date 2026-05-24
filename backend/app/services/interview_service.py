@@ -1,4 +1,4 @@
-"""Simulador de entrevistas: pool curado + personalización Gemini."""
+"""Simulador de entrevistas: pool con fuentes reales + personalización Gemini."""
 
 from __future__ import annotations
 
@@ -536,12 +536,17 @@ async def seleccionar_preguntas_pool(
 ) -> list[dict]:
     """
     Consulta interview_questions_seed.
-    Si hay skill, prioriza coincidencias; completa con sector='general' si faltan.
+    Con skill: prioriza filas donde skill ILIKE %skill% (ej. React, JavaScript).
+    Completa con más del sector y fallback a sector='general' si faltan.
     """
     sector = normalizar_sector(sector)
+    # Si piden skill tech pero el sector cayó en general, usar tecnologia
+    if skill and sector == "general":
+        tech_hints = ("react", "javascript", "python", "java", "sql", "git", "node", "backend")
+        if any(h in skill.lower() for h in tech_hints):
+            sector = "tecnologia"
 
     if USE_MOCK:
-        # Pool mínimo embebido si no hay Supabase
         pool: list[dict] = []
         for key, preguntas in MOCK_INTERVIEW_CACHE.items():
             for p in preguntas:
@@ -569,23 +574,37 @@ async def seleccionar_preguntas_pool(
             seen.add(pid)
             selected.append(row)
 
-    # Candidatas del sector
-    res = (
-        supabase.table("interview_questions_seed")
-        .select("*")
-        .eq("sector", sector)
-        .eq("nivel", nivel)
-        .limit(limit * 3)
-        .execute()
-    )
-    rows = res.data or []
-
     if skill:
-        skill_lower = skill.lower()
-        matched = [r for r in rows if r.get("skill") and skill_lower in str(r["skill"]).lower()]
-        other = [r for r in rows if r not in matched]
-        add_rows(matched + other)
-    else:
+        skill_pattern = f"%{skill.strip()}%"
+        res_skill = (
+            supabase.table("interview_questions_seed")
+            .select("*")
+            .eq("sector", sector)
+            .eq("nivel", nivel)
+            .ilike("skill", skill_pattern)
+            .limit(limit * 3)
+            .execute()
+        )
+        skill_rows = res_skill.data or []
+        random.shuffle(skill_rows)
+        add_rows(skill_rows)
+        logger.info(
+            "Pool skill match sector=%s skill~%s → %s candidatas",
+            sector,
+            skill,
+            len(skill_rows),
+        )
+
+    if len(selected) < limit:
+        res = (
+            supabase.table("interview_questions_seed")
+            .select("*")
+            .eq("sector", sector)
+            .eq("nivel", nivel)
+            .limit(limit * 4)
+            .execute()
+        )
+        rows = res.data or []
         random.shuffle(rows)
         add_rows(rows)
 

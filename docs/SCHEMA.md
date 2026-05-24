@@ -20,7 +20,7 @@ profiles ── (demanda) ──> scrape_queue ──> jobs (pipeline CLI)
 
 user_accounts ── FK auth.users (cuenta opcional, separada del coach)
 
-interview_questions_seed (banco curado, sin FK — lectura por sector/nivel)
+interview_questions_seed (pool entrevistas — lectura por sector/skill/nivel; fuentes reales B7)
 ```
 
 ---
@@ -287,21 +287,36 @@ Sesiones del simulador de entrevistas con IA. Migración `012_progress_and_inter
 
 ## Tabla: `interview_questions_seed`
 
-Banco curado de preguntas de entrevista por sector (español CO, nivel junior). Seed: `013_seed_interview_questions.sql` (120 filas, 12 por sector).
+Pool de preguntas de entrevista por sector. Repoblado en B7 (2026-05-24): **629 filas** — 521 tech de fuentes reales + 108 no-tech `ai_generated`. Migraciones: `012`, `013` (seed original), `014` (trazabilidad), `015` (reemplazo).
 
 | Columna | Tipo | Nulable | Default | Descripción |
 |---------|------|---------|---------|-------------|
 | `id` | `uuid` | NO | `gen_random_uuid()` | PK |
 | `sector` | `text` | NO | — | `tecnologia`, `marketing`, `ventas`, `contabilidad`, `servicio_cliente`, `operaciones`, `administracion`, `salud`, `educacion`, `general` |
-| `skill` | `text` | SÍ | — | Skill asociada (opcional) |
+| `skill` | `text` | SÍ | — | Skill asociada (ej. `React`, `JavaScript`; NULL en sector `general`) |
 | `nivel` | `text` | NO | — | `junior`, `mid`, `senior` |
 | `tipo` | `text` | NO | — | `tecnica`, `behavioral`, `situacional` |
-| `pregunta` | `text` | NO | — | Texto de la pregunta |
-| `rubrica` | `jsonb` | SÍ | — | `{keywords_clave, puntos_fuertes_esperados, red_flags}` |
-| `fuente` | `text` | SÍ | `'curado_dulia'` | Origen del contenido |
-| `idioma` | `text` | SÍ | `'es'` | Idioma |
+| `pregunta` | `text` | NO | — | Texto de la pregunta (español en prod) |
+| `rubrica` | `jsonb` | SÍ | — | `{keywords_clave, puntos_fuertes_esperados, red_flags}` — específica por pregunta en tech |
+| `fuente` | `text` | SÍ | `'curado_dulia'` | Ver valores válidos abajo |
+| `idioma` | `text` | SÍ | `'es'` | Idioma de la pregunta mostrada al candidato |
+| `fuente_url` | `text` | SÍ | — | URL al repo/dataset origen (migración 014) |
+| `idioma_origen` | `text` | SÍ | `'es'` | Idioma del texto original antes de traducción (`en` para tech B7) |
 
-**Índices:** `(sector, nivel)`
+**Valores válidos de `fuente`:**
+
+| Valor | Descripción |
+|-------|-------------|
+| `github_sudheerj_react` | [sudheerj/reactjs-interview-questions](https://github.com/sudheerj/reactjs-interview-questions) |
+| `github_sudheerj_javascript` | [sudheerj/javascript-interview-questions](https://github.com/sudheerj/javascript-interview-questions) |
+| `github_arialdomartini_backend` | [arialdomartini/Back-End-Developer-Interview-Questions](https://github.com/arialdomartini/Back-End-Developer-Interview-Questions) |
+| `huggingface_ali_alkhars` | [ali-alkhars/interviews](https://huggingface.co/datasets/ali-alkhars/interviews) |
+| `ai_generated` | Preguntas no-tech del seed 013 (honestamente marcadas) |
+| `curado_dulia` | Legacy B1 — ya no en prod tras B7 |
+
+**Índices:** `(sector, nivel)`, `(fuente)`
+
+**Backup:** `interview_questions_seed_backup_2026_05_24` (120 filas del pool B1, por si hay que revertir).
 
 ---
 

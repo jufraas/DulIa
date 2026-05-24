@@ -33,8 +33,9 @@
 | 2026-05-24 | backend | Progreso plan: JSONB `completed_tasks` + convención task_id | [decisions/2026-05-24-plan-progress-task-id-jsonb.md](./decisions/2026-05-24-plan-progress-task-id-jsonb.md) |
 | 2026-05-24 | backend | Rate limits asimétricos mock interview | [decisions/2026-05-24-interview-rate-limits.md](./decisions/2026-05-24-interview-rate-limits.md) |
 | 2026-05-24 | backend | Add-tasks in-place en action_plans | [decisions/2026-05-24-add-tasks-action-plan-inplace.md](./decisions/2026-05-24-add-tasks-action-plan-inplace.md) |
+| 2026-05-24 | backend + ia | Pool entrevistas con fuentes reales (ETL B7) | [decisions/2026-05-24-interview-pool-real-sources.md](./decisions/2026-05-24-interview-pool-real-sources.md) |
 
-### Panorama B1–B6 (hackathon progreso + interview)
+### Panorama B1–B7 (hackathon progreso + interview)
 
 | Fase | Decisión clave | Doc |
 |------|----------------|-----|
@@ -44,6 +45,7 @@
 | B4 | Híbrido pool + Gemini evaluación | [mock-interview-seed-pool](./decisions/2026-05-24-mock-interview-seed-pool.md) |
 | B5 | Rate limits 5/10/3 min | [interview-rate-limits](./decisions/2026-05-24-interview-rate-limits.md) |
 | B6 | Coach context + add-tasks in-place | [add-tasks-action-plan-inplace](./decisions/2026-05-24-add-tasks-action-plan-inplace.md) |
+| B7 | ETL pool real GitHub/HF + trazabilidad | [interview-pool-real-sources](./decisions/2026-05-24-interview-pool-real-sources.md) |
 
 ## Decisiones stack (resumen)
 
@@ -63,6 +65,7 @@
 | 2026-05-24 | Rate limits interview 5/10/3 por min | 1 entrevista = 7 llamadas Gemini cabe en límites; protege cuota | Sin límite; límite uniforme 10/min |
 | 2026-05-24 | Add-tasks modifica action_plans in-place | Sin migración; front ve tareas al refetch plan | Columna extra_tasks en plan_progress |
 | 2026-05-24 | Coach prompt v2.4 + user_context_block | Progreso + entrevista solo si relevante a la pregunta | Meter JSON crudo al prompt |
+| 2026-05-24 | ETL pool entrevistas fuentes reales | 521 tech auditable (GitHub/HF) + 108 no-tech AI; rúbricas específicas | Scraping job boards; 100% Gemini |
 | 2026-05-23 | Sin auth — session_id (coach) | Evita fricción en demo; auth es capa aparte | Supabase Auth obligatorio |
 | 2026-05-23 | Tabla `jobs` en inglés | Compatible Adzuna/pipeline | Solo español en BD |
 | 2026-05-23 | slowapi 10 req/min | Protege cuota Gemini | Sin rate limit |

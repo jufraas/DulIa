@@ -89,3 +89,6 @@ temp/
 *.sqlite3
 *.db
 frontend/ReBrand/DulIA Design System (1).zip
+
+# ETL pool entrevistas (B7) — no subir descargas ni traducciones
+backend/scripts/etl_interview_pool/cache/

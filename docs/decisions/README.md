@@ -56,4 +56,5 @@ Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_
 | 2026-05-24 | [2026-05-24-plan-progress-task-id-jsonb.md](./2026-05-24-plan-progress-task-id-jsonb.md) | Progreso plan: JSONB + task_id `fase_X:semana_N:idx_M` |
 | 2026-05-24 | [2026-05-24-interview-rate-limits.md](./2026-05-24-interview-rate-limits.md) | Rate limits 5/10/3 min en endpoints interview |
 | 2026-05-24 | [2026-05-24-add-tasks-action-plan-inplace.md](./2026-05-24-add-tasks-action-plan-inplace.md) | Tareas refuerzo in-place en fase_30 |
+| 2026-05-24 | [2026-05-24-interview-pool-real-sources.md](./2026-05-24-interview-pool-real-sources.md) | ETL B7: pool 629 filas (GitHub sudheerj/* + HF + AI no-tech) |
 | — | Ver [DECISIONS.md](../DECISIONS.md) | pydantic 3.14, slowapi, jobs en inglés, mock data |

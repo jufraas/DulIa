@@ -4,17 +4,17 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend B1–B6 ✅:** progreso + mock interview + coach context-aware. Listo para integración E2E y deploy.
+2026-05-24 — **Backend B1–B7 ✅:** progreso + mock interview con pool real + coach context-aware. Listo para pitch con procedencia honesta.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
-| Backend (FastAPI) | ✅ B1–B6 completo | Progreso + interview + coach context; deploy pendiente |
+| Backend (FastAPI) | ✅ B1–B7 completo | Progreso + interview pool real + coach context; deploy pendiente |
 | Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mocks si API falla |
 | Pipeline | ✅ Híbrido | getonbrd + remotive; `run_queue.py` + `run_baseline.py`; cache-first en backend |
-| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008–013**; ~380 jobs; seed entrevistas 120 filas |
+| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008–015**; ~380 jobs; pool entrevistas **629 filas** (521 tech reales + 108 AI) |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
@@ -101,6 +101,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | **B4** | Servicio mock interview + Gemini | ✅ pool, generar, evaluar, finalizar + 3 cachés demo |
 | **B5** | Endpoints REST mock interview | ✅ start/answer/finish/history + rate limits |
 | **B6** | Coach context-aware + add-tasks | ✅ + docs finales |
+| **B7** | Reemplazo pool con fuentes reales | ✅ ~521 preguntas tech (GitHub + HF) + 108 no-tech AI; ETL + migraciones 014–015 |
 
 ## Leyenda
 
