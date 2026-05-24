@@ -177,7 +177,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Nav (6 ítems) | Contenido |
 |---------------|-----------|
-| Tu análisis | `AnalysisOverviewGrid` — score + PDF + **Registrar mi progreso** + resumen (580px desktop) |
+| Tu análisis | `AnalysisOverviewGrid` — score compacto + PDF (`pdf-card-in-grid`) + **Registrar mi progreso** (compacto) + resumen (580px desktop) |
 | Mercado | `MarketThermometer` |
 | Oportunidades | `OpportunitiesAndPlan` (vacantes + plan 30d) |
 | Radar match | `RadarMatch` |
@@ -204,12 +204,12 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Sección | Componente |
 |---------|------------|
-| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` + `PdfDownloadCard` + `RegisterProgressButton`) vs `ProfileSummary` |
+| Tu análisis | `AnalysisOverviewGrid` — `ScoreCard` **`compactGrid`** + `PdfDownloadCard` **`pdf-card-in-grid`** + `RegisterProgressButton` compact (580px desktop, **congelado**) |
 | Termómetro mercado | `MarketThermometer` — scope perfil, desglose geo, skills demandadas (`tienes`), modalidad/fuente (`marketDisplay.js`) |
 | Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
 | Match radar | `RadarMatch` |
 | Timeline + coach FAB | `CareerTimeline`, `CoachChatBubble` |
-| PDF | `AnalysisPdfDocument` + `generateAnalysisPdf.jsx` — captura por `[data-pdf-block]`, fondo uniforme |
+| PDF | `AnalysisPdfDocument` + `generateAnalysisPdf.jsx` — bloques `[data-pdf-block]`, `scrollHeight`, timeline/skills en export; `ScoreRing exportMode` |
 | Carga larga | `ProcessStatusBar` — generación PDF |
 
 ## División de trabajo
@@ -218,7 +218,11 @@ Ver [COMPONENT_OWNERS.md](./COMPONENT_OWNERS.md).
 
 Post-MVP (login, timeline plan, pitch): [../docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
 
-**Layout congelado:** el diseño visual de `/resultados` no se modifica sin pedido explícito — ver `.cursor/rules/results-layout-frozen.mdc`.
+**Layout congelado:** diseño de `/resultados` aprobado — **no modificar** `.analysis-overview-grid*` ni `compactGrid` / `pdf-card-in-grid` sin pedido explícito. Ver `.cursor/rules/results-layout-frozen.mdc`.
+
+### Auth (`/login`, `/registro`)
+
+Botón ← sin texto: `navigate(-1)` si hay historial; fallback `/`.
 
 ## Deploy (Vercel)
 

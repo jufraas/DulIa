@@ -21,15 +21,34 @@ El diseño actual de la pantalla de resultados está **aprobado y congelado**. N
 |---------|------------|--------------|
 | Hero título | inline en ResultsPage | `clamp(36px, 4.5vw, 60px)` |
 | Coach banner | `CoachPromptBanner` | dismissible, no sticky |
-| Tu análisis | `AnalysisOverviewGrid` | 2 cols lg; izq. `card-dl` score+PDF; der. resumen; **580px** ambos |
+| Tu análisis | `AnalysisOverviewGrid` | 2 cols lg; izq. `card-dl` score+PDF+progreso; der. resumen; **580px** ambos — ver § congelado abajo |
 | Mercado | `MarketThermometer` | ancho completo |
-| Vacantes y plan | `OpportunitiesAndPlan` | altura sync + scroll plan interno |
+| Oportunidades y plan | `OpportunitiesAndPlan` | altura sync + scroll plan interno |
 | Radar | `RadarMatch` | sin envolver en grid nuevo |
 | Timeline | `CareerTimeline` | |
 | Coach FAB | `CoachChatBubble` | |
 | PDF banner | sección `resultados-pdf` | CTA final |
 
-Nav: `ResultsSectionNav` — vertical sticky desktop / chips móvil. Anclas en `resultsSections.js`.
+Nav: `ResultsSectionNav` — vertical sticky desktop / chips móvil. Anclas en `resultsSections.js` (label **Oportunidades**).
+
+## AnalysisOverviewGrid — congelado (2026-05-24, aprobado por usuario)
+
+**No modificar** salvo pedido explícito del usuario para este bloque.
+
+| Pieza | Config fija |
+|-------|-------------|
+| Altura desktop | `580px` min/max en `.analysis-overview-grid__left` y `.profile-summary-card` |
+| Score | `ScoreCard` con `embedded` + **`compactGrid`** — anillo 158px, sin `CoachAskLink` en columna izq. |
+| PDF | `PdfDownloadCard` con clase **`pdf-card-in-grid`** — altura natural, sin `flex-1` |
+| Progreso | `RegisterProgressButton` **`compact`** debajo del PDF |
+| CSS | Reglas `.analysis-overview-grid__left`, `__actions`, `.pdf-card-in-grid` en `dulia-kit.css` |
+| Overflow | Columna izq. `overflow: hidden`; zona `__actions` con `overflow-y: auto` si hace falta |
+
+Archivos tocados por este layout: `AnalysisOverviewGrid.jsx`, `ScoreCard.jsx`, `PdfDownloadCard.jsx`, `RegisterProgressButton.jsx`, `dulia-kit.css` (solo reglas `analysis-overview-grid*`).
+
+## PDF export (off-screen, no confundir con layout pantalla)
+
+Generación en `generateAnalysisPdf.jsx` + `AnalysisPdfDocument.jsx` + `pdf-document.css`. Mejoras de captura (`scrollHeight`, `ScoreRing exportMode`) **no** cambian el layout de `/resultados`.
 
 ## Ejemplos
 

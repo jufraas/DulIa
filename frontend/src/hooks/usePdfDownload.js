@@ -8,6 +8,7 @@ export function usePdfDownload() {
   const analysis = useProfileStore((s) => s.analysis)
   const plan = useProfileStore((s) => s.plan)
   const radar = useProfileStore((s) => s.radar)
+  const timeline = useProfileStore((s) => s.timeline)
   const [downloading, setDownloading] = useState(false)
 
   const downloadPdf = useCallback(async () => {
@@ -15,6 +16,13 @@ export function usePdfDownload() {
     setDownloading(true)
     try {
       const { generateAnalysisPdf } = await import('../utils/generateAnalysisPdf')
+      const topJob = jobs.reduce(
+        (best, job) =>
+          !best || (job.score_compatibilidad ?? 0) > (best.score_compatibilidad ?? 0)
+            ? job
+            : best,
+        null,
+      )
       await generateAnalysisPdf({
         profile: savedProfile,
         jobs,
@@ -22,6 +30,8 @@ export function usePdfDownload() {
         analysis,
         plan,
         radar,
+        timeline,
+        topJob,
       })
     } catch (err) {
       console.error('[PDF]', err)
@@ -31,7 +41,7 @@ export function usePdfDownload() {
     } finally {
       setDownloading(false)
     }
-  }, [savedProfile, jobs, market, analysis, plan, radar])
+  }, [savedProfile, jobs, market, analysis, plan, radar, timeline])
 
   return { downloading, downloadPdf }
 }
