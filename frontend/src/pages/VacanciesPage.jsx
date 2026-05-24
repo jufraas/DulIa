@@ -4,6 +4,7 @@ import { ArrowLeft, Briefcase, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
 import MarketThermometer from '../components/results/MarketThermometer'
+import CoachAskLink from '../components/results/CoachAskLink'
 import {
   FilterChip,
   TrafficStat,
@@ -234,6 +235,12 @@ export default function VacanciesPage() {
               <p className="mt-1 text-sm leading-relaxed text-[color:var(--fg-2)]">
                 Cruzamos cada vacante con históricos de reclutadores y patrones de fraude. Si
                 algo no cuadra, lo marcamos antes de que apliques.
+              </p>
+              <p className="mt-3">
+                <CoachAskLink
+                  question="¿Cómo interpreto el semáforo de vacantes?"
+                  label="¿Dudas con una vacante? Pregúntale al coach"
+                />
               </p>
             </div>
           </div>

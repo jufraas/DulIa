@@ -18,6 +18,8 @@ export default function CoachChatBubble() {
     fabPulse,
     welcomeMessage,
     starterSuggestions,
+    teaserTitle,
+    teaserBody,
   } = useCoachContext()
 
   const listRef = useRef(/** @type {HTMLDivElement | null} */ (null))
@@ -67,10 +69,8 @@ export default function CoachChatBubble() {
             >
               <X className="h-3.5 w-3.5" />
             </button>
-            <p className="m-0 font-semibold text-[color:var(--violet-200)]">¿Alguna duda?</p>
-            <p className="mt-1 mb-0 text-[color:var(--fg-2)]">
-              Escríbeme sobre tu score, plan o vacantes.
-            </p>
+            <p className="m-0 font-semibold text-[color:var(--violet-200)]">{teaserTitle}</p>
+            <p className="mt-1 mb-0 text-[color:var(--fg-2)]">{teaserBody}</p>
             <button
               type="button"
               onClick={() => openCoach()}

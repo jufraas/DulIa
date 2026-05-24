@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import CoachAskLink from '../results/CoachAskLink'
 import RevealOnScroll from '../motion/RevealOnScroll'
 import Button from '../ui/Button'
 
@@ -34,6 +35,13 @@ export default function CTABanner() {
             Descubre tu potencial
           </Button>
         </Link>
+        <p className="mt-4 text-sm text-[color:var(--fg-3)]">
+          <CoachAskLink
+            question="¿Qué obtengo al completar el wizard?"
+            label="¿Tienes dudas? Pregúntale al coach"
+            className="text-[color:var(--fg-3)] hover:text-[color:var(--violet-200)]"
+          />
+        </p>
       </div>
     </RevealOnScroll>
   )

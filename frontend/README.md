@@ -24,7 +24,7 @@ cp .env.example .env.local
 
 | Variable | Default dev | Notas |
 |----------|-------------|-------|
-| `VITE_API_URL` | `http://localhost:8000/api` | Cambiar si el backend corre en otro puerto |
+| `VITE_API_URL` | `/api` | Proxy Vite → `127.0.0.1:8000` (evita CORS si abres por IP de red) |
 | `VITE_SUPABASE_URL` | — | Misma URL que `SUPABASE_URL` del backend |
 | `VITE_SUPABASE_ANON_KEY` | — | Misma anon key que `SUPABASE_KEY` del backend |
 
@@ -32,9 +32,22 @@ cp .env.example .env.local
 
 Sin las vars de Supabase, el flujo anónimo (`/comenzar`, `/resultados`, `/vacantes`) funciona; login/registro con Google requiere ambas `VITE_SUPABASE_*`.
 
-Reinicia `npm run dev` después de editar `.env.local`.
+Reinicia `npm run dev` después de editar `.env.local` o `vite.config.js`.
 
-Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeout **120s** en `api.js`.
+### Proxy API (desarrollo)
+
+`vite.config.js` reenvía `/api/*` al backend local. El frontend llama `/api/profile`, no `localhost:8000` directo. En **producción** (Vercel) usa la URL absoluta del backend en `VITE_API_URL`.
+
+**Backend en local:** debe correr en `:8000` con el venv del repo:
+
+```powershell
+cd backend
+.\.venv\Scripts\uvicorn.exe main:app --reload --port 8000
+```
+
+Si arrancas `uvicorn` con Python del sistema, `POST /profile/parse-cv` devuelve **422** (falta `markitdown[pdf]`).
+
+Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeout **120s** en `api.js`. La subida de CV usa **`fetch` + FormData** (no axios).
 
 ## Rutas de la app
 
@@ -87,7 +100,9 @@ src/
 │   ├── sessionHydration.js
 │   └── mock*.js
 ├── constants/colombiaLocations.js, resultsSections.js
+├── components/coach/AppCoachShell.jsx
 ├── context/CoachProvider.jsx
+├── utils/coachPageContext.js
 ├── store/useProfileStore.js
 ├── utils/              # session, marketDisplay, analysisDisplay, coachSuggestions, planDisplay, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
@@ -135,14 +150,16 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 - Móvil: chips horizontales sticky bajo el header.
 - Anclas: `constants/resultsSections.js` + `useResultsSectionNav`.
 
-### Coach (solo `/resultados`)
+### Coach (global en la SPA)
 
 | Pieza | Rol |
 |-------|-----|
-| `CoachProvider` | Estado chat + banner/teaser |
-| `CoachPromptBanner` | Aviso inline dismissible (no sticky) |
+| `AppCoachShell` | Envuelve rutas en `App.jsx`; oculto en login/registro/construcción |
+| `CoachProvider` | Estado chat + contexto por ruta (`routePath`) |
+| `coachPageContext.js` | Teaser y copy por pantalla |
+| `CoachPromptBanner` | Aviso inline dismissible — **solo** `/resultados` |
 | `CoachChatBubble` | FAB + teaser auto-ocultable + bienvenida personalizada |
-| `CoachAskLink` | CTAs en score, resumen, mercado, radar, plan |
+| `CoachAskLink` | CTAs en landing, about, wizard, vacantes, score, plan, radar, mercado |
 | `coachSuggestions.js` | Mensaje y chips iniciales desde perfil |
 
 ### Secciones (detalle)

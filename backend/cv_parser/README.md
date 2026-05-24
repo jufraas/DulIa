@@ -1,36 +1,30 @@
 # MarkItDown — CV PDF → Markdown
 
-Módulo backend para convertir **CV en PDF** a markdown y enriquecer prompts de Gemini.
+Módulo backend para convertir **CV en PDF** a markdown y prellenar el wizard vía `POST /api/profile/parse-cv`.
 
-> **Estado:** implementado, **diferido** en el MVP frontend. El contrato actual usa JSON-only (ver [docs/ENDPOINTS.md](../../docs/ENDPOINTS.md)). Este módulo se integrará en una fase posterior.
+> **Estado:** ✅ integrado — ver [ENDPOINTS.md](../../docs/ENDPOINTS.md) y [decisions/2026-05-23-cv-pdf-markitdown.md](../../docs/decisions/2026-05-23-cv-pdf-markitdown.md).
 
-## Flujo previsto (fase posterior)
+## Flujo
 
 ```
-Frontend (multipart o endpoint CV)     Backend                    IA
-─────────────────────────────────     ───────                    ──
-profile: JSON                   →     parse JSON
-cv: archivo PDF                 →     validate_cv_pdf()
-                                 →     cv_file_to_markdown()  →  cv_markdown
-                                 →     build_gemini_prompt_vars()
-                                 →     Gemini (docs/PROMPTS.md)
+Frontend (CvUploadZone)          Backend                         IA
+────────────────────────         ───────                         ──
+POST /api/profile/parse-cv  →    validate_cv_pdf()
+  multipart: cv (PDF)       →    cv_file_to_markdown()      →   Gemini extrae prefill
+                            →    CvParseOut → JSON           →   wizard paso 0
+Usuario revisa → POST /profile (JSON)
 ```
 
-## Uso en FastAPI (stub actual)
+## Uso en FastAPI
 
-Integrado en `backend/main.py` (stub multipart legacy):
+Ruta: `backend/app/routes/profile.py` → `cv_service.parse_cv_pdf()`.
 
 ```python
-from cv_parser import cv_file_to_markdown, build_gemini_prompt_vars
+from cv_parser import cv_file_to_markdown
 
-file_bytes = await cv.read()
-cv_result = cv_file_to_markdown(file_bytes, filename=cv.filename, content_type=cv.content_type)
-prompt_vars = build_gemini_prompt_vars(profile_data, cv_result)
-
-# prompt_vars["cv_markdown"] → pegar en PROFILE_ANALYSIS_USER de PROMPTS.md
+cv_result = cv_file_to_markdown(file_bytes, filename="cv.pdf", content_type="application/pdf")
+# cv_result.markdown → prompt Gemini en cv_service.py
 ```
-
-> `main.py` debe migrarse al contrato de [ENDPOINTS.md](../../docs/ENDPOINTS.md). MarkItDown quedará disponible cuando se reactive la subida de CV.
 
 ## API del módulo
 
@@ -42,27 +36,27 @@ prompt_vars = build_gemini_prompt_vars(profile_data, cv_result)
 
 ## Errores
 
-| Excepción | HTTP sugerido | Cuándo |
-|-----------|---------------|--------|
+| Excepción | HTTP | Cuándo |
+|-----------|------|--------|
 | `CvValidationError` | 400 | No PDF, > 5 MB, vacío |
-| `CvConversionError` | 422 | PDF corrupto o MarkItDown falló |
+| `CvConversionError` | 422 | PDF corrupto, escaneado sin texto, MarkItDown falló |
 
-## Instalación
+## Instalación y arranque
 
 ```bash
 cd backend
-python -m venv venv
-# Windows: venv\Scripts\activate
-pip install -r requirements.txt
-# Requiere markitdown[pdf] (pdfplumber, pdfminer) — ver requirements.txt
-uvicorn main:app --reload --port 8000
+python -m venv .venv
+# Windows:
+.\.venv\Scripts\pip install -r requirements.txt
+.\.venv\Scripts\uvicorn.exe main:app --reload --port 8000
 ```
 
-## Probar con curl (stub multipart)
+Requiere `markitdown[pdf]` y `pdfplumber` (fallback). **No uses** `uvicorn` del Python del sistema — devuelve 422 al subir PDFs.
+
+## Probar con curl
 
 ```bash
-curl -X POST http://localhost:8000/api/profile \
-  -F 'profile={"name":"María","city":"Barranquilla","skills":"Canva, Excel"};type=application/json' \
+curl -X POST http://localhost:8000/api/profile/parse-cv \
   -F "cv=@./mi_cv.pdf;type=application/pdf"
 ```
 
@@ -71,9 +65,9 @@ curl -X POST http://localhost:8000/api/profile \
 - Solo `.pdf`, máximo **5 MB**
 - **No persistir** el PDF en disco ni BD
 - El markdown solo vive en memoria para el request actual
+- Rate limit: 10 req/min (bucket Gemini compartido)
 
-## Siguiente paso
+## Frontend
 
-1. Alinear `backend/main.py` al contrato JSON de [ENDPOINTS.md](../../docs/ENDPOINTS.md).
-2. Cuando se reactive CV: endpoint multipart o `POST /profile/cv`.
-3. Conectar Gemini con [docs/PROMPTS.md](../../docs/PROMPTS.md).
+- `CvUploadZone.jsx` → `parseCvPdf()` (`fetch` + FormData)
+- Dev: `VITE_API_URL=/api` + proxy Vite en `vite.config.js`

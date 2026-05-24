@@ -235,7 +235,9 @@ Convierte un CV en PDF a markdown (MarkItDown) y extrae campos para **prellenar 
 | `422` | PDF ilegible, escaneado sin texto, o Gemini no interpretó el CV |
 | `500` | Error interno Gemini/conversión |
 
-**Backend (deps):** `markitdown[pdf]>=0.1.5` en `requirements.txt`. Conversión: MarkItDown → tempfile → fallback **pdfplumber**. Modelo Gemini: `gemini-3.1-flash-lite` (alineado al resto de la API).
+**Backend (deps):** `markitdown[pdf]>=0.1.5` y `pdfplumber>=0.11.0` en `requirements.txt`. Uvicorn debe usar **`backend/.venv`**. Conversión: MarkItDown → tempfile → fallback **pdfplumber**. Modelo Gemini: `gemini-3.1-flash-lite` (alineado al resto de la API).
+
+**Frontend (dev):** `VITE_API_URL=/api` + proxy Vite → evita CORS. `parseCvPdf()` usa **`fetch` + FormData** (no axios).
 
 **Mock (`USE_MOCK_DATA=true`):** devuelve prefill simulado sin procesar el PDF.
 
@@ -718,6 +720,8 @@ POST /profile  →  POST .../analyze  →  POST .../action-plan
 | `GET .../timeline-data` → **404** | Sin fila en `action_plans` | Completar action-plan |
 | Termómetro con **0 vacantes** pero hay jobs | `jobs.city` null en pipeline | Backend hace fallback a todas las activas; enriquecer pipeline (`city` al insertar) |
 | UI sigue con mocks tras arreglar API | Cache local o bundle anterior | Limpiar `localStorage` / rehacer wizard; reiniciar uvicorn |
+| `POST /profile/parse-cv` → **422** “convertir CV…” | Uvicorn sin `.venv` / sin `markitdown[pdf]` | `.\.venv\Scripts\uvicorn.exe` en Windows; `pip install -r requirements.txt` |
+| CV falla solo desde IP de red | CORS directo a `:8000` | `VITE_API_URL=/api` + proxy Vite |
 
 ### Smoke test local (Plan 2)
 

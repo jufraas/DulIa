@@ -27,6 +27,7 @@
 | 2026-05-23 | pipeline | Arquitectura híbrida cache-first + queue manual | [PIPELINE_HYBRID.md](./PIPELINE_HYBRID.md) — cron pendiente fase 2 |
 | 2026-05-24 | backend | Scoring v1.1 + filtro seniority junior | [decisions/2026-05-24-jobs-seniority-scoring.md](./decisions/2026-05-24-jobs-seniority-scoring.md) |
 | 2026-05-24 | frontend | PDF html2canvas + layout análisis | [decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md](./decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md) |
+| 2026-05-24 | frontend | Proxy Vite `/api` + coach global | [decisions/2026-05-24-frontend-vite-proxy-coach-global.md](./decisions/2026-05-24-frontend-vite-proxy-coach-global.md) |
 
 ## Decisiones stack (resumen)
 

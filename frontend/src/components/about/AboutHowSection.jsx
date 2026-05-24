@@ -1,4 +1,5 @@
 import { BarChart3, FileText, Sparkles, Target } from 'lucide-react'
+import CoachAskLink from '../results/CoachAskLink'
 import IconBox from '../brand/IconBox'
 import Section from '../ui/Section'
 
@@ -58,6 +59,12 @@ export default function AboutHowSection() {
           </li>
         ))}
       </ol>
+      <p className="mt-8 text-center text-sm text-[color:var(--fg-3)]">
+        <CoachAskLink
+          question="Explícame los pasos de DulIA con más detalle"
+          label="¿Algo no quedó claro? Pregúntale a DulIA"
+        />
+      </p>
     </Section>
   )
 }

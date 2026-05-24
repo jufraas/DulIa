@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Termómetro personalizado, refetch vacantes, labels analyze humanizados, auth Supabase opcional.
+**Última actualización:** 2026-05-24 · Proxy Vite `/api`, coach global, fix upload CV (fetch + venv backend).
 
 ---
 
@@ -22,10 +22,12 @@
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
-| `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
+| `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
+| Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
 | Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
+| Coach global SPA | ✅ | `AppCoachShell` + `coachPageContext.js`; FAB en landing, wizard, vacantes |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
 | Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
@@ -51,13 +53,14 @@ Las credenciales Supabase son las **mismas** en ambos lados; en el front van con
 
 | Variable (frontend) | Valor dev |
 |---------------------|-----------|
-| `VITE_API_URL` | `http://localhost:8000/api` |
+| `VITE_API_URL` | `/api` (proxy Vite → `:8000`; en prod URL absoluta del backend) |
 | `VITE_SUPABASE_URL` | = `SUPABASE_URL` del backend |
 | `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend |
 
 | Infra local | Comando / nota |
 |-------------|----------------|
-| Backend | `cd backend && uvicorn main:app --reload --port 8000` |
+| Backend | `cd backend && .\.venv\Scripts\uvicorn.exe main:app --reload --port 8000` (Windows) |
+| Frontend | `cd frontend && npm run dev` — proxy `/api` en `vite.config.js` |
 | Migraciones | `002_plan2_tables.sql` + `004_plan2_backend_fixes.sql` en Supabase |
 | Swagger | http://localhost:8000/docs |
 
@@ -371,7 +374,19 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 | Analyze / plan / radar / timeline | Datos fijos realistas | Gemini + BD |
 | Jobs | 2 vacantes ejemplo | Pipeline + Supabase |
 
-**Deploy backend:** Fase 11 pendiente. Cuando exista URL prod, solo cambiar `VITE_API_URL` y configurar `CORS_ORIGINS` en el backend.
+**Deploy backend:** Fase 11 pendiente. Cuando exista URL prod, cambiar `VITE_API_URL` a la URL absoluta (sin proxy) y configurar `CORS_ORIGINS` en el backend.
+
+### Troubleshooting — subida de CV (`parse-cv`)
+
+| Síntoma | Causa | Solución |
+|---------|-------|----------|
+| Error rojo “No pudimos enviar tu CV…” | Backend caído o CORS | Usar `VITE_API_URL=/api` + `npm run dev`; backend en `:8000` |
+| **422** “No se pudo convertir el CV…” | Uvicorn con Python del sistema | Reiniciar con `backend\.venv\Scripts\uvicorn.exe` |
+| **422** PDF escaneado | Sin texto seleccionable | Exportar PDF con texto o completar wizard manual |
+| **429** | Rate limit Gemini (10/min) | Esperar 1 minuto |
+| Spinner infinito | Timeout red | Reintentar; PDF &lt; 5 MB |
+
+Decisión técnica: [decisions/2026-05-24-frontend-vite-proxy-coach-global.md](decisions/2026-05-24-frontend-vite-proxy-coach-global.md).
 
 ---
 

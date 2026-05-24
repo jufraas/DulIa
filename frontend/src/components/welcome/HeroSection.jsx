@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles, Star, User } from 'lucide-react'
+import CoachAskLink from '../results/CoachAskLink'
 import ScoreRing from '../brand/ScoreRing'
 import RevealOnScroll from '../motion/RevealOnScroll'
 import Button from '../ui/Button'
@@ -158,6 +159,12 @@ export default function HeroSection({ enter = true }) {
                   <strong className="text-[color:var(--violet-300)]">15k</strong> vacantes reales
                 </span>
               </div>
+              <p className="mt-4 text-center text-[13px] lg:text-left">
+                <CoachAskLink
+                  question="¿Cómo funciona DulIA y qué es el score?"
+                  label="Pregúntale al coach antes de empezar"
+                />
+              </p>
             </RevealOnScroll>
           </div>
 

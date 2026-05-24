@@ -9,6 +9,7 @@ import WizardHeader from '../components/onboarding/WizardHeader'
 import WizardStepper from '../components/onboarding/WizardStepper'
 import PageShell from '../components/layout/PageShell'
 import PrivacyNotice from '../components/shared/PrivacyNotice'
+import CoachAskLink from '../components/results/CoachAskLink'
 import ProcessStatusBar from '../components/shared/ProcessStatusBar'
 import Container from '../components/ui/Container'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
@@ -134,6 +135,12 @@ export default function OnboardingPage() {
 
               <ApiErrorBanner message={apiError} />
               <PrivacyNotice />
+              <p className="text-center text-[13px] text-[color:var(--fg-3)] sm:text-left">
+                <CoachAskLink
+                  question="Ayúdame a completar este paso del wizard"
+                  label="¿Te trabas en algún campo? Pregúntale al coach"
+                />
+              </p>
 
               <WizardActions
                 step={step}

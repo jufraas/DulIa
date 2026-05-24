@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** termómetro personalizado por perfil, refetch vacantes/resultados, labels analyze humanizados, auth Supabase opcional, PDF ampliado.
+2026-05-24 — **Front:** coach global (`AppCoachShell`), proxy Vite `/api`, fix upload CV. **Backend:** `pdfplumber` en requirements.
 
 ## Estado por módulo
 
@@ -46,7 +46,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Integración Axios → API | ✅ | `services/api.js` + `mockResultsBundle.js` |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
-| Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
+| Subida CV PDF | ✅ | `parseCvPdf` vía `fetch` + proxy; backend `.venv` + `markitdown[pdf]`/`pdfplumber` |
+| Coach global SPA | ✅ | `AppCoachShell`, `coachPageContext.js`; FAB en landing/wizard/vacantes; banner solo resultados |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques solo entre/al final; regla `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones `/resultados` | ✅ | `ResultsSectionNav` — vertical sticky (desktop) / chips (móvil); 6 anclas agrupadas |
 | Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
@@ -55,7 +56,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas/debilidades con labels humanizados (`humanizeArea`); score `nivel_preparacion` |
 | Refetch market + jobs | ✅ | `VacanciesPage` + `useResultsData` — siempre al montar; evita 1 vacante vieja en localStorage |
-| Coach chat UI | ✅ | `CoachProvider` + banner, teaser FAB, chips iniciales, `CoachAskLink` en tarjetas |
+| Coach chat UI | ✅ | Coach global + banner en resultados; chips, teaser FAB, `CoachAskLink` |
 | Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
 | Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |

@@ -15,7 +15,17 @@ import { normalizeActionPlanOut } from '../utils/planDisplay'
 import { parseRadarApiResponse } from '../utils/radarApi'
 import { getOrCreateSessionId } from '../utils/session'
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+const baseURL = import.meta.env.VITE_API_URL || '/api'
+
+/** @param {number} ms */
+function uploadAbortSignal(ms) {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms)
+  }
+  const controller = new AbortController()
+  setTimeout(() => controller.abort(), ms)
+  return controller.signal
+}
 
 const api = axios.create({
   baseURL,
@@ -71,23 +81,64 @@ export async function getProfile(sessionId = getOrCreateSessionId()) {
 
 /**
  * @param {File} file
- * @returns {Promise<import('../services/mockCvPrefill').MOCK_CV_PREFILL extends infer T ? T : never>}
+ * @returns {Promise<ReturnType<typeof normalizeCvParseResponse>>}
  */
 export async function parseCvPdf(file) {
   const formData = new FormData()
   formData.append('cv', file)
+
   try {
-    const { data } = await api.post('/profile/parse-cv', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 60000,
+    // fetch nativo: el browser pone boundary correcto (axios + default JSON rompe uploads)
+    const response = await fetch(`${baseURL}/profile/parse-cv`, {
+      method: 'POST',
+      body: formData,
+      signal: uploadAbortSignal(60000),
     })
-    return normalizeCvParseResponse(data)
-  } catch (err) {
-    if (axios.isAxiosError(err) && err.response?.status === 400) {
-      throw new Error(String(err.response.data?.detail ?? 'Archivo inválido'), { cause: err })
+
+    const data = await response.json().catch(() => ({}))
+    const detail =
+      typeof data?.detail === 'string'
+        ? data.detail
+        : Array.isArray(data?.detail)
+          ? data.detail.map((/** @type {{ msg?: string }} */ d) => d.msg).filter(Boolean).join('. ')
+          : null
+
+    if (response.status === 400) {
+      throw new Error(detail ?? 'Archivo inválido')
     }
-    if (axios.isAxiosError(err) && err.response?.status === 422) {
-      throw new Error(String(err.response.data?.detail ?? 'No pudimos leer el PDF'), { cause: err })
+    if (response.status === 422) {
+      throw new Error(detail ?? 'No pudimos leer el PDF')
+    }
+    if (response.status === 429) {
+      throw new Error('Demasiadas solicitudes a la IA. Espera un minuto e intenta de nuevo.')
+    }
+    if (!response.ok) {
+      throw new Error(detail ?? `Error al subir el CV (${response.status})`)
+    }
+
+    const normalized = normalizeCvParseResponse(data)
+    if (
+      !normalized.parsed &&
+      Object.keys(normalized.prefill ?? {}).length === 0
+    ) {
+      throw new Error(normalized.message ?? 'No detectamos datos en tu CV. Prueba otro PDF.')
+    }
+    return normalized
+  } catch (err) {
+    const isTimeout =
+      err instanceof Error &&
+      (err.name === 'TimeoutError' || err.name === 'AbortError' || err.name === 'AbortSignal')
+    if (isTimeout) {
+      throw new Error('La lectura del CV tardó demasiado. Intenta de nuevo.', { cause: err })
+    }
+    if (err instanceof TypeError) {
+      throw new Error(
+        'No pudimos enviar tu CV al servidor. Verifica que el backend esté en marcha (uvicorn :8000) y recarga la página.',
+        { cause: err },
+      )
+    }
+    if (err instanceof Error) {
+      throw err
     }
     logOfflineFallback('parseCvPdf', err)
     return MOCK_CV_PREFILL
