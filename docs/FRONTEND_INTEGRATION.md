@@ -37,14 +37,30 @@ Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026
 
 ## Configuración local
 
-| Variable | Valor dev |
-|----------|-----------|
+### Dos archivos `.env`
+
+| Archivo | Variables clave |
+|---------|-----------------|
+| `backend/.env` | `SUPABASE_URL`, `SUPABASE_KEY`, `GEMINI_API_KEY`, `USE_MOCK_DATA=false` |
+| `frontend/.env.local` | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+
+Copiar plantillas: `cp backend/.env.example backend/.env` y `cp frontend/.env.example frontend/.env.local`.  
+Las credenciales Supabase son las **mismas** en ambos lados; en el front van con prefijo `VITE_`. Reiniciar uvicorn y `npm run dev` tras editar.
+
+| Variable (frontend) | Valor dev |
+|---------------------|-----------|
 | `VITE_API_URL` | `http://localhost:8000/api` |
-| Backend | `cd backend && USE_MOCK_DATA=false uvicorn main:app --reload --port 8000` |
-| Migraciones | Ejecutar `002_plan2_tables.sql` + `004_plan2_backend_fixes.sql` en Supabase |
+| `VITE_SUPABASE_URL` | = `SUPABASE_URL` del backend |
+| `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend |
+
+| Infra local | Comando / nota |
+|-------------|----------------|
+| Backend | `cd backend && uvicorn main:app --reload --port 8000` |
+| Migraciones | `002_plan2_tables.sql` + `004_plan2_backend_fixes.sql` en Supabase |
 | Swagger | http://localhost:8000/docs |
 
-**`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.
+**`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.  
+**Auth (opcional):** `services/supabase.js` — si faltan `VITE_SUPABASE_*`, `supabase = null` y el flujo anónimo no se rompe.
 
 ---
 

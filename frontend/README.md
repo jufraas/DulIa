@@ -16,15 +16,23 @@ npm run lint         # ESLint (solo src/ + config; ver abajo)
 
 ## Variables de entorno
 
-| Variable | Default dev |
-|----------|-------------|
-| `VITE_API_URL` | `http://localhost:8000/api` |
+El frontend usa **`frontend/.env.local`** (no el `backend/.env`). Copia la plantilla:
 
-Crear `frontend/.env.local` si el backend corre en otro puerto (p. ej. `8001`):
+```bash
+cp .env.example .env.local
+```
 
-```
-VITE_API_URL=http://127.0.0.1:8001/api
-```
+| Variable | Default dev | Notas |
+|----------|-------------|-------|
+| `VITE_API_URL` | `http://localhost:8000/api` | Cambiar si el backend corre en otro puerto |
+| `VITE_SUPABASE_URL` | — | Misma URL que `SUPABASE_URL` del backend |
+| `VITE_SUPABASE_ANON_KEY` | — | Misma anon key que `SUPABASE_KEY` del backend |
+
+**Dos `.env` en el repo:** credenciales del API/Gemini van en `backend/.env`; las del cliente Vite (prefijo `VITE_`) van aquí. Ninguno se commitea.
+
+Sin las vars de Supabase, el flujo anónimo (`/comenzar`, `/resultados`, `/vacantes`) funciona; login/registro con Google requiere ambas `VITE_SUPABASE_*`.
+
+Reinicia `npm run dev` después de editar `.env.local`.
 
 Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeout **120s** en `api.js`.
 

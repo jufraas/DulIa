@@ -45,15 +45,15 @@ cd backend
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env       # USE_MOCK_DATA=true para dev sin credenciales
+cp .env.example .env       # ver tabla "Variables de entorno" abajo
 uvicorn main:app --reload
 # Swagger: http://localhost:8000/docs · Contrato: docs/ENDPOINTS.md
 
 # 3. Frontend (en otra terminal — debe ser desde frontend/)
 cd frontend
 npm install
-npm run dev    # http://localhost:5173
-# Opcional: frontend/.env.local → VITE_API_URL=http://localhost:8000/api
+cp .env.example .env.local # ver tabla "Variables de entorno" abajo
+npm run dev                # http://localhost:5173
 
 # 4. Pipeline (en otra terminal)
 cd pipeline
@@ -62,6 +62,31 @@ source venv/bin/activate
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Variables de entorno (dos archivos)
+
+Backend y frontend **no comparten** el mismo `.env`. Cada capa lee su propio archivo local (gitignored).
+
+| Archivo | Plantilla | Uso |
+|---------|-----------|-----|
+| `backend/.env` | `backend/.env.example` | API, Gemini, Supabase (servidor), pipeline |
+| `frontend/.env.local` | `frontend/.env.example` | URL del API, auth Supabase (login Google) |
+
+| Variable | Archivo | Obligatoria | Descripción |
+|----------|---------|-------------|-------------|
+| `SUPABASE_URL` | `backend/.env` | Modo real | URL del proyecto Supabase |
+| `SUPABASE_KEY` | `backend/.env` | Modo real | Anon key (`Settings → API → anon public`) |
+| `GEMINI_API_KEY` | `backend/.env` | Modo real | Google AI Studio |
+| `USE_MOCK_DATA` | `backend/.env` | No | `true` = dev sin credenciales; `false` = BD + IA real |
+| `VITE_API_URL` | `frontend/.env.local` | No | Default dev: `http://localhost:8000/api` |
+| `VITE_SUPABASE_URL` | `frontend/.env.local` | Solo login | Misma URL que `SUPABASE_URL` |
+| `VITE_SUPABASE_ANON_KEY` | `frontend/.env.local` | Solo login | Misma anon key que `SUPABASE_KEY` |
+
+Sin `VITE_SUPABASE_*` la app anónima (wizard, resultados, vacantes) sigue funcionando; `/login` y `/registro` muestran aviso.
+
+Tras editar cualquier `.env`, **reinicia** el servidor correspondiente (uvicorn o `npm run dev`).
 
 ---
 

@@ -123,10 +123,24 @@ backend/
 
 ## Variables de entorno
 
-| Variable | Dónde | Valor dev |
-|----------|-------|-----------|
+Hay **dos archivos** locales (gitignored), uno por capa:
+
+| Archivo | Plantilla |
+|---------|-----------|
+| `backend/.env` | `backend/.env.example` |
+| `frontend/.env.local` | `frontend/.env.example` |
+
+| Variable | Archivo | Valor dev |
+|----------|---------|-----------|
+| `SUPABASE_URL` | backend | URL del proyecto |
+| `SUPABASE_KEY` | backend | Anon key (Settings → API) |
+| `GEMINI_API_KEY` | backend | Google AI Studio |
+| `USE_MOCK_DATA` | backend | `true` sin credenciales; `false` modo real |
 | `VITE_API_URL` | frontend | `http://localhost:8000/api` |
-| `USE_MOCK_DATA` | backend | `true` (dev sin credenciales) |
+| `VITE_SUPABASE_URL` | frontend | Igual que `SUPABASE_URL` (login Google) |
+| `VITE_SUPABASE_ANON_KEY` | frontend | Igual que `SUPABASE_KEY` (login Google) |
+
+Sin `VITE_SUPABASE_*` el front anónimo sigue; auth en `/login` queda deshabilitada con mensaje claro.
 
 ## Desarrollo local
 
