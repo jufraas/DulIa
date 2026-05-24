@@ -35,7 +35,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
-| `/resultados` | Resultados | Score, análisis IA, termómetro, plan 30-60-90, radar, timeline, coach, PDF |
+| `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
 | `/vacantes` | Vacantes | Termómetro + semáforo; **Volver a mi análisis** → `/resultados` |
 
 ## Flujo de datos
@@ -71,15 +71,16 @@ src/
 ├── components/         # about/, welcome/, onboarding/, results/, vacancies/, motion/, …
 ├── components/motion/
 │   └── RevealOnScroll.jsx   # Framer Motion: mount (hero) | scroll (secciones)
-├── hooks/              # useOnboardingForm, useResultsData, useSessionHydration, …
+├── hooks/              # useOnboardingForm, useResultsSectionNav, useCoachContext, …
 ├── services/
 │   ├── api.js
 │   ├── mockResultsBundle.js   # fallbacks Plan 2 personalizados
 │   ├── sessionHydration.js
 │   └── mock*.js
-├── constants/colombiaLocations.js
+├── constants/colombiaLocations.js, resultsSections.js
+├── context/CoachProvider.jsx
 ├── store/useProfileStore.js
-├── utils/              # session, sessionCache, planDisplay, marketDisplay, onboardingValidation, parseTags, …
+├── utils/              # session, marketDisplay, coachSuggestions, planDisplay, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 
@@ -110,16 +111,43 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 ## Resultados (`/resultados`)
 
+### Navegación por secciones
+
+| Nav (6 ítems) | Contenido |
+|---------------|-----------|
+| Tu análisis | `ScoreCard` + `PdfDownloadCard` + `ProfileSummary` (misma altura en desktop) |
+| Mercado | `MarketThermometer` |
+| Vacantes y plan | `OpportunitiesAndPlan` |
+| Radar match | `RadarMatch` |
+| Timeline | `CareerTimeline` |
+| Descargar PDF | Banner final |
+
+- Desktop: `ResultsSectionNav` vertical sticky (`dulia-kit.css`).
+- Móvil: chips horizontales sticky bajo el header.
+- Anclas: `constants/resultsSections.js` + `useResultsSectionNav`.
+
+### Coach (solo `/resultados`)
+
+| Pieza | Rol |
+|-------|-----|
+| `CoachProvider` | Estado chat + banner/teaser |
+| `CoachPromptBanner` | Aviso inline dismissible (no sticky) |
+| `CoachChatBubble` | FAB + teaser auto-ocultable + bienvenida personalizada |
+| `CoachAskLink` | CTAs en score, resumen, mercado, radar, plan |
+| `coachSuggestions.js` | Mensaje y chips iniciales desde perfil |
+
+### Secciones (detalle)
+
 | Sección | Componente |
 |---------|------------|
-| Score + PDF | `ScoreCard`, `PdfDownloadCard` (columna izq.); badge comparativa sin truncar |
-| Resumen IA | `ProfileSummary` — scroll interno (`.results-summary-scroll`) |
-| Termómetro mercado | `MarketThermometer.jsx` — chips modalidad + fuente (`marketDisplay.js`); `GET .../market/dashboard` |
-| Vacantes + plan | `OpportunitiesAndPlan.jsx` — oportunidades define altura; `ThirtyDayPlan` igual alto + scroll |
-| Match radar | `RadarMatch.jsx` — 5 ejes usuario vs mercado vía `GET .../radar-data` |
-| Timeline + coach | `CareerTimeline.jsx`, `CoachChatBubble.jsx` |
-| PDF | `generateAnalysisPdf.js` — score, análisis, plan, radar, jobs, mercado (modalidad/fuente) |
-| Carga larga | `ProcessStatusBar.jsx` — generación PDF |
+| Score + PDF | `ScoreCard` (`flex-1`) + `PdfDownloadCard` — columna izq. |
+| Resumen IA | `ProfileSummary` — `h-full`, scroll interno |
+| Termómetro mercado | `MarketThermometer` — modalidad/fuente (`marketDisplay.js`) |
+| Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
+| Match radar | `RadarMatch` |
+| Timeline + coach FAB | `CareerTimeline`, `CoachChatBubble` |
+| PDF | `generateAnalysisPdf.js` + banner descarga |
+| Carga larga | `ProcessStatusBar` — generación PDF |
 
 ## División de trabajo
 

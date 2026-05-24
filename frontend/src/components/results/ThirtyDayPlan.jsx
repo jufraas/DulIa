@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Calendar, Check } from 'lucide-react'
 import { useProfileStore } from '../../store/useProfileStore'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../../utils/planDisplay'
+import CoachAskLink from './CoachAskLink'
 
 const TABS = [
   { id: '30', label: '30 días' },
@@ -86,6 +87,9 @@ export default function ThirtyDayPlan() {
             {weeks.map((w, i) => (
               <WeekBlock key={`${w.w}-${w.title}`} index={i} week={w} />
             ))}
+          </div>
+          <div className="mt-5 border-t border-[rgba(168,85,247,0.12)] pt-4">
+            <CoachAskLink question="Ayúdame con la primera semana de mi plan de acción" />
           </div>
         </>
       )}

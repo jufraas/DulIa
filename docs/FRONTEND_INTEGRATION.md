@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Market dashboard (`por_modalidad`, `por_fuente`) + `ProcessStatusBar`.
+**Última actualización:** 2026-05-24 · Nav secciones resultados + presencia coach + layout análisis alineado.
 
 ---
 
@@ -21,7 +21,9 @@
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
-| Layout `/resultados` | ✅ | `OpportunitiesAndPlan` — plan = alto oportunidades + scroll interno |
+| Layout `/resultados` | ✅ | Análisis 2 cols misma altura; `OpportunitiesAndPlan` — plan = alto oportunidades + scroll |
+| Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
+| Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
 | Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |

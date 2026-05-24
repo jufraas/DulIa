@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Termómetro:** `por_modalidad` + `por_fuente` en market dashboard · **UX carga:** `ProcessStatusBar` (CV, análisis, PDF).
+2026-05-24 — **Resultados:** nav por secciones + presencia coach (banner, CTAs, teaser) · bloque análisis con columnas alineadas.
 
 ## Estado por módulo
 
@@ -48,13 +48,14 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
 | Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
-| Layout `/resultados` | ✅ | Score+PDF columna izq.; resumen con scroll; `OpportunitiesAndPlan` (altura sync + scroll plan) |
+| Layout `/resultados` | ✅ | Score+PDF vs resumen misma altura (580px desktop); `OpportunitiesAndPlan` (altura sync + scroll plan) |
+| Nav secciones `/resultados` | ✅ | `ResultsSectionNav` — vertical sticky (desktop) / chips (móvil); 6 anclas agrupadas |
 | Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
 | Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |
-| Coach chat UI | ✅ | `CoachChatBubble` en `/resultados` |
+| Coach chat UI | ✅ | `CoachProvider` + banner, teaser FAB, chips iniciales, `CoachAskLink` en tarjetas |
 | Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
 | Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |

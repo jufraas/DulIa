@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Market dashboard `por_modalidad`/`por_fuente` + ProcessStatusBar frontend.
+**Última actualización:** 2026-05-24 · Frontend: nav secciones `/resultados`, presencia coach, layout análisis.
 
 ## Base URL
 

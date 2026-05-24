@@ -1,5 +1,6 @@
 import { Target, TrendingUp } from 'lucide-react'
 import ScoreRing from '../brand/ScoreRing'
+import CoachAskLink from './CoachAskLink'
 
 /**
  * @param {{
@@ -14,7 +15,7 @@ export default function ScoreCard({ score, comparativa, className = '' }) {
 
   return (
     <div
-      className={`card-dl flex min-h-[360px] shrink-0 flex-col items-center justify-center gap-3 p-6 ${className}`}
+      className={`card-dl flex min-h-[300px] flex-1 flex-col items-center justify-center gap-3 p-6 ${className}`}
       style={{ boxShadow: 'var(--glow-violet-strong)' }}
     >
       <div className="eyebrow-dl shrink-0">
@@ -32,6 +33,10 @@ export default function ScoreCard({ score, comparativa, className = '' }) {
         <TrendingUp className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
         <span>{badgeText}</span>
       </div>
+      <CoachAskLink
+        question={`¿Cómo puedo subir mi score de empleabilidad de ${score}?`}
+        className="mt-1"
+      />
     </div>
   )
 }

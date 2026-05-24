@@ -1,4 +1,5 @@
 import { TrendingUp } from 'lucide-react'
+import CoachAskLink from './CoachAskLink'
 import {
   formatMarketSourceSummary,
   getModalityEntries,
@@ -131,6 +132,10 @@ export default function MarketThermometer({ market }) {
           </ul>
         </div>
       )}
+
+      <div className="mt-5 border-t border-[rgba(168,85,247,0.12)] pt-4">
+        <CoachAskLink question="¿Vale la pena buscar vacantes remotas con mi perfil?" />
+      </div>
     </article>
   )
 }

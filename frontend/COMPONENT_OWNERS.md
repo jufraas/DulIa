@@ -29,7 +29,11 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/shared/ProcessStatusBar.jsx` | Barra fija inferior — CV, submit wizard, PDF |
 | `src/utils/generateAnalysisPdf.js` | PDF completo (analyze, plan, radar, mercado modalidad/fuente, …) |
 | `src/store/useProfileStore.js` | Estado global + persistencia cache |
-| `src/utils/sessionCache.js` | Lectura/escritura localStorage sesión |
+| `src/utils/coachSuggestions.js` | Bienvenida coach + chips iniciales desde perfil |
+| `src/context/CoachProvider.jsx` | Provider coach en `/resultados` |
+| `src/hooks/useCoachContext.js` | Hook contexto coach |
+| `src/constants/resultsSections.js` | Anclas nav `/resultados` |
+| `src/hooks/useResultsSectionNav.js` | Scroll + sección activa |
 
 ## Joufra — landing, resultados, vacantes
 
@@ -41,7 +45,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — semáforo; **Volver a mi análisis** → `/resultados` |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Resultados: `OpportunitiesAndPlan`, `MarketThermometer`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
+| `src/components/results/*` | Resultados: `ResultsSectionNav`, `CoachPromptBanner`, `CoachAskLink`, `OpportunitiesAndPlan`, `MarketThermometer`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 
@@ -51,7 +55,7 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------|
 | `src/pages/WelcomePage.jsx` | Landing — splash + fases (`splash`/`exit`/`done`) |
 | `src/pages/OnboardingPage.jsx` | Wizard |
-| `src/pages/ResultsPage.jsx` | Resultados — orquesta score, analyze, plan, radar, timeline, coach, PDF |
+| `src/pages/ResultsPage.jsx` | Resultados — nav secciones, coach, score/resumen, plan, radar, PDF |
 | `src/App.jsx` | Rutas (`/sobre` = Migue) |
 | `src/index.css` / `src/styles/*` | Design system (`dulia-tokens.css`, `dulia-kit.css`) |
 | `ReBrand/` | Referencia visual — no editar para producción |
@@ -78,7 +82,7 @@ Contenido movido al kit ReBrand o a `/sobre`; no importados en la app:
 
 Deploy prod, login, pipeline jobs reales: [docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
 
-**Coach:** `CoachChatBubble` + `useCoachChat.js` — implementado en `/resultados`.
+**Coach:** `CoachProvider` + `CoachChatBubble` + `CoachAskLink` + `useCoachChat.js` — solo `/resultados`.
 
 ## Flujo Git
 
