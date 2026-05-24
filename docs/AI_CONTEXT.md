@@ -96,7 +96,8 @@ backend/
 | POST | `/api/profile/parse-cv` | ✅ |
 | GET | `/api/profile/{session_id}` | ✅ |
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
-| GET | `/api/market/dashboard` | ✅ (+ `por_modalidad`, `por_fuente`) |
+| GET | `/api/market/dashboard` | ✅ global (`?city=`) — fallback |
+| GET | `/api/market/dashboard/{session_id}` | ✅ personalizado — `top_skills_demandadas`, sectores, geo |
 | POST | `/api/coach/chat` | ✅ |
 | GET | `/api/plan/{session_id}` | ⚠️ legacy — no usar en front |
 | GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |
@@ -109,7 +110,9 @@ backend/
 | Archivo | Para qué |
 |---------|----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | **Contrato API — fuente de verdad** |
-| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | **Handoff frontend — flujo Plan 2 + recharts** |
+| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | **Handoff frontend — flujo Plan 2 + termómetro personalizado** |
+| [handoff-frontend-termometro-vacantes.md](handoff-frontend-termometro-vacantes.md) | Handoff termómetro + refetch (implementado) |
+| [handoff-frontend-analysis-labels.md](handoff-frontend-analysis-labels.md) | Handoff labels analyze (implementado) |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Módulos y flujo |
 | [SCHEMA.md](SCHEMA.md) | Tablas Supabase |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |

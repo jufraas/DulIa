@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** PDF por secciones, layout `/resultados` congelado, auth OAuth.
+2026-05-24 — **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** termómetro personalizado por perfil, refetch vacantes/resultados, labels analyze humanizados, auth Supabase opcional, PDF ampliado.
 
 ## Estado por módulo
 
@@ -37,7 +37,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
-| `MarketThermometer` | ✅ | `/resultados` y `/vacantes`; `por_modalidad` + `por_fuente` (Get on Board + Remotive); dashboard personalizado por perfil |
+| `MarketThermometer` | ✅ | `/resultados` y `/vacantes`; endpoint `GET /market/dashboard/{session_id}`; geo + skills demandadas + modalidad/fuente; refetch sin cache stale |
 | `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
@@ -53,7 +53,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
-| `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |
+| `analysis` en UI + store | ✅ | Fortalezas/debilidades con labels humanizados (`humanizeArea`); score `nivel_preparacion` |
+| Refetch market + jobs | ✅ | `VacanciesPage` + `useResultsData` — siempre al montar; evita 1 vacante vieja en localStorage |
 | Coach chat UI | ✅ | `CoachProvider` + banner, teaser FAB, chips iniciales, `CoachAskLink` en tarjetas |
 | Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |

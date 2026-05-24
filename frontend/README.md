@@ -50,11 +50,12 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 
 1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; CV opcional; **habilidades en tags** con sugerencias; validación edad ≥15 y coherencia experiencia/tipo de oportunidad).
 2. **POST** `/api/profile` con `session_id` (UUID en `localStorage`, clave `dulia_session_id`).
-3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
+3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market (`sessionId`) + radar + timeline.
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
-6. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
-7. PDF (`generateAnalysisPdf.jsx`): bloques por sección → html2canvas (PNG) → jsPDF; fondo oscuro en cada hoja (lazy).
+6. `/resultados` y `/vacantes` **refetch** market + jobs al montar (datos frescos del backend).
+7. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
+8. PDF (`generateAnalysisPdf.jsx`): bloques por sección → html2canvas (PNG) → jsPDF; fondo oscuro en cada hoja (lazy).
 
 Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
 
@@ -67,7 +68,7 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `parseCvPdf` | POST `/profile/parse-cv` → `normalizeCvParseResponse` |
 | `loadResultsBundle` | Plan 2: analyze + action-plan + jobs/market/radar/timeline |
 | `getRecommendedJobs` | GET `/jobs/recommended/{session_id}` |
-| `getMarketDashboard` | GET `/market/dashboard` |
+| `getMarketDashboard` | GET `/market/dashboard/{session_id}` (preferido) o `/market/dashboard?city=...` |
 | `getRadarData` | GET `/profile/{id}/radar-data` |
 | `postCoachChat` | POST `/coach/chat` |
 
@@ -88,7 +89,7 @@ src/
 ├── constants/colombiaLocations.js, resultsSections.js
 ├── context/CoachProvider.jsx
 ├── store/useProfileStore.js
-├── utils/              # session, marketDisplay, coachSuggestions, planDisplay, …
+├── utils/              # session, marketDisplay, analysisDisplay, coachSuggestions, planDisplay, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 
@@ -149,7 +150,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 | Sección | Componente |
 |---------|------------|
 | Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` embedded + `PdfDownloadCard`) vs `ProfileSummary` |
-| Termómetro mercado | `MarketThermometer` — modalidad/fuente (`marketDisplay.js`) |
+| Termómetro mercado | `MarketThermometer` — scope perfil, desglose geo, skills demandadas (`tienes`), modalidad/fuente (`marketDisplay.js`) |
 | Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
 | Match radar | `RadarMatch` |
 | Timeline + coach FAB | `CareerTimeline`, `CoachChatBubble` |

@@ -1,5 +1,7 @@
 # Handoff Frontend — Termómetro personalizado + cache de vacantes
 
+> **Estado:** ✅ Implementado (2026-05-24) — `MarketThermometer`, `VacanciesPage`, `useResultsData`, `api.js` · commit `7a18bc1`
+
 > **Para:** Migue (frontend)  
 > **De:** Carlos (backend)  
 > **Fecha:** 2026-05-24  

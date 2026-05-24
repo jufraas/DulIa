@@ -22,10 +22,11 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/services/mockCoachChat.js` | Fallback coach offline |
 | `src/services/mockPlan.js` | Fallback plan 30d offline |
 | `src/utils/planDisplay.js` | Normaliza action-plan → UI (tabs 30/60/90) |
-| `src/utils/analysisDisplay.js` | Parser respuesta analyze |
+| `src/utils/analysisDisplay.js` | Parser analyze + `humanizeArea()` (labels fortalezas/debilidades) |
 | `src/utils/timelineDisplay.js` | Parser timeline API |
 | `src/utils/radarApi.js` | Parser radar API |
-| `src/utils/marketDisplay.js` | Labels modalidad/fuente (Get on Board, Remotive) para termómetro y PDF |
+| `src/utils/marketDisplay.js` | Scope/geo/skills termómetro; labels modalidad/fuente (Get on Board, Remotive) — UI + PDF |
+| `src/hooks/useResultsData.js` | Datos `/resultados`; refetch market/jobs al montar |
 | `src/components/shared/ProcessStatusBar.jsx` | Barra fija inferior — CV, submit wizard, PDF |
 | `src/utils/generateAnalysisPdf.jsx` | PDF — React + html2canvas → jsPDF (lazy desde `usePdfDownload`) |
 | `src/components/pdf/*` | `AnalysisPdfDocument`, `PdfSection`, `pdf-document.css` |

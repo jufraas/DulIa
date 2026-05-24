@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · PDF por secciones + layout resultados congelado.
+**Última actualización:** 2026-05-24 · Termómetro personalizado, refetch vacantes, labels analyze humanizados, auth Supabase opcional.
 
 ---
 
@@ -16,7 +16,9 @@
 | `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
 | `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
 | `GET .../timeline-data` | ✅ | `CareerTimeline` |
-| `GET market/dashboard` | ✅ | Termómetro; `por_modalidad` + `por_fuente` en UI y PDF |
+| `GET market/dashboard/{session_id}` | ✅ | Termómetro **personalizado** (ciudad + sectores + `top_skills_demandadas`) |
+| `GET market/dashboard?city=...` | ✅ | Fallback global; reservado para anónimo sin perfil |
+| Labels analyze (`area`) | ✅ | `humanizeArea()` en `analysisDisplay.js` — snake_case → español legible |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
@@ -28,7 +30,7 @@
 | Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
-| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
+| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch** market/jobs al montar (sin cache stale) |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
@@ -77,8 +79,9 @@ POST /api/profile                    ← guardar perfil
     ├── POST /api/profile/{id}/analyze      ← análisis IA (Plan 2)
     ├── POST /api/profile/{id}/action-plan  ← plan 30-60-90 (Plan 2)
     │
-    ├── GET /api/jobs/recommended/{id}      ← vacantes con score
-    ├── GET /api/market/dashboard?city=...  ← termómetro
+    ├── GET /api/jobs/recommended/{id}      ← vacantes con score (refetch en /vacantes)
+    ├── GET /api/market/dashboard/{id}      ← termómetro personalizado (preferido)
+    ├── GET /api/market/dashboard?city=...  ← fallback global
     │
     ├── GET /api/profile/{id}/radar-data    ← gráfica radar (Plan 2)
     └── GET /api/profile/{id}/timeline-data ← gráfica timeline (Plan 2)
@@ -111,8 +114,9 @@ Archivos: `utils/onboardingValidation.js`, `utils/validateOnboardingStep.js`, `c
 | Wizard paso 0 (opcional) | POST | `/profile/parse-cv` | `CvParseOut` → prefill formulario |
 | Tras wizard | POST | `/profile` | Perfil (`ProfileOut`) |
 | Recargar perfil | GET | `/profile/{session_id}` | Mismo shape (404 en mock) |
-| Pantalla vacantes | GET | `/jobs/recommended/{session_id}` | Array de vacantes + score |
-| Termómetro / PDF | GET | `/market/dashboard?city=...` | Stats agregadas |
+| Pantalla vacantes | GET | `/jobs/recommended/{session_id}` | Array de vacantes + score (seniority en backend) |
+| Termómetro / PDF | GET | `/market/dashboard/{session_id}` | Pool personalizado por perfil |
+| Termómetro (fallback) | GET | `/market/dashboard?city=...` | Agregado global por ciudad |
 | Coach chat | POST | `/coach/chat` | `{ respuesta, sugerencias_rapidas }` |
 
 Detalle JSON: [ENDPOINTS.md](ENDPOINTS.md).
@@ -146,7 +150,34 @@ POST /api/profile/{session_id}/analyze?regenerate=true   ← forzar nuevo
 
 **UI sugerida:** cards de fortalezas/debilidades; badge con `nivel_preparacion.overall` (0–100).
 
-**Implementado:** `utils/analysisDisplay.js` → `ProfileSummary`, `ScoreCard`, PDF.
+**Implementado:** `utils/analysisDisplay.js` → `ProfileSummary`, `ScoreCard`, PDF.  
+**Labels `area`:** el backend envía snake_case fijo (`educacion`, `soft_skills`, `habilidades_tecnicas`, …). La UI humaniza con `humanizeArea()` / `AREA_LABELS` — ver [handoff-frontend-analysis-labels.md](handoff-frontend-analysis-labels.md).
+
+---
+
+### 1b. Termómetro de mercado (personalizado)
+
+```
+GET /api/market/dashboard/{session_id}     ← preferido cuando hay perfil
+GET /api/market/dashboard?city=Barranquilla   ← fallback global
+```
+
+**Campos clave en UI** (`MarketThermometer`, PDF):
+
+| Campo | Uso en pantalla |
+|-------|-----------------|
+| `sectores_filtro` | Subtítulo del scope del perfil |
+| `vacantes_locales` / `remotas` / `nacionales` | Desglose geo (*3 en Barranquilla · 350 remoto · …*) |
+| `top_skills_demandadas` | Lista con `tienes` → check / "Ya la tienes" |
+| `por_modalidad` | Chips Remoto / Presencial / Híbrido |
+| `por_fuente` | Get on Board, Remotive, Demo |
+| `crecimiento_semanal_pct` | Stat + hint semanal |
+
+**Implementado:** `getMarketDashboard(filters, profile, sessionId)` en `api.js`; `loadResultsBundle` pasa `sessionId`; refetch al montar en `VacanciesPage` y `useResultsData` (`/resultados`). Helpers en `utils/marketDisplay.js`.
+
+La lista de vacantes puede ser **más corta** que `total_vacantes_activas` del termómetro (seniority solo aplica a jobs recomendados).
+
+Ver [handoff-frontend-termometro-vacantes.md](handoff-frontend-termometro-vacantes.md) · contrato: [ENDPOINTS.md](ENDPOINTS.md).
 
 ---
 

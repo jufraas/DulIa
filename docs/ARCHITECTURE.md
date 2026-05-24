@@ -115,7 +115,7 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | Cache sesión | `sessionCache.js` (localStorage) | — |
 | Rehidratación | `sessionHydration.js` al boot | `GET /profile/{session_id}` |
 | Matching vacantes | Scores, semáforo y **RadarMatch** (5 ejes vía API) | Calcula `score_compatibilidad` |
-| Termómetro mercado | `MarketThermometer` en `/resultados` y `/vacantes` | Agrega sobre `jobs` |
+| Termómetro mercado | `MarketThermometer` en `/resultados` y `/vacantes` | `GET /market/dashboard/{session_id}` (personalizado) o global por `city` |
 | Plan 30 días | `ThirtyDayPlan` ← `POST .../action-plan` o mock por perfil (1 curso por habilidad) | Plan 2 + Gemini |
 | Coach / chat | `CoachChatBubble` → `postCoachChat()` | Gemini + perfil |
 | PDF plan de acción | `generateAnalysisPdf.jsx` + `components/pdf/*` (html2canvas → jsPDF) | — |
@@ -132,7 +132,7 @@ frontend/src/
 ├── store/           # useProfileStore.js (profile, jobs, market, plan, radar, timeline, analysis)
 ├── constants/       # colombiaLocations.js (DANE)
 ├── components/pdf/  # AnalysisPdfDocument, PdfSection
-└── utils/           # session, sessionCache, planDisplay, radarApi, analysisDisplay, timelineDisplay, generateAnalysisPdf.jsx
+└── utils/           # session, sessionCache, planDisplay, radarApi, analysisDisplay, marketDisplay, timelineDisplay, generateAnalysisPdf.jsx
 ```
 
 ## Roadmap post-MVP
