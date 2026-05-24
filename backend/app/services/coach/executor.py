@@ -18,6 +18,31 @@ from app.services.action_plan_service import action_plan_service
 
 logger = get_logger(__name__)
 
+# Palabras clave por sector/industria para filtrar título + descripción
+_SECTOR_KEYWORDS: dict[str, list[str]] = {
+    "videojuegos": ["videojuego", "video juego", "game dev", "gamedev", "unity", "unreal", "ue4", "ue5", "godot"],
+    "videojuego": ["videojuego", "video juego", "game dev", "gamedev", "unity", "unreal"],
+    "video juegos": ["videojuego", "video juego", "game dev", "gamedev", "unity", "unreal"],
+    "tecnología": ["software", "developer", "desarrollador", "programador", "tech", "it "],
+    "tecnologia": ["software", "developer", "desarrollador", "programador", "tech", "it "],
+    "fintech": ["fintech", "financier", "banco", "pagos"],
+}
+
+
+def _job_search_text(v) -> str:
+    parts = [v.titulo or "", v.descripcion or "", v.sector or "", v.empresa or ""]
+    return " ".join(parts).lower()
+
+
+def _matches_sector_filter(v, sector: str) -> bool:
+    """Coincide por columna sector o por keywords en título/descripción."""
+    sector_lower = sector.lower().strip()
+    if v.sector and sector_lower in v.sector.lower():
+        return True
+    keywords = _SECTOR_KEYWORDS.get(sector_lower, [sector_lower])
+    text = _job_search_text(v)
+    return any(kw in text for kw in keywords)
+
 
 class FunctionExecutor:
     """Ejecuta las funciones del coach y devuelve resultados."""
@@ -82,8 +107,8 @@ async def handle_buscar_vacantes(parametros: dict, session_id: str) -> dict:
     filtradas = vacantes
     
     if parametros.get("sector"):
-        sector = parametros["sector"].lower()
-        filtradas = [v for v in filtradas if v.sector and sector in v.sector.lower()]
+        sector = parametros["sector"]
+        filtradas = [v for v in filtradas if _matches_sector_filter(v, sector)]
     
     if parametros.get("ciudad"):
         ciudad = parametros["ciudad"].lower()

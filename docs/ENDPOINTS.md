@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-23 · Plan 2 UI + normalización respuesta `parse-cv`.
+**Última actualización:** 2026-05-23 · Fase 1 Plan 2 real verificada + normalización respuesta `parse-cv`.
 
 ## Base URL
 
@@ -35,8 +35,8 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | `POST /profile/parse-cv` | Prefill simulado (sin leer PDF real) | MarkItDown + Gemini |
 | `GET /profile/{id}` | Siempre **404** | 200 si existe, 404 si no |
 | `GET /jobs/recommended/{id}` | 2 vacantes mock (cualquier `session_id`) | Top 20 reales; `[]` sin perfil o sin jobs |
-| `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos |
-| `GET /plan/{id}` | Plan mock genérico (frontend fallback) | Gemini + perfil; **pendiente implementación backend** |
+| `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos; fallback global si `city` sin datos |
+| `GET /plan/{id}` | Plan mock genérico (legacy) | **Deprecado** — usar `POST .../action-plan` |
 | `POST /coach/chat` | Respuesta simulada | Gemini + perfil en Supabase; 404 sin perfil |
 | `POST /profile/.../analyze` | Análisis mock fijo | Gemini + tabla `profile_analysis` |
 | `POST /profile/.../action-plan` | Plan mock 30-60-90 | Gemini + tabla `action_plans`; requiere análisis previo |
@@ -617,13 +617,56 @@ const market = await fetch(
 
 ---
 
+## Troubleshooting — modo real (`USE_MOCK_DATA=false`)
+
+Si el front muestra textos genéricos o plan “de plantilla”, revisar la pestaña Network **antes** de culpar a la UI: los fallbacks en `api.js` rellenan mocks cuando la API falla.
+
+### Cadena Plan 2 (orden obligatorio)
+
+```
+POST /profile  →  POST .../analyze  →  POST .../action-plan
+                      ↓                      ↓
+              GET .../radar-data     GET .../timeline-data
+```
+
+| Síntoma | Causa habitual | Solución |
+|---------|----------------|----------|
+| `POST .../analyze` → **500** | RLS en `profile_analysis` o JSONB mal serializado | Ejecutar `backend/migrations/004_plan2_backend_fixes.sql` en Supabase |
+| `GET /market/dashboard` → **500** | Query a columna `jobs.location` inexistente | Migración 004 + código actualizado (`market_service.py`) |
+| `POST .../action-plan` → **404** | Análisis previo no guardado | Arreglar analyze primero; mensaje: `"Análisis previo requerido..."` |
+| `GET .../timeline-data` → **404** | Sin fila en `action_plans` | Completar action-plan |
+| Termómetro con **0 vacantes** pero hay jobs | `jobs.city` null en pipeline | Backend hace fallback a todas las activas; enriquecer pipeline (`city` al insertar) |
+| UI sigue con mocks tras arreglar API | Cache local o bundle anterior | Limpiar `localStorage` / rehacer wizard; reiniciar uvicorn |
+
+### Smoke test local (Plan 2)
+
+Con `.env` real y uvicorn en `:8000`:
+
+```bash
+cd backend && source venv/bin/activate
+curl -s http://localhost:8000/api/health | jq .mock_data   # debe ser "false"
+
+SESSION="<uuid-tras-post-profile>"
+curl -s -X POST "http://localhost:8000/api/profile/$SESSION/analyze" | jq .session_id
+curl -s -X POST "http://localhost:8000/api/profile/$SESSION/action-plan" | jq .plan.resumen_ejecutivo
+curl -s "http://localhost:8000/api/profile/$SESSION/radar-data" | jq .radar.usuario
+curl -s "http://localhost:8000/api/profile/$SESSION/timeline-data" | jq .timeline.inicio
+```
+
+Decisión técnica completa: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
+
+---
+
 ## Checklist pipeline → backend
 
 Para que el front vea datos reales (`USE_MOCK_DATA=false`):
 
-1. Insertar filas en `jobs` con `activo=true`, `semaforo`, `sector`, `ciudad`, salarios opcionales.
-2. El usuario debe tener perfil (`POST /profile` con mock off).
-3. `GET /jobs/recommended/{session_id}` necesita ese perfil en `profiles`.
+1. Ejecutar en Supabase SQL Editor:
+   - `backend/migrations/002_plan2_tables.sql`
+   - `backend/migrations/004_plan2_backend_fixes.sql`
+2. Insertar filas en `jobs` con `active=true`, `status`, `sector`, `city` (recomendado).
+3. El usuario debe tener perfil (`POST /profile`).
+4. Secuencia Plan 2: `analyze` → `action-plan` → `radar-data` / `timeline-data`.
 
 Campos mínimos por vacante: ver `docs/SCHEMA.md` tabla `jobs`.
 
