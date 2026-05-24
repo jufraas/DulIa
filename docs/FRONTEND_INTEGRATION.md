@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · PDF React+html2canvas · `AnalysisOverviewGrid` (columnas alineadas).
+**Última actualización:** 2026-05-24 · PDF por secciones + layout resultados congelado.
 
 ---
 
@@ -21,7 +21,7 @@
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
-| Layout `/resultados` | ✅ | Análisis 2 cols misma altura; `OpportunitiesAndPlan` — plan = alto oportunidades + scroll |
+| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
 | Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
@@ -29,7 +29,7 @@
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
-| PDF export | ✅ | `generateAnalysisPdf.jsx` — `AnalysisPdfDocument` + html2canvas + jsPDF (lazy) |
+| PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
 

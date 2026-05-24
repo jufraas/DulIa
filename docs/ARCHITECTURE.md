@@ -46,7 +46,7 @@ SPA **sin login**, alineada al **kit ReBrand** con pantallas separadas:
 - **Persistencia:** cache en `dulia_session_data` (incluye plan, radar, timeline); borrador wizard en `dulia_wizard_draft`.
 - **Rehidratación** al cargar app (`sessionHydration.js`): cache → `GET /profile` → `loadResultsBundle` si faltan datos.
 - Fallbacks: `mockResultsBundle.js` (personalizado al perfil) + `mockData`, `mockCvPrefill`, `mockProfileFromPayload`, `mockPlan`, `mockCoachChat`.
-- PDF: documento React (`AnalysisPdfDocument`) capturado con html2canvas → jsPDF multipágina (`generateAnalysisPdf.jsx`, lazy).
+- PDF: bloques `[data-pdf-block]` capturados con html2canvas (PNG) → jsPDF; fondo `#0D0D0D` en cada hoja (`generateAnalysisPdf.jsx`, lazy).
 - **Coach:** `CoachChatBubble` → `postCoachChat()`.
 - División de archivos: [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 - **Motion landing:** `framer-motion` vía `components/motion/RevealOnScroll.jsx`; splash orquestado en `WelcomePage` (ver [decisión landing animations](decisions/2026-05-23-frontend-landing-animations.md)).

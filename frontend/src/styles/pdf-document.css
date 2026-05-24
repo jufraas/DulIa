@@ -1,11 +1,10 @@
-/* Documento PDF — captura off-screen (html2canvas) */
+/* Documento PDF — captura off-screen por secciones (html2canvas) */
 
 .pdf-capture-root {
   width: 794px;
   box-sizing: border-box;
-  background: var(--bg-0);
+  background: #0d0d0d;
   color: var(--fg-1);
-  padding: 28px 32px 40px;
   font-family: var(--font-body, system-ui, sans-serif);
 }
 
@@ -13,8 +12,25 @@
   box-sizing: border-box;
 }
 
+/* Bloque atómico: no se parte entre secciones distintas */
+.pdf-block {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0d0d0d;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.pdf-block--first {
+  padding-top: 28px;
+}
+
+.pdf-block--last {
+  padding-bottom: 40px;
+}
+
 .pdf-header {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   padding: 18px 20px;
   border-radius: var(--r-lg);
   background: linear-gradient(135deg, #7c3aed 0%, #a855f7 55%, #7c3aed 100%);
@@ -48,7 +64,7 @@
 }
 
 .pdf-intro {
-  margin: 0 0 20px;
+  margin: 0 0 18px;
   font-size: 15px;
   line-height: 1.55;
   color: var(--fg-2);
@@ -62,7 +78,7 @@
   display: flex;
   gap: 20px;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 0;
   padding: 18px 20px;
 }
 
@@ -93,8 +109,8 @@
 }
 
 .pdf-section {
-  margin-bottom: 22px;
-  break-inside: avoid;
+  margin-bottom: 18px;
+  padding-bottom: 2px;
 }
 
 .pdf-section__head {
@@ -116,7 +132,6 @@
 
 .pdf-section__card {
   padding: 16px 18px;
-  break-inside: avoid;
 }
 
 .pdf-subtitle {
@@ -246,7 +261,7 @@
 .pdf-job--red .pdf-job__title { color: #f87171; }
 
 .pdf-footer {
-  margin-top: 28px;
+  margin-top: 8px;
   padding-top: 14px;
   border-top: 1px solid rgba(168, 85, 247, 0.25);
   font-size: 11px;

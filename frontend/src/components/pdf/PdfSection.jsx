@@ -4,7 +4,7 @@
  */
 export default function PdfSection({ eyebrow, title, children, className = '' }) {
   return (
-    <section className={`pdf-section ${className}`.trim()}>
+    <section className={`pdf-section pdf-block ${className}`.trim()} data-pdf-block>
       <div className="pdf-section__head">
         <p className="eyebrow-dl pdf-section__eyebrow">{eyebrow}</p>
         <h2 className="pdf-section__title">{title}</h2>

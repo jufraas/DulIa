@@ -23,6 +23,11 @@ export function usePdfDownload() {
         plan,
         radar,
       })
+    } catch (err) {
+      console.error('[PDF]', err)
+      window.alert(
+        'No pudimos generar el PDF. Intenta de nuevo en unos segundos o recarga la página.',
+      )
     } finally {
       setDownloading(false)
     }

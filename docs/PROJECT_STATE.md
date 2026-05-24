@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Resultados:** PDF React+html2canvas · `AnalysisOverviewGrid` (score+PDF vs resumen, 580px desktop).
+2026-05-24 — **Resultados:** PDF por secciones + fondo oscuro uniforme · layout congelado · fix `flushSync`.
 
 ## Estado por módulo
 
@@ -48,7 +48,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
 | Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
-| Layout `/resultados` | ✅ | `AnalysisOverviewGrid` — contenedor único izq. (score+PDF) = resumen (580px desktop, scroll interno); `OpportunitiesAndPlan` |
+| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques solo entre/al final; regla `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones `/resultados` | ✅ | `ResultsSectionNav` — vertical sticky (desktop) / chips (móvil); 6 anclas agrupadas |
 | Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
 | Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
@@ -60,7 +60,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
 | Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |
 | Links `url` en vacantes | ✅ | Preview + panel semáforo; mock con URLs demo |
-| Descarga PDF | ✅ | React + html2canvas → jsPDF multipágina (`AnalysisPdfDocument`, lazy en `usePdfDownload`) |
+| Descarga PDF | ✅ | Por secciones `[data-pdf-block]` · fondo `#0D0D0D` en cada hoja · PNG · `flushSync` (`react-dom`) · alerta si falla |
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
 

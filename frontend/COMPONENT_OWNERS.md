@@ -51,6 +51,16 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 
+### Layout congelado (`/resultados`)
+
+**No modificar** tamaños, grid, alturas ni espaciado de componentes ya existentes sin pedido explícito. Diseño fijado 2026-05-24:
+
+- `AnalysisOverviewGrid`: 2 cols lg, contenedores 580px, score embedded + PDF + resumen (scroll interno).
+- Orden: hero → coach banner → nav → análisis → mercado → vacantes/plan → radar → timeline → coach FAB → banner PDF.
+- **Nuevos componentes**: insertar entre secciones o al final en `ResultsPage.jsx`.
+
+Regla Cursor: `.cursor/rules/results-layout-frozen.mdc`.
+
 ## Compartido (avisar antes de tocar)
 
 | Archivo | Notas |

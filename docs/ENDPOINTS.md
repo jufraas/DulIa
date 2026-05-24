@@ -377,7 +377,7 @@ Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil pre
 
 **Errores:** `404` sin perfil · `500` error interno.
 
-**Frontend:** `loadResultsBundle()` → store → UI (`AnalysisOverviewGrid`, `ProfileSummary`, `ThirtyDayPlan`, `RadarMatch`, `CareerTimeline`, `CoachChatBubble`) + `generateAnalysisPdf.jsx` (React + html2canvas).
+**Frontend:** `loadResultsBundle()` → store → UI + `generateAnalysisPdf.jsx` (PDF por secciones, fondo oscuro uniforme).
 
 ---
 

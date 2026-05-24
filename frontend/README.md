@@ -46,7 +46,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
 6. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
-7. PDF (`generateAnalysisPdf.jsx`): documento React off-screen → html2canvas → jsPDF multipágina (lazy).
+7. PDF (`generateAnalysisPdf.jsx`): bloques por sección → html2canvas (PNG) → jsPDF; fondo oscuro en cada hoja (lazy).
 
 Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
 
@@ -145,7 +145,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 | Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
 | Match radar | `RadarMatch` |
 | Timeline + coach FAB | `CareerTimeline`, `CoachChatBubble` |
-| PDF | `components/pdf/AnalysisPdfDocument` + `generateAnalysisPdf.jsx` (lazy) |
+| PDF | `AnalysisPdfDocument` + `generateAnalysisPdf.jsx` — captura por `[data-pdf-block]`, fondo uniforme |
 | Carga larga | `ProcessStatusBar` — generación PDF |
 
 ## División de trabajo
@@ -153,6 +153,8 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 Ver [COMPONENT_OWNERS.md](./COMPONENT_OWNERS.md).
 
 Post-MVP (login, timeline plan, pitch): [../docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
+
+**Layout congelado:** el diseño visual de `/resultados` no se modifica sin pedido explícito — ver `.cursor/rules/results-layout-frozen.mdc`.
 
 ## Deploy (Vercel)
 

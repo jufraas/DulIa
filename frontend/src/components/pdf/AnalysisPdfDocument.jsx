@@ -52,35 +52,39 @@ export default function AnalysisPdfDocument({
 
   return (
     <div className="pdf-capture-root">
-      <header className="pdf-header">
-        <h1 className="pdf-header__brand">DulIA</h1>
-        <p className="pdf-header__tagline">Tu plan de carrera personalizado</p>
-        <div className="pdf-header__meta">
-          <span>Coach de carrera con IA · Barranqui-IA 2026</span>
-          <span>{dateStr}</span>
-        </div>
-      </header>
+      <div className="pdf-block pdf-block--first" data-pdf-block>
+        <header className="pdf-header">
+          <h1 className="pdf-header__brand">DulIA</h1>
+          <p className="pdf-header__tagline">Tu plan de carrera personalizado</p>
+          <div className="pdf-header__meta">
+            <span>Coach de carrera con IA · Barranqui-IA 2026</span>
+            <span>{dateStr}</span>
+          </div>
+        </header>
 
-      <p className="pdf-intro">
-        <strong>{city ? `${name} · ${city}` : name}</strong>
-        {insights?.descripcion ? (
-          <>
-            {' '}
-            — {insights.descripcion}
-          </>
-        ) : null}
-      </p>
-
-      <div className="card-dl pdf-score-row">
-        <ScoreRing value={score} size={108} stroke={10} animate={false} />
-        <div className="pdf-score-row__info">
-          <h3>Score de empleabilidad</h3>
-          <p>
-            {score}/100 · {scoreLabel}
-          </p>
-          {insights?.comparativa ? (
-            <p className="pdf-score-row__badge">{insights.comparativa}</p>
+        <p className="pdf-intro">
+          <strong>{city ? `${name} · ${city}` : name}</strong>
+          {insights?.descripcion ? (
+            <>
+              {' '}
+              — {insights.descripcion}
+            </>
           ) : null}
+        </p>
+      </div>
+
+      <div className="pdf-block" data-pdf-block>
+        <div className="card-dl pdf-score-row">
+          <ScoreRing value={score} size={108} stroke={10} animate={false} />
+          <div className="pdf-score-row__info">
+            <h3>Score de empleabilidad</h3>
+            <p>
+              {score}/100 · {scoreLabel}
+            </p>
+            {insights?.comparativa ? (
+              <p className="pdf-score-row__badge">{insights.comparativa}</p>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -312,7 +316,7 @@ export default function AnalysisPdfDocument({
         </dl>
       </PdfSection>
 
-      <footer className="pdf-footer">
+      <footer className="pdf-footer pdf-block pdf-block--last" data-pdf-block>
         Generado por DulIA · Continúa tu plan y habla con el coach en la app
       </footer>
     </div>
