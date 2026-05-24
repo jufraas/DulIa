@@ -16,7 +16,8 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from supabase import create_client
 
-load_dotenv()
+_HERE = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_HERE, "..", "backend", ".env"))
 sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 API_BASE = "https://www.getonbrd.com/api/v0"

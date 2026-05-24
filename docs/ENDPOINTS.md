@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Frontend: PDF html2canvas, `AnalysisOverviewGrid`, nav/coach resultados.
+**Última actualización:** 2026-05-24 · Scoring v1.1 + termómetro híbrido · Front: PDF por secciones, layout congelado, nav/coach.
 
 ## Base URL
 
@@ -34,8 +34,9 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | `POST /profile` | Responde perfil simulado, **no guarda** en BD | Gemini + Supabase |
 | `POST /profile/parse-cv` | Prefill simulado (sin leer PDF real) | MarkItDown + Gemini |
 | `GET /profile/{id}` | Siempre **404** | 200 si existe, 404 si no |
-| `GET /jobs/recommended/{id}` | 2 vacantes mock (cualquier `session_id`) | Top 20 reales; `[]` sin perfil o sin jobs |
-| `GET /market/dashboard` | Números fijos de ejemplo | Agrega sobre `jobs` activos; fallback global si `city` sin datos |
+| `GET /jobs/recommended/{id}` | 2 vacantes mock (cualquier `session_id`) | Todas las compatibles scoreadas (cap opcional vía `RECOMMENDED_TOP_N`); `[]` sin perfil |
+| `GET /market/dashboard` | Números fijos de ejemplo | Agrega global sobre `jobs` activos; alcance accesible por `city` |
+| `GET /market/dashboard/{id}` | Mock personalizado | Pool filtrado por perfil (ciudad + sectores) + `top_skills_demandadas` |
 | `GET /plan/{id}` | Plan mock genérico (legacy) | **Deprecado** — usar `POST .../action-plan` |
 | `POST /coach/chat` | Respuesta simulada | Gemini + perfil en Supabase; 404 sin perfil |
 | `POST /profile/.../analyze` | Análisis mock fijo | Gemini + tabla `profile_analysis` |
@@ -285,7 +286,19 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 
 > BD `jobs` en **inglés** (`title`, `company`, `status`, …). Ver `docs/PIPELINE_JOBS.md`. La API sigue en español.
 
-**Scoring (referencia):** 40% skills + 20% ciudad + 25% experiencia + 15% educación. Ver `docs/SCHEMA.md`.
+**Scoring (referencia v1.1):**
+
+| Componente | Puntos | Notas |
+|------------|--------|-------|
+| Skills | 0–40 | Match ratio × 40. Sin `skills_required` → **15** (no 40). |
+| Ciudad/modalidad | 0–20 | Remoto **15**; misma ciudad **20**; mismo depto **10**. |
+| Experiencia | 0–25 | Cumple → 25; si no, `max(0, 25 - brecha × 8)`. |
+| Educación | 0–15 | Según nivel vs requerido. |
+| Youth bonus | 0–5 | Perfil ≤2 años + `hires_youth=true`. |
+
+- Score final redondeado a **múltiplos de 5** (cap 100).
+- **Pre-filtro seniority:** perfiles ≤2 años exp no reciben vacantes senior/lead (salvo título junior explícito o `hires_youth`). El resto se ordena por score; sector suma puntos pero no excluye del listado.
+- Ver `docs/PROMPTS.md` (`JOB_MATCHER_SYSTEM` v1.1) y [decisions/2026-05-24-jobs-seniority-scoring.md](./decisions/2026-05-24-jobs-seniority-scoring.md).
 
 **Errores:** `500` error interno.
 
@@ -299,13 +312,15 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 
 | Param | Ejemplo | Descripción |
 |-------|---------|-------------|
-| `city` | `Barranquilla` | Filtro por ciudad (ilike) |
+| `city` | `Barranquilla` | Alcance accesible: local + remoto + Colombia (no solo `city` exacto) |
 | `sector` | `tecnología` | Filtro por sector (ilike) |
 
 **Response 200:**
 ```json
 {
-  "total_vacantes_activas": 312,
+  "total_vacantes_activas": 375,
+  "vacantes_locales": 3,
+  "vacantes_remotas": 350,
   "top_sectores": [
     { "sector": "tecnología", "count": 87 },
     { "sector": "comercial", "count": 64 }
@@ -316,24 +331,77 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
   "ciudad_filtro": "Barranquilla",
   "sector_filtro": null,
   "por_modalidad": {
-    "remoto": 128,
-    "presencial": 7,
-    "hibrido": 0
+    "remoto": 58,
+    "presencial": 198,
+    "hibrido": 56
   },
   "por_fuente": {
-    "getonbrd": 127,
-    "remotive": 8
+    "getonbrd": 100,
+    "remotive": 8,
+    "mock": 204
   }
 }
 ```
 
 | Campo | Notas |
 |-------|-------|
-| `por_modalidad` | Siempre incluye `remoto`, `presencial`, `hibrido` (puede ser 0) |
-| `por_fuente` | Conteo por `jobs.source`: `getonbrd` (local/LATAM), `remotive` (remoto internacional); en dev puede aparecer `mock` |
+| `total_vacantes_activas` | Vacantes accesibles desde `city` (local + remoto + nacional CO) |
+| `vacantes_locales` | Presenciales/híbridos en la ciudad filtrada |
+| `vacantes_remotas` | Remoto o sin ciudad (Remotive internacional) |
 | `salario_promedio` | Promedio del punto medio min/max; `null` si no hay salarios |
-| `crecimiento_semanal_pct` | Esta semana vs anterior; `null` sin histórico |
+| `crecimiento_semanal_pct` | Variación por `scraped_at` (indexación en DulIA); `null` sin histórico |
 | `ciudad_filtro` / `sector_filtro` | Eco de los query params enviados |
+| `por_modalidad` | Conteo por `jobs.modality` normalizado: `remoto`, `presencial`, `hibrido` (siempre incluye las 3 claves, puede ser 0) |
+| `por_fuente` | Conteo por `jobs.source` (ej. `getonbrd`, `remotive`, `mock`); ordenado por count descendente |
+| `top_skills_demandadas` | Vacío en endpoint global; ver endpoint personalizado |
+| `sectores_filtro` | Vacío en endpoint global; ver endpoint personalizado |
+
+#### `GET /api/market/dashboard/{session_id}` ✅
+
+Termómetro **personalizado al perfil**: métricas calculadas sobre vacantes dentro del scope del usuario (ciudad accesible + sectores de interés). Sin filtro de seniority (eso aplica solo en `/jobs/recommended`).
+
+**Path param:** `session_id` — UUID de sesión con perfil guardado (`POST /profile`).
+
+**Response 200:** mismo schema que el dashboard global, más:
+
+```json
+{
+  "total_vacantes_activas": 375,
+  "vacantes_locales": 3,
+  "vacantes_remotas": 350,
+  "vacantes_nacionales": 22,
+  "sectores_filtro": ["technology", "user experience", "innovation"],
+  "top_skills_demandadas": [
+    { "skill": "Python", "count": 87, "tienes": false },
+    { "skill": "SQL", "count": 76, "tienes": false },
+    { "skill": "TypeScript", "count": 71, "tienes": true }
+  ],
+  "salario_promedio": 33190495,
+  "crecimiento_semanal_pct": 100.0,
+  "ciudad_filtro": "Barranquilla",
+  "sector_filtro": null,
+  "top_sectores": [{ "sector": "Programming", "count": 198 }],
+  "por_modalidad": { "remoto": 350, "presencial": 23, "hibrido": 0 },
+  "por_fuente": { "getonbrd": 346, "remotive": 18, "mock": 11 }
+}
+```
+
+| Campo | Notas |
+|-------|-------|
+| `total_vacantes_activas` | Pool filtrado: alcance desde `perfil.ciudad` + match con `perfil.sectores_interes` |
+| `sectores_filtro` | Eco de `profiles.sectores_interes` usados en el filtro |
+| `top_skills_demandadas` | Top 8 skills en `skills_required` del pool; `tienes=true` si el perfil ya la tiene |
+| `salario_promedio` | Promedio **del pool del perfil**, no global |
+| `crecimiento_semanal_pct` | Variación por `scraped_at` **dentro del pool del perfil** |
+
+**Errores:**
+
+| Código | Cuándo |
+|--------|--------|
+| `404` | Perfil no encontrado para `session_id` |
+| `500` | Error interno |
+
+**Uso en frontend:** preferir este endpoint cuando hay `sessionId` + perfil; reservar `GET /market/dashboard?city=...` para fallback anónimo o landing.
 
 ---
 

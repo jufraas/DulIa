@@ -1,6 +1,6 @@
 # SCHEMA — Base de datos DulIA
 
-> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Mock data pendiente, a cargo del pipeline.
+> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009).
 > **BD:** PostgreSQL 17 vía Supabase (proyecto DulIA)
 > **Última actualización:** 2026-05-23
 
@@ -10,8 +10,9 @@
 
 ```
 profiles ──< scoring_history >── jobs
-                                  │
-                               companies
+    │                              │
+    └── user_interests             companies
+profiles ── (demanda) ──> scrape_queue ──> jobs (pipeline CLI)
 ```
 
 ---
@@ -66,7 +67,7 @@ Vacantes laborales (schema **inglés**, compatible Adzuna/pipeline). El pipeline
 | `education_level_req` | `text` | SÍ | — | Nivel educativo mínimo |
 | `modality` | `text` | SÍ | — | `presencial`, `remoto`, `hibrido` |
 | `status` | `text` | NO | `'green'` | `green` 🟢 / `yellow` 🟡 / `red` 🔴 |
-| `source` | `text` | NO | — | Origen (adzuna, mock, etc.) |
+| `source` | `text` | NO | — | Origen: `getonbrd`, `remotive`, `mock` (legacy: `adzuna`, `jooble`) |
 | `url` | `text` | SÍ | — | URL de la vacante |
 | `unique_hash` | `text` | NO | — | SHA256(title+company+url), UNIQUE |
 | `description` | `text` | SÍ | — | Descripción |
@@ -119,6 +120,54 @@ Plan 30-60-90 días (`POST /profile/{id}/action-plan`).
 | `created_at` | `timestamptz` | — | |
 
 **RLS:** desactivado en hackathon (migración `004_plan2_backend_fixes.sql`).
+
+---
+
+## Tabla: `user_interests`
+
+Señales de demanda capturadas al guardar perfil (`POST /profile`). **Best-effort** — un fallo aquí no afecta la respuesta del endpoint.
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | PK |
+| `session_id` | `text` | NO | — | UUID del wizard |
+| `city` | `text` | SÍ | — | Ciudad del perfil |
+| `department` | `text` | SÍ | — | Departamento |
+| `sector` | `text` | SÍ | — | Primer sector de interés |
+| `skills` | `text[]` | SÍ | `'{}'` | Habilidades del perfil |
+| `modality` | `text` | SÍ | — | Modalidad preferida |
+| `experience_years` | `numeric` | SÍ | `0` | Años de experiencia |
+| `education_level` | `text` | SÍ | — | Nivel educativo |
+| `created_at` | `timestamptz` | NO | `now()` | Cuándo se registró |
+| `source` | `text` | NO | `'profile_post'` | Origen del registro |
+
+**Índices:** `(city, sector)`, `created_at DESC`
+
+**RLS:** desactivado (migración `008_user_interests.sql`).
+
+---
+
+## Tabla: `scrape_queue`
+
+Cola manual de scraping on-demand. Procesada por `pipeline/run_queue.py` (sin cron en hackathon).
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | PK |
+| `filters` | `jsonb` | NO | `'{}'` | `{ city, sector, skills[] }` para fetchers |
+| `priority` | `integer` | NO | `0` | Mayor = antes |
+| `status` | `text` | NO | `'pending'` | `pending` \| `processing` \| `done` \| `failed` |
+| `source_hint` | `text[]` | NO | `'{}'` | Fuentes a usar: `getonbrd`, `remotive` |
+| `created_at` | `timestamptz` | NO | `now()` | Encolado |
+| `started_at` | `timestamptz` | SÍ | — | Inicio de procesamiento |
+| `finished_at` | `timestamptz` | SÍ | — | Fin |
+| `jobs_inserted` | `integer` | NO | `0` | Vacantes insertadas en `jobs` |
+| `error_msg` | `text` | SÍ | — | Detalle si `failed` |
+| `retry_count` | `integer` | NO | `0` | Reintentos |
+
+**Índice:** `(status, priority DESC, created_at ASC)`
+
+**RLS:** desactivado (migración `009_scrape_queue.sql`).
 
 ---
 

@@ -112,16 +112,22 @@ class ProfileAnalysisService:
             
             # Extraer habilidades demandadas de las vacantes
             habilidades_demandadas = set()
+            job_scores = []
             for v in vacantes[:10]:  # Top 10
                 habilidades_demandadas.update(v.habilidades_requeridas or [])
+                if v.score_compatibilidad is not None:
+                    job_scores.append(v.score_compatibilidad)
             
+            avg_job_score = round(sum(job_scores) / len(job_scores)) if job_scores else None
+
             return {
                 "top_sectores": [s.sector for s in dashboard.top_sectores],
                 "total_vacantes": dashboard.total_vacantes_activas,
                 "salario_promedio": dashboard.salario_promedio,
                 "ciudad": ciudad,
                 "habilidades_demandadas": list(habilidades_demandadas)[:20],
-                "num_vacantes_recomendadas": len(vacantes)
+                "num_vacantes_recomendadas": len(vacantes),
+                "avg_job_score": avg_job_score,
             }
         except Exception as e:
             logger.error(f"Error obteniendo contexto de mercado: {e}")
@@ -131,7 +137,8 @@ class ProfileAnalysisService:
                 "salario_promedio": None,
                 "ciudad": perfil.get("ciudad"),
                 "habilidades_demandadas": [],
-                "num_vacantes_recomendadas": 0
+                "num_vacantes_recomendadas": 0,
+                "avg_job_score": None,
             }
 
     @staticmethod
@@ -194,24 +201,54 @@ class ProfileAnalysisService:
         }
 
     @staticmethod
+    def _estimate_preparacion_overall(perfil: dict, mercado: dict) -> int:
+        """Estima overall sin Gemini: heurística + promedio de vacantes recomendadas."""
+        exp = float(perfil.get("experiencia_anios") or 0)
+        skills_count = len(perfil.get("habilidades") or [])
+        edu = (perfil.get("nivel_educativo") or "").lower()
+
+        base = 30 + min(20, skills_count * 4)
+        if edu in ("universitario", "posgrado"):
+            base += 10
+        elif edu in ("tecnologo", "tecnico"):
+            base += 6
+        base += min(12, exp * 4)
+
+        avg_jobs = mercado.get("avg_job_score")
+        if avg_jobs is not None:
+            base = round((base + avg_jobs) / 2)
+
+        return max(25, min(85, round(base / 5) * 5))
+
+    @staticmethod
     def _fallback_analysis(perfil: dict, mercado: dict) -> dict:
         """Genera análisis básico si Gemini falla."""
         habilidades = perfil.get("habilidades", [])
         sectores = perfil.get("sectores_interes", [])
         experiencia = perfil.get("experiencia_anios", 0)
+        carrera = perfil.get("carrera") or perfil.get("nivel_educativo") or "formación en curso"
+        overall = ProfileAnalysisService._estimate_preparacion_overall(perfil, mercado)
         
         return {
             "fortalezas": [
                 {
                     "area": "habilidades_tecnicas" if habilidades else "educacion",
-                    "descripcion": f"Tienes {len(habilidades)} habilidades registradas" if habilidades else "Perfil educativo sólido",
+                    "descripcion": (
+                        f"Base sólida en {', '.join(habilidades[:4])}."
+                        if habilidades
+                        else f"Trayectoria académica en {carrera} con buen potencial de crecimiento."
+                    ),
                     "nivel": "medio"
                 }
             ],
             "debilidades": [
                 {
                     "area": "experiencia",
-                    "descripcion": f"{experiencia} años de experiencia, busca proyectos prácticos",
+                    "descripcion": (
+                        f"Con {experiencia} años de experiencia, conviene sumar proyectos prácticos o prácticas."
+                        if experiencia
+                        else "Aún sin experiencia laboral formal; prioriza portafolio y proyectos reales."
+                    ),
                     "impacto": "medio"
                 }
             ],
@@ -225,9 +262,13 @@ class ProfileAnalysisService:
                 }
             ],
             "nivel_preparacion": {
-                "overall": 65,
-                "descripcion": "Perfil en desarrollo, requiere fortalecer experiencia práctica",
-                "comparativa": "En el percentil 50 vs jóvenes similares"
+                "overall": overall,
+                "descripcion": (
+                    "Perfil en desarrollo con buenas bases; refuerza experiencia práctica para subir el match."
+                    if overall < 55
+                    else "Perfil competitivo para roles junior; sigue fortaleciendo habilidades clave del mercado."
+                ),
+                "comparativa": "Estimado según habilidades, educación y vacantes compatibles en cache"
             },
             "recomendaciones": [
                 "Busca proyectos freelance para ganar experiencia",

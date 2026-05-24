@@ -18,7 +18,9 @@
                               │
                     ┌─────────┴──────┐
                     │    Pipeline    │
-                    │ mock / Adzuna  │
+                    │ getonbrd +     │
+                    │ remotive +     │
+                    │ run_queue CLI  │
                     └────────────────┘
 ```
 
@@ -73,8 +75,10 @@ backend/
 
 ### `pipeline/`
 
-- Inserta vacantes en Supabase tabla `jobs` (mock Gemini, Adzuna, Jooble).
-- No depende del backend en runtime.
+- Inserta vacantes en Supabase tabla `jobs` (**Get on Board** + **Remotive**).
+- **Híbrido cache-first:** `run_queue.py` procesa `scrape_queue`; `run_baseline.py` scrape directo.
+- No depende del backend en runtime (excepto compartir `.env` Supabase).
+- Ver [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md).
 - **Responsable:** Jose
 
 ## Flujo principal (happy path)
@@ -82,12 +86,13 @@ backend/
 0. Usuario ve **landing** (`/`): splash logo → hero en cascada → scroll con reveal en features/CTA; o **Sobre DulIA** (`/sobre`).
 1. Completa **onboarding** (`/comenzar`, 3 pasos).
 2. Frontend envía `POST /api/profile` con `session_id`.
-3. Backend estructura perfil (Gemini) y guarda en `profiles`.
+3. Backend estructura perfil (Gemini) y guarda en `profiles` + best-effort `user_interests`.
 4. Frontend pide jobs + market + plan en paralelo.
-5. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d, **Match Radar** (store).
-6. **Vacantes** (`/vacantes`): listado completo con semáforo; **Volver** regresa a `/resultados` (store conserva perfil y análisis).
-7. Usuario descarga **PDF**.
-8. **Coach** → `CoachChatBubble` / `POST /api/coach/chat`.
+5. **Jobs recomendados:** cache-first por frescura (`FRESH_HORIZON_HOURS`); si pocas frescas → encola `scrape_queue` (best-effort).
+6. **Resultados** (`/resultados`): score, perfil, top vacantes, plan 30d, **Match Radar** (store).
+7. **Vacantes** (`/vacantes`): listado completo con semáforo; **Volver** regresa a `/resultados` (store conserva perfil y análisis).
+8. Usuario descarga **PDF**.
+9. **Coach** → `CoachChatBubble` / `POST /api/coach/chat`.
 
 Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
 
@@ -98,7 +103,8 @@ Ideas post-MVP (login, timeline del plan, deploy): [EXTRA_IDEAS/post-mvp-roadmap
 | Frontend | Backend | HTTP REST (JSON) — `ENDPOINTS.md` |
 | Backend | Gemini | HTTPS (google-generativeai) |
 | Backend | Supabase | supabase-py (PostgREST) |
-| Pipeline | Supabase | Inserción directa en `jobs` |
+| Pipeline | Supabase | Inserción directa en `jobs`; cola `scrape_queue` vía `run_queue.py` |
+| Backend | scrape_queue | `request_scrape()` best-effort desde `jobs_service` |
 
 ## Responsabilidades: datos del usuario
 

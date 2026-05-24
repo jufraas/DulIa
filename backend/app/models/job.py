@@ -35,6 +35,7 @@ class ScoreBreakdown(BaseModel):
     ciudad: int        # 0-20
     experiencia: int   # 0-25
     educacion: int     # 0-15
+    youth: int = 0     # 0-5 bonus si hires_youth y perfil junior
 
 
 class ScoreOut(BaseModel):
