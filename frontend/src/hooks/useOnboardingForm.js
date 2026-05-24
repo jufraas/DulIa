@@ -220,7 +220,7 @@ export function useOnboardingForm() {
     ],
   )
 
-  const progress = ((step + 1) / WIZARD_STEPS.length) * 100
+  const progress = step === 0 ? 0 : step >= WIZARD_STEPS.length - 1 ? 90 : (step / WIZARD_STEPS.length) * 100
 
   return {
     step,

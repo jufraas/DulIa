@@ -1,7 +1,11 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import AboutPage from './pages/AboutPage'
+import ConstruccionPage from './pages/ConstruccionPage'
+import LoginPage from './pages/LoginPage'
 import OnboardingPage from './pages/OnboardingPage'
+import ProfilePage from './pages/ProfilePage'
+import RegisterPage from './pages/RegisterPage'
 import ResultsPage from './pages/ResultsPage'
 import VacanciesPage from './pages/VacanciesPage'
 import WelcomePage from './pages/WelcomePage'
@@ -24,6 +28,10 @@ function App() {
         <Route path="/comenzar" element={<OnboardingPage />} />
         <Route path="/resultados" element={<ResultsPage />} />
         <Route path="/vacantes" element={<VacanciesPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/perfil" element={<ProfilePage />} />
+        <Route path="/construccion" element={<ConstruccionPage />} />
       </Routes>
     </BrowserRouter>
   )
