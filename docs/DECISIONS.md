@@ -29,6 +29,7 @@
 | 2026-05-24 | frontend | PDF html2canvas + layout análisis | [decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md](./decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md) |
 | 2026-05-24 | frontend | Proxy Vite `/api` + coach global | [decisions/2026-05-24-frontend-vite-proxy-coach-global.md](./decisions/2026-05-24-frontend-vite-proxy-coach-global.md) |
 | 2026-05-24 | full-stack | Auth Supabase opcional + vinculación session_id | [decisions/2026-05-24-auth-supabase-vinculado.md](./decisions/2026-05-24-auth-supabase-vinculado.md) |
+| 2026-05-24 | frontend | Mi Progreso — foundation (stores, mocks, `/progreso`) | [decisions/2026-05-24-frontend-progress-foundation.md](./decisions/2026-05-24-frontend-progress-foundation.md) |
 
 ## Decisiones stack (resumen)
 

@@ -14,6 +14,11 @@ export function useCoachChat() {
     const trimmed = text.trim()
     if (!trimmed || loading) return
 
+    const historial = messages.map((m) => ({
+      role: m.role === 'user' ? /** @type {'usuario'} */ ('usuario') : /** @type {'coach'} */ ('coach'),
+      texto: m.text,
+    }))
+
     const userMsg = {
       id: `user-${Date.now()}`,
       role: /** @type {'user'} */ ('user'),
@@ -26,7 +31,7 @@ export function useCoachChat() {
     setLoading(true)
 
     try {
-      const data = await postCoachChat(trimmed, getOrCreateSessionId())
+      const data = await postCoachChat(trimmed, getOrCreateSessionId(), historial)
       setMessages((prev) => [
         ...prev,
         {
@@ -41,7 +46,7 @@ export function useCoachChat() {
     } finally {
       setLoading(false)
     }
-  }, [loading])
+  }, [loading, messages])
 
   return { messages, suggestions, loading, error, sendMessage }
 }

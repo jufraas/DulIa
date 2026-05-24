@@ -14,6 +14,23 @@ import { buildMockProfileFromPayload } from './mockProfileFromPayload'
 import { normalizeActionPlanOut } from '../utils/planDisplay'
 import { parseRadarApiResponse } from '../utils/radarApi'
 import { getOrCreateSessionId } from '../utils/session'
+import { extractApiErrorMessage, isForceProgressMock } from '../utils/apiErrors'
+import {
+  addMockTasksFromWeakSkills,
+  ensureMockProgress,
+  getMockProgress,
+  initMockProgress,
+  mockHasProfileDemo,
+  normalizeProgressResponse,
+  toggleMockTask,
+} from '../mocks/mockProgress'
+import {
+  finishMockInterview,
+  getMockInterviewHistory,
+  normalizeInterviewSession,
+  startMockInterview,
+  submitMockAnswer,
+} from '../mocks/mockInterview'
 
 const baseURL = import.meta.env.VITE_API_URL || '/api'
 
@@ -37,6 +54,42 @@ const api = axios.create({
 function logOfflineFallback(label, err) {
   if (import.meta.env.DEV) {
     console.warn(`[DulIA] ${label}: usando datos mock locales`, err)
+  }
+}
+
+/** @template T
+ * @typedef {{ data: T, dataSource: 'api' | 'mock', fallbackDetail?: string }} ProgressApiResult
+ */
+
+/**
+ * @template T
+ * @param {() => Promise<T>} apiCall
+ * @param {() => T | Promise<T>} mockCall
+ * @param {string} label
+ * @param {string} [forcedMockReason]
+ * @returns {Promise<ProgressApiResult<T>>}
+ */
+async function withProgressFallback(apiCall, mockCall, label, forcedMockReason) {
+  if (isForceProgressMock()) {
+    const data = await mockCall()
+    return {
+      data,
+      dataSource: 'mock',
+      fallbackDetail: forcedMockReason ?? 'Modo demo forzado (VITE_FORCE_PROGRESS_MOCK)',
+    }
+  }
+
+  try {
+    const data = await apiCall()
+    return { data, dataSource: 'api' }
+  } catch (err) {
+    logOfflineFallback(label, err)
+    const data = await mockCall()
+    return {
+      data,
+      dataSource: 'mock',
+      fallbackDetail: extractApiErrorMessage(err, 'Usando datos locales'),
+    }
   }
 }
 
@@ -150,13 +203,19 @@ export async function parseCvPdf(file) {
  * @param {string} [sessionId]
  * @returns {Promise<import('../store/useProfileStore').CoachChatResponse>}
  */
-export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId()) {
+/**
+ * @param {string} mensaje
+ * @param {string} [sessionId]
+ * @param {{ role: 'usuario' | 'coach', texto: string }[]} [historial]
+ */
+export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId(), historial = []) {
   try {
     const { data } = await api.post(
       '/coach/chat',
       {
         session_id: sessionId,
         mensaje,
+        historial,
       },
       { timeout: 60000 },
     )
@@ -359,6 +418,218 @@ export async function linkSession(sessionId, userId) {
     user_id: userId,
   })
   return data
+}
+
+/**
+ * @param {string} userId
+ * @returns {Promise<{ has_profile: boolean, session_id?: string | null }>}
+ */
+export async function hasProfile(userId) {
+  try {
+    const { data } = await api.get('/user/has-profile', { params: { user_id: userId } })
+    return {
+      has_profile: Boolean(data?.has_profile),
+      session_id: data?.session_id ?? null,
+    }
+  } catch (err) {
+    logOfflineFallback('hasProfile', err)
+    return mockHasProfileDemo()
+  }
+}
+
+/**
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').ActionPlan | null} [plan]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockProgress').ProgressState>>}
+ */
+export async function getProgress(
+  sessionId = getOrCreateSessionId(),
+  plan = null,
+  profile = null,
+) {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.get(`/progress/${sessionId}`)
+      const normalized = normalizeProgressResponse(data)
+      if (!normalized) throw new Error('Respuesta de progreso inválida')
+      return normalized
+    },
+    () => getMockProgress(sessionId, plan, profile),
+    'getProgress',
+  )
+}
+
+/**
+ * @param {string} taskId
+ * @param {boolean} [completed]
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').ActionPlan | null} [plan]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockProgress').ProgressState>>}
+ */
+export async function toggleTask(
+  taskId,
+  completed,
+  sessionId = getOrCreateSessionId(),
+  plan = null,
+  profile = null,
+) {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.patch('/progress/task', {
+        session_id: sessionId,
+        task_id: taskId,
+        completed,
+      })
+      const normalized = normalizeProgressResponse(data)
+      if (!normalized) throw new Error('Respuesta toggle inválida')
+      return normalized
+    },
+    () => {
+      ensureMockProgress(sessionId, plan, profile)
+      const updated = toggleMockTask(sessionId, taskId, completed)
+      if (!updated) throw new Error('Tarea no encontrada')
+      return updated
+    },
+    'toggleTask',
+  )
+}
+
+/**
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').ActionPlan | null} [plan]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockProgress').ProgressState>>}
+ */
+export async function initProgress(
+  sessionId = getOrCreateSessionId(),
+  plan = null,
+  profile = null,
+) {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.post('/progress/init', { session_id: sessionId })
+      const normalized = normalizeProgressResponse(data)
+      if (!normalized) throw new Error('Respuesta init progreso inválida')
+      return normalized
+    },
+    () => initMockProgress(sessionId, plan, profile),
+    'initProgress',
+  )
+}
+
+/**
+ * @param {string} skill
+ * @param {string | null} [role]
+ * @param {string} [sessionId]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockInterview').ActiveInterviewSession>>}
+ */
+export async function startInterview(skill, role = null, sessionId = getOrCreateSessionId()) {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.post('/interview/start', {
+        session_id: sessionId,
+        skill,
+        role,
+      })
+      const normalized = normalizeInterviewSession(data)
+      if (!normalized) throw new Error('Respuesta entrevista inválida')
+      return normalized
+    },
+    () => startMockInterview(sessionId, skill, role),
+    'startInterview',
+  )
+}
+
+/**
+ * @param {string} interviewId
+ * @param {string} answer
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockInterview').ActiveInterviewSession>>}
+ */
+export async function submitAnswer(interviewId, answer) {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.post(`/interview/${interviewId}/answer`, { answer })
+      const normalized = normalizeInterviewSession(data)
+      if (!normalized) throw new Error('Respuesta parcial inválida')
+      return normalized
+    },
+    () => {
+      const updated = submitMockAnswer(interviewId, answer)
+      if (!updated) throw new Error('Sesión de entrevista no encontrada')
+      return updated
+    },
+    'submitAnswer',
+  )
+}
+
+/**
+ * @param {string} interviewId
+ * @param {string} [userId]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockInterview').InterviewResult>>}
+ */
+export async function finishInterview(interviewId, userId = 'demo-user') {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.post(`/interview/${interviewId}/finish`, { user_id: userId })
+      return data
+    },
+    () => {
+      const result = finishMockInterview(interviewId, userId)
+      if (!result) throw new Error('No pudimos cerrar la entrevista')
+      return result
+    },
+    'finishInterview',
+  )
+}
+
+/**
+ * @param {string} [userId]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockInterview').InterviewHistoryItem[]>>}
+ */
+export async function interviewHistory(userId = 'demo-user') {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.get('/interview/history', { params: { user_id: userId } })
+      return Array.isArray(data) ? data : data?.items ?? []
+    },
+    () => getMockInterviewHistory(userId),
+    'interviewHistory',
+  )
+}
+
+/**
+ * @param {string[]} weakSkills
+ * @param {string} [sessionId]
+ * @param {import('../store/useProfileStore').ActionPlan | null} [plan]
+ * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
+ * @returns {Promise<ProgressApiResult<import('../mocks/mockProgress').ProgressState>>}
+ */
+export async function addTasksFromWeakSkills(
+  weakSkills,
+  sessionId = getOrCreateSessionId(),
+  plan = null,
+  profile = null,
+) {
+  return withProgressFallback(
+    async () => {
+      const { data } = await api.post('/progress/add-from-skills', {
+        session_id: sessionId,
+        weak_skills: weakSkills,
+      })
+      const normalized = normalizeProgressResponse(data)
+      if (!normalized) throw new Error('Respuesta add-from-skills inválida')
+      return normalized
+    },
+    () => {
+      ensureMockProgress(sessionId, plan, profile)
+      const updated = addMockTasksFromWeakSkills(sessionId, weakSkills)
+      if (!updated) throw new Error('Progreso no inicializado')
+      return updated
+    },
+    'addTasksFromWeakSkills',
+  )
 }
 
 export default api

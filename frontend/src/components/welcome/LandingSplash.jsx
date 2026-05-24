@@ -16,11 +16,14 @@ export default function LandingSplash({ exiting = false, onSkip }) {
       }}
     >
       <div className="landing-splash__atmosphere" aria-hidden />
-      <div className="landing-splash__inner">
-        <div className="landing-splash__halo" aria-hidden />
-        <DuliaLogo height={56} className="landing-splash__logo" />
-        <p className="landing-splash__tagline">Coach de carrera con IA</p>
-        <p className="landing-splash__hint">Barranqui-IA 2026</p>
+      <div className="landing-splash__stage">
+        <div className="landing-splash__brand">
+          <div className="landing-splash__logo-wrap">
+            <div className="landing-splash__halo" aria-hidden />
+            <DuliaLogo height={56} className="landing-splash__logo" />
+          </div>
+          <p className="landing-splash__tagline">Coach de carrera con IA</p>
+        </div>
       </div>
     </div>
   )

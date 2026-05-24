@@ -28,7 +28,7 @@ async def responder_chat(data: ChatMessage) -> ChatResponse:
     if not perfil:
         raise PerfilNoEncontradoError(data.session_id)
 
-    return await _responder_con_gemini(data.mensaje, perfil)
+    return await _responder_con_gemini(data.mensaje, perfil, data.historial)
 
 
 async def _cargar_perfil(session_id: str) -> dict | None:
@@ -40,18 +40,22 @@ async def _cargar_perfil(session_id: str) -> dict | None:
     return resultado.data[0]
 
 
-async def _responder_con_gemini(mensaje: str, perfil: dict) -> ChatResponse:
-    """Invoca Gemini con system prompt + perfil resumido + mensaje del usuario."""
+async def _responder_con_gemini(
+    mensaje: str,
+    perfil: dict,
+    historial: list | None = None,
+) -> ChatResponse:
+    """Invoca Gemini con system prompt + historial + mensaje del usuario."""
+    historial = historial or []
     try:
         system_template = get_prompt("CAREER_COACH_SYSTEM")
     except Exception as e:
         logger.error(f"Error cargando prompt: {e}")
-        return _fallback_respuesta(mensaje, perfil)
-    
-    # Crear perfil resumido (NO pasar todo el JSON crudo)
+        return _fallback_respuesta(mensaje, perfil, historial)
+
     perfil_resumido = _crear_perfil_resumido(perfil)
-    
     system_instruction = system_template.replace("{perfil_json}", perfil_resumido)
+    system_instruction += _continuity_suffix(historial)
 
     import google.generativeai as genai
 
@@ -61,10 +65,11 @@ async def _responder_con_gemini(mensaje: str, perfil: dict) -> ChatResponse:
         system_instruction=system_instruction,
     )
 
+    contents = _build_gemini_contents(historial, mensaje)
+
     try:
-        logger.info(f"Llamando a Gemini con mensaje: {mensaje[:50]}...")
-        logger.info(f"System instruction preview: {system_instruction[:150]}...")
-        respuesta = model.generate_content(mensaje)
+        logger.info(f"Llamando a Gemini con mensaje: {mensaje[:50]}... (historial={len(historial)} turnos)")
+        respuesta = model.generate_content(contents)
         texto = (respuesta.text or "").strip()
         logger.info(f"Respuesta de Gemini recibida: {texto[:200]}...")
         return _parsear_respuesta(texto)
@@ -83,6 +88,31 @@ async def _responder_con_gemini(mensaje: str, perfil: dict) -> ChatResponse:
             respuesta=f"ERROR: {type(e).__name__}: {str(e)[:200]}. Revisa los logs del backend.",
             sugerencias_rapidas=["Ver logs del servidor"]
         )
+
+
+def _continuity_suffix(historial: list) -> str:
+    """Refuerza en runtime si es primer turno o continuación."""
+    if not historial:
+        return (
+            "\n\n## TURNO ACTUAL\nPrimera pregunta del usuario en este chat. "
+            "Si la pregunta ya es concreta, responde directo sin saludo."
+        )
+    return (
+        f"\n\n## TURNO ACTUAL\nContinuación — ya hay {len(historial)} mensajes previos. "
+        "NO saludes ni repitas el nombre. Entra directo a la respuesta."
+    )
+
+
+def _build_gemini_contents(historial: list, mensaje: str) -> list[dict]:
+    """Arma historial multi-turno para Gemini (máx. 10 turnos previos)."""
+    contents: list[dict] = []
+    for turno in historial[-10:]:
+        role = "user" if getattr(turno, "role", turno.get("role")) == "usuario" else "model"
+        texto = getattr(turno, "texto", turno.get("texto", ""))
+        if texto:
+            contents.append({"role": role, "parts": [texto]})
+    contents.append({"role": "user", "parts": [mensaje]})
+    return contents
 
 
 def _crear_perfil_resumido(perfil: dict) -> str:
@@ -144,11 +174,13 @@ def _parsear_respuesta(texto: str) -> ChatResponse:
         return ChatResponse(respuesta=texto, sugerencias_rapidas=[])
 
 
-def _fallback_respuesta(mensaje: str, perfil: dict) -> ChatResponse:
+def _fallback_respuesta(mensaje: str, perfil: dict, historial: list | None = None) -> ChatResponse:
     """Respuesta fallback cuando Gemini falla — tono natural y cercano."""
+    historial = historial or []
     nombre = perfil.get("nombre") or "parcero"
     ciudad = perfil.get("ciudad") or "Barranquilla"
-    
+    es_continuacion = len(historial) > 0
+    apertura = "" if es_continuacion else f"¡Qué más {nombre}! "
     # Tomar solo 1-2 habilidades relevantes, NO todas
     habilidades = perfil.get("habilidades", [])
     if habilidades:
@@ -161,7 +193,7 @@ def _fallback_respuesta(mensaje: str, perfil: dict) -> ChatResponse:
     
     if "vacante" in mensaje_lower or "trabajo" in mensaje_lower or "empleo" in mensaje_lower:
         respuesta = (
-            f"¡Qué más {nombre}! Vi que tienes experiencia en {skill_mencion}. "
+            f"{apertura}Vi que tienes experiencia en {skill_mencion}. "
             f"Hay unas oportunidades bacanas en {ciudad} que pueden interesarte. "
             f"¿Buscas algo específico o te muestro las que tengo filtradas?"
         )
@@ -169,19 +201,19 @@ def _fallback_respuesta(mensaje: str, perfil: dict) -> ChatResponse:
     
     elif "plan" in mensaje_lower or "próximo" in mensaje_lower or "que hacer" in mensaje_lower:
         respuesta = (
-            f"¡Parce! Según tu perfil, esta semana podrías enfocarte en reforzar {skill_mencion}. "
+            f"{apertura}Según tu perfil, esta semana podrías enfocarte en reforzar {skill_mencion}. "
             f"¿Querés que te muestro el plan completo o prefieres ver recursos específicos?"
         )
         sugerencias = ["Ver mi plan", "Recursos de aprendizaje", "Cursos gratis"]
     
     elif "aprender" in mensaje_lower or "curso" in mensaje_lower or "estudiar" in mensaje_lower:
         respuesta = (
-            f"¡Bacano {nombre}! Para reforzar {skill_mencion} hay unos cursos chéveres. "
+            f"{apertura}Para reforzar {skill_mencion} hay unos cursos chéveres. "
             f"¿Te gustan los tutoriales en video o prefieres practicar con proyectos?"
         )
         sugerencias = ["Cursos gratuitos", "Proyectos prácticos", "Certificaciones"]
     
-    elif "hola" in mensaje_lower or "saludo" in mensaje_lower or len(mensaje) < 20:
+    elif not es_continuacion and ("hola" in mensaje_lower or "saludo" in mensaje_lower or len(mensaje) < 20):
         respuesta = (
             f"¡Qué más {nombre}! Soy DulIA, tu parcero para consejos de carrera. "
             f"¿Cómo te puedo ayudar hoy? Puedo buscar vacantes, analizar el mercado, o revisar tu plan."
@@ -189,9 +221,8 @@ def _fallback_respuesta(mensaje: str, perfil: dict) -> ChatResponse:
         sugerencias = ["Buscar vacantes", "Analizar mercado", "Ver mi plan"]
     
     else:
-        # Respuesta genérica pero natural
         respuesta = (
-            f"¡Listo {nombre}! Viendo tu perfil, veo que estás en {ciudad} con experiencia en {skill_mencion}. "
+            f"{apertura}Viendo tu perfil, veo que estás en {ciudad} con experiencia en {skill_mencion}. "
             f"¿Querés que busque oportunidades específicas o te ayudo con el plan de acción?"
         )
         sugerencias = ["Buscar vacantes", "Ver mi plan", "Analizar mercado"]
@@ -326,40 +357,44 @@ async def responder_chat_con_funciones(data: ChatMessage) -> ChatResponse:
     
     # PASO 3: Generar respuesta con contexto
     if funcion_ejecutada and resultado_funcion:
-        # Hay datos de función - generar respuesta personalizada
         return await _generar_respuesta_con_datos(
-            data.mensaje, perfil, funcion_ejecutada, resultado_funcion
+            data.mensaje, perfil, funcion_ejecutada, resultado_funcion, data.historial
         )
     else:
-        # No requiere función - respuesta directa
-        return await _responder_con_gemini(data.mensaje, perfil)
+        return await _responder_con_gemini(data.mensaje, perfil, data.historial)
 
 
 async def _generar_respuesta_con_datos(
-    mensaje: str, perfil: dict, funcion: str, datos: dict
+    mensaje: str,
+    perfil: dict,
+    funcion: str,
+    datos: dict,
+    historial: list | None = None,
 ) -> ChatResponse:
     """Genera respuesta usando los datos reales de la función ejecutada."""
-    
-    # Crear mensaje enriquecido con los datos
+    historial = historial or []
+
     contexto = f"\n\n[DATOS DEL SISTEMA - Función: {funcion}]\n"
     contexto += json.dumps(datos, ensure_ascii=False, indent=2)[:1000]
-    
-    # Cargar prompt y generar respuesta
+
     system_template = get_prompt("CAREER_COACH_SYSTEM")
     perfil_resumido = _crear_perfil_resumido(perfil)
     system_instruction = system_template.replace("{perfil_json}", perfil_resumido)
+    system_instruction += _continuity_suffix(historial)
     system_instruction += "\n\nUsa los datos del sistema proporcionados arriba para responder de forma específica y concreta."
     system_instruction += contexto
-    
+
     import google.generativeai as genai
     get_gemini_model("gemini-3.1-flash-lite")
     model = genai.GenerativeModel(
         "gemini-3.1-flash-lite",
         system_instruction=system_instruction,
     )
-    
+
+    contents = _build_gemini_contents(historial, mensaje)
+
     try:
-        respuesta = model.generate_content(mensaje)
+        respuesta = model.generate_content(contents)
         texto = (respuesta.text or "").strip()
         
         chat_resp = _parsear_respuesta(texto)

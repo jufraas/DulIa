@@ -460,7 +460,11 @@ Coach con contexto del perfil (`profiles`). System prompt en `docs/PROMPTS.md` (
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
-  "mensaje": "¿Qué debería aprender para mejorar mi perfil en logística?"
+  "mensaje": "¿Qué debería aprender para mejorar mi perfil en logística?",
+  "historial": [
+    { "role": "usuario", "texto": "¿Cómo subo mi score de 65?" },
+    { "role": "coach", "texto": "Para subir ese 65, enfócate en..." }
+  ]
 }
 ```
 
@@ -468,6 +472,7 @@ Coach con contexto del perfil (`profiles`). System prompt en `docs/PROMPTS.md` (
 |-------|------|-------|
 | `session_id` | string | **Requerido.** Mismo UUID del onboarding |
 | `mensaje` | string | **Requerido.** Pregunta del usuario |
+| `historial` | array | Opcional. Turnos previos `{ role: "usuario"\|"coach", texto }` para continuidad (evita saludos repetidos) |
 
 **Response 200:**
 ```json
@@ -758,6 +763,33 @@ Campos mínimos por vacante: ver `docs/SCHEMA.md` tabla `jobs`.
 
 ---
 
+## Progreso del plan + mock interview ✅ (M3 E2E)
+
+Cliente en `frontend/src/services/api.js` con fallback a `src/mocks/mockProgress.js` y `mockInterview.js`. Backend en memoria (MVP demo): `backend/app/services/progress_service.py`, `interview_service.py`; rutas `routes/progress.py`, `routes/user.py`.
+
+| Método | Ruta | Descripción | Estado backend |
+|--------|------|-------------|----------------|
+| GET | `/user/has-profile?user_id=` | ¿Usuario ya tiene perfil coach? (UUID Supabase) | ✅ |
+| GET | `/progress/{session_id}` | Estado progreso (tareas, %, fases); auto-init si no existe | ✅ |
+| PATCH | `/progress/task` | Marcar tarea `{ session_id, task_id, completed }` — **404** si tarea no existe | ✅ |
+| POST | `/progress/init` | Inicializar progreso desde action-plan | ✅ |
+| POST | `/progress/add-from-skills` | Agregar tareas desde weak skills entrevista | ✅ |
+| POST | `/interview/start` | Iniciar entrevista `{ session_id, skill, role? }` | ✅ |
+| POST | `/interview/{id}/answer` | Enviar respuesta — **404** si sesión no existe | ✅ |
+| POST | `/interview/{id}/finish` | Cerrar y obtener score/feedback | ✅ |
+| GET | `/interview/history?user_id=` | Últimas entrevistas (máx. 10 por usuario) | ✅ |
+
+**Notas M3:**
+- Progreso e historial de entrevistas: **store en memoria** (reinicia al recargar uvicorn). Persistencia Supabase post-MVP.
+- `has-profile`: devuelve `{ has_profile: false }` si `user_id` no es UUID válido o Supabase no está configurado.
+- Frontend: `dataSource: 'api' | 'mock'` en stores; banner en `/progreso` si usa mock; `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local.
+
+Regla unlock fases: **80%** de la fase anterior. Ver [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
+
+**Tests:** `npm run test:progress` (11 unit) · `npm run test:progress:api` (smoke contra :8000) · `pytest backend/tests/test_m3_progress_api.py` (6).
+
+---
+
 ## Auth — vincular sesión anónima (opcional)
 
 Tras login/registro en el frontend, best-effort para asociar el perfil coach al usuario.
@@ -807,7 +839,8 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/login` | Login email/password (+ Google pendiente config) |
 | `/registro` | Registro + upsert `user_accounts` |
 | `/perfil` | Cuenta de usuario (protegida); requiere sesión Supabase |
+| `/progreso` | Mi progreso — plan checkeable (protegida); mock si API cae o `VITE_FORCE_PROGRESS_MOCK` |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`, **`mockProgress.js`**, **`mockInterview.js`**. Persistencia: `sessionCache.js` + `sessionHydration.js`. Tests: `npm run test:progress`, `npm run test:progress:api`.
 
 **Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)
