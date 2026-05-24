@@ -17,6 +17,7 @@
 | 2026-05-23 | frontend | React Router (SPA) | [decisions/2026-05-23-frontend-react-router-flujo-spa.md](./decisions/2026-05-23-frontend-react-router-flujo-spa.md) |
 | 2026-05-23 | frontend | Zustand estado perfil | [decisions/2026-05-23-frontend-zustand-estado-perfil.md](./decisions/2026-05-23-frontend-zustand-estado-perfil.md) |
 | 2026-05-23 | frontend | Rehidratación sesión (refresh) | [decisions/2026-05-23-frontend-session-rehydration.md](./decisions/2026-05-23-frontend-session-rehydration.md) |
+| 2026-05-23 | backend | Plan 2 Fase 1 — RLS, dashboard, JSONB | [decisions/2026-05-23-backend-plan2-phase1-fixes.md](./decisions/2026-05-23-backend-plan2-phase1-fixes.md) |
 | 2026-05-23 | frontend | Plan 2 UI Sprints 1–3 | [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](./decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) |
 | 2026-05-23 | frontend | Plan 2 + termómetro + mocks | [decisions/2026-05-23-frontend-plan2-locations-thermometer.md](./decisions/2026-05-23-frontend-plan2-locations-thermometer.md) |
 | 2026-05-23 | frontend | Ubicaciones DANE wizard | [decisions/2026-05-23-frontend-colombia-locations-wizard.md](./decisions/2026-05-23-frontend-colombia-locations-wizard.md) |

@@ -58,14 +58,14 @@ class ProfileAnalysisService:
         # Guardar en BD
         analysis_record = {
             "session_id": session_id,
-            "fortalezas": json.dumps(analisis["fortalezas"]),
-            "debilidades": json.dumps(analisis["debilidades"]),
-            "gaps_mercado": json.dumps(analisis["gaps_mercado"]),
-            "oportunidades": json.dumps(analisis["oportunidades"]),
-            "nivel_preparacion": json.dumps(analisis["nivel_preparacion"]),
-            "recomendaciones": json.dumps(analisis["recomendaciones"]),
+            "fortalezas": analisis["fortalezas"],
+            "debilidades": analisis["debilidades"],
+            "gaps_mercado": analisis["gaps_mercado"],
+            "oportunidades": analisis["oportunidades"],
+            "nivel_preparacion": analisis["nivel_preparacion"],
+            "recomendaciones": analisis["recomendaciones"],
             "raw_gemini_response": json.dumps(analisis, ensure_ascii=False),
-            "updated_at": datetime.now(timezone.utc).isoformat()
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
         
         # Upsert (insertar o actualizar)

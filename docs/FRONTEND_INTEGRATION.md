@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-23 · Plan 2 UI completa (Sprints 1–3): analyze, coach, timeline, tabs plan, PDF.
+**Última actualización:** 2026-05-23 · Backend Fase 1 Plan 2 verificada + Front Plan 2 UI (Sprints 1–3).
 
 ---
 
@@ -12,18 +12,18 @@
 | Pieza | Estado | Notas |
 |-------|--------|-------|
 | `loadResultsBundle()` | ✅ | Tras wizard y rehidratación |
-| `POST .../analyze` | ✅ | Store `analysis` → `ProfileSummary`, PDF |
+| `POST .../analyze` | ✅ | Store `analysis` → `ProfileSummary`, PDF; backend Fase 1 sin 500 |
 | `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
 | `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
 | `GET .../timeline-data` | ✅ | `CareerTimeline` |
-| `GET market/dashboard` | ✅ | Termómetro, copy vacantes, PDF |
+| `GET market/dashboard` | ✅ | Termómetro; fallback si `jobs.city` vacío |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
-| Fallbacks offline | ✅ | `mockResultsBundle.js` |
+| Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
 | PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 
-Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
 
 ---
 
@@ -32,7 +32,8 @@ Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026
 | Variable | Valor dev |
 |----------|-----------|
 | `VITE_API_URL` | `http://localhost:8000/api` |
-| Backend | `cd backend && USE_MOCK_DATA=true uvicorn main:app --reload` |
+| Backend | `cd backend && USE_MOCK_DATA=false uvicorn main:app --reload --port 8000` |
+| Migraciones | Ejecutar `002_plan2_tables.sql` + `004_plan2_backend_fixes.sql` en Supabase |
 | Swagger | http://localhost:8000/docs |
 
 **`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.
@@ -262,6 +263,13 @@ const { jobs, market, plan, radar, timeline, analysis } =
 // coach → CoachChatBubble (POST /coach/chat aparte del bundle)
 ```
 
+### Coach chat (`POST /coach/chat`)
+
+- **Timeout recomendado:** 60 s (Gemini + function calling puede tardar ~30–45 s).
+- **No usar mock silencioso** en errores 4xx/5xx: mostrar el mensaje de error al usuario.
+- Mock local (`mockCoachChat.js`) solo si el backend no responde **y** `/health` indica `mock_data: true`.
+- Preguntas como «buscar vacantes en Videojuegos» activan `buscar_vacantes_filtradas` en el backend; la respuesta debe mencionar vacantes reales o la ausencia de ellas, no el texto genérico del mock.
+
 ---
 
 ## Rate limits y errores
@@ -274,6 +282,14 @@ const { jobs, market, plan, radar, timeline, analysis } =
 | POST `/coach/chat` | 10 req/min por IP |
 
 Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
+
+### Modo real — qué esperar tras Fase 1 backend
+
+1. Tras el wizard, Network debe mostrar **200** en: `analyze`, `action-plan`, `radar-data`, `timeline-data`, `dashboard`.
+2. Si alguno falla, el front **sigue mostrando UI** con mocks (`mockPlan.js`, `ProfileSummary` fijo) — no confundir con IA.
+3. **Coach:** si ves «fortalecer una habilidad técnica esta semana…» es `mockCoachChat.js` — revisa Network en `/coach/chat` (timeout 15 s → 60 s; errores API ya no caen al mock).
+4. Limpiar cache: borrar claves `dulia_*` en `localStorage` y repetir wizard.
+5. Troubleshooting detallado: [ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse](ENDPOINTS.md).
 
 ---
 

@@ -184,7 +184,9 @@ REGLAS:
                     return {
                         "requiere_funcion": True,
                         "funcion": funcion.value,
-                        "parametros": IntentRouter._inferir_parametros(funcion, perfil),
+                        "parametros": IntentRouter._inferir_parametros(
+                            funcion, perfil, mensaje
+                        ),
                         "razonamiento": f"Keyword detectada: '{kw}'"
                     }
         
@@ -197,13 +199,37 @@ REGLAS:
         }
     
     @staticmethod
-    def _inferir_parametros(funcion: FunctionName, perfil: dict) -> dict:
-        """Infiere parámetros basados en el perfil."""
+    def _inferir_parametros(funcion: FunctionName, perfil: dict, mensaje: str = "") -> dict:
+        """Infiere parámetros basados en el perfil y el mensaje del usuario."""
+        mensaje_lower = mensaje.lower()
+
         if funcion == FunctionName.BUSCAR_VACANTES:
             params = {"limit": 5}
             if perfil.get("ciudad"):
                 params["ciudad"] = perfil["ciudad"]
-            if perfil.get("sectores_interes"):
+            # Sector explícito en el mensaje (ej. "vacantes en Videojuegos")
+            sector_from_msg = None
+            for sector_hint in (
+                "videojuegos",
+                "videojuego",
+                "video juegos",
+                "fintech",
+                "tecnología",
+                "tecnologia",
+                "salud",
+                "comercial",
+                "logística",
+                "logistica",
+                "marketing",
+                "diseño",
+                "diseno",
+            ):
+                if sector_hint in mensaje_lower:
+                    sector_from_msg = sector_hint.replace("video juegos", "videojuegos")
+                    break
+            if sector_from_msg:
+                params["sector"] = sector_from_msg
+            elif perfil.get("sectores_interes"):
                 params["sector"] = perfil["sectores_interes"][0]
             return params
         

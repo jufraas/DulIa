@@ -101,14 +101,38 @@ export async function parseCvPdf(file) {
  */
 export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId()) {
   try {
-    const { data } = await api.post('/coach/chat', {
-      session_id: sessionId,
-      mensaje,
-    })
+    const { data } = await api.post(
+      '/coach/chat',
+      {
+        session_id: sessionId,
+        mensaje,
+      },
+      { timeout: 60000 },
+    )
     return data
   } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      throw new Error('Completa el onboarding antes de usar el coach.')
+    }
+    if (axios.isAxiosError(err) && err.response?.status === 429) {
+      throw new Error('Demasiadas preguntas seguidas. Espera un minuto e intenta de nuevo.')
+    }
+    if (axios.isAxiosError(err) && err.response?.data?.detail) {
+      throw new Error(String(err.response.data.detail))
+    }
+    // Solo mock offline si el backend no responde (red) o está en modo mock explícito
+    const unreachable =
+      axios.isAxiosError(err) &&
+      (!err.response || err.code === 'ECONNABORTED' || err.message.includes('Network Error'))
+    if (unreachable) {
+      const health = await fetchHealth().catch(() => ({ mock: true }))
+      if (health.mock) {
+        logOfflineFallback('postCoachChat', err)
+        return mockCoachChatResponse(mensaje)
+      }
+    }
     logOfflineFallback('postCoachChat', err)
-    return mockCoachChatResponse(mensaje)
+    throw err instanceof Error ? err : new Error('No pudimos contactar al coach.')
   }
 }
 
