@@ -1,0 +1,44 @@
+---
+description: No alterar tamaños ni layout de componentes existentes en /resultados
+globs: frontend/src/pages/ResultsPage.jsx,frontend/src/components/results/**,frontend/src/styles/dulia-kit.css,frontend/src/constants/resultsSections.js
+alwaysApply: false
+---
+
+# /resultados — layout congelado
+
+El diseño actual de la pantalla de resultados está **aprobado y congelado**. No cambies tamaños, proporciones, grid, alturas fijas ni espaciado de componentes que ya existen salvo que el usuario lo pida **explícitamente** para ese componente.
+
+## Reglas
+
+1. **No tocar lo visual de lo existente** al implementar otra cosa (p. ej. arreglar PDF, coach, copy). Cambios de lógica/datos sí; cambios de `className`, `min-h`, `flex-1`, `grid`, márgenes o CSS de layout **no**.
+2. **Componentes nuevos**: insertarlos en `ResultsPage.jsx` **entre** secciones existentes o **al final** (antes del footer de página). No reordenar ni redimensionar bloques actuales.
+3. **CSS de layout**: no modificar reglas `.analysis-overview-grid*`, `.results-page-layout`, `.results-section-nav*` ni alturas acordadas (p. ej. 580px desktop en análisis) unless explicit user request.
+4. **Refactors**: extraer lógica a hooks/utils está bien; mover markup que cambie el DOM visual de un componente congelado **no**.
+
+## Orden y bloques congelados (ResultsPage)
+
+| Sección | Componente | Notas layout |
+|---------|------------|--------------|
+| Hero título | inline en ResultsPage | `clamp(36px, 4.5vw, 60px)` |
+| Coach banner | `CoachPromptBanner` | dismissible, no sticky |
+| Tu análisis | `AnalysisOverviewGrid` | 2 cols lg; izq. `card-dl` score+PDF; der. resumen; **580px** ambos |
+| Mercado | `MarketThermometer` | ancho completo |
+| Vacantes y plan | `OpportunitiesAndPlan` | altura sync + scroll plan interno |
+| Radar | `RadarMatch` | sin envolver en grid nuevo |
+| Timeline | `CareerTimeline` | |
+| Coach FAB | `CoachChatBubble` | |
+| PDF banner | sección `resultados-pdf` | CTA final |
+
+Nav: `ResultsSectionNav` — vertical sticky desktop / chips móvil. Anclas en `resultsSections.js`.
+
+## Ejemplos
+
+```
+// ❌ Mal — pedían fix de descarga PDF y se cambia min-h del ScoreCard
+<ScoreCard className="min-h-[400px]" />
+
+// ✅ Bien — nuevo bloque después de timeline
+<ResultsSection id="resultados-nuevo">
+  <NuevoComponente />
+</ResultsSection>
+```

@@ -416,3 +416,189 @@ button { font-family: inherit; cursor: pointer; }
   0% { transform: scale(0.8); opacity: 0.6; }
   100% { transform: scale(2.6); opacity: 0; }
 }
+
+@keyframes coachFabPulse {
+  0%, 100% {
+    box-shadow: 0 12px 32px rgba(236,72,153,0.45), 0 0 0 0 rgba(236,72,153,0.35);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(236,72,153,0.55), 0 0 0 8px rgba(236,72,153,0);
+  }
+}
+
+.coach-fab-pulse {
+  animation: coachFabPulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-fab-pulse {
+    animation: none;
+  }
+}
+
+/* ----- results section nav ----- */
+.results-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.results-page-sections {
+  min-width: 0;
+}
+
+.results-section-nav__eyebrow {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.results-section-nav__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out), background 0.2s var(--ease-out);
+}
+
+.results-section-nav__link:hover {
+  color: var(--fg-1);
+}
+
+.results-section-nav__link--active {
+  color: var(--violet-200);
+}
+
+.results-section-nav--mobile {
+  position: sticky;
+  top: 72px;
+  z-index: 40;
+  margin: 0 calc(-1 * var(--s-6)) 1.25rem;
+  padding: 12px var(--s-6) 14px;
+  backdrop-filter: blur(16px);
+  background: rgba(13, 13, 13, 0.82);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.18);
+}
+
+.results-section-nav--mobile .results-section-nav__scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.results-section-nav--mobile .results-section-nav__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.results-section-nav__link--compact {
+  width: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+
+.results-section-nav__link--compact.results-section-nav__link--active {
+  background: var(--grad-brand);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(124, 58, 237, 0.35);
+}
+
+.results-section-nav--desktop {
+  position: sticky;
+  top: 96px;
+  align-self: flex-start;
+  flex-shrink: 0;
+  width: 11.5rem;
+  padding-top: 4px;
+}
+
+.results-section-nav--desktop .results-section-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(168, 85, 247, 0.18);
+}
+
+.results-section-nav--desktop .results-section-nav__link {
+  position: relative;
+  border-radius: 10px;
+  padding: 9px 10px 9px 14px;
+  margin-left: -12px;
+}
+
+.results-section-nav--desktop .results-section-nav__link--active {
+  background: rgba(168, 85, 247, 0.12);
+}
+
+.results-section-nav--desktop .results-section-nav__link--active::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #7c3aed, #ec4899);
+}
+
+@media (min-width: 1024px) {
+  .results-page-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+}
+
+/* Tu análisis — score+PDF y resumen: misma fila, misma altura */
+.analysis-overview-grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.analysis-overview-grid__left {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.analysis-overview-grid__left .pdf-card-anim {
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 1rem;
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .analysis-overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .analysis-overview-grid__left,
+  .analysis-overview-grid .profile-summary-card {
+    height: 580px;
+    min-height: 580px;
+    max-height: 580px;
+  }
+}

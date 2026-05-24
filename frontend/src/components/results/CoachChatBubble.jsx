@@ -1,11 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { MessageCircle, Send, Sparkles, X } from 'lucide-react'
-import { useCoachChat } from '../../hooks/useCoachChat'
+import { useCoachContext } from '../../hooks/useCoachContext'
 
 export default function CoachChatBubble() {
-  const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
-  const { messages, suggestions, loading, error, sendMessage } = useCoachChat()
+  const {
+    open,
+    toggleOpen,
+    messages,
+    suggestions,
+    loading,
+    error,
+    sendMessage,
+    showTeaser,
+    dismissTeaser,
+    openCoach,
+    fabPulse,
+    welcomeMessage,
+    starterSuggestions,
+  } = useCoachContext()
+
   const listRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const inputRef = useRef(/** @type {HTMLInputElement | null} */ (null))
 
@@ -26,8 +40,57 @@ export default function CoachChatBubble() {
     setInput('')
   }
 
+  const displaySuggestions =
+    messages.length === 0 && !loading ? starterSuggestions : suggestions
+
   return (
     <>
+      {showTeaser && (
+        <div
+          className="fixed bottom-[5.25rem] right-4 z-[99] w-[min(calc(100vw-5.5rem),260px)] sm:right-6 sm:w-[min(calc(100vw-6rem),280px)]"
+          role="status"
+          aria-live="polite"
+        >
+          <div
+            className="relative rounded-2xl px-3.5 py-3 pr-9 text-[13px] leading-snug text-[color:var(--fg-1)] shadow-lg"
+            style={{
+              background: 'var(--bg-2)',
+              border: '1px solid rgba(168,85,247,0.35)',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.35)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={dismissTeaser}
+              className="absolute right-2 top-2 rounded p-0.5 text-[color:var(--fg-3)] hover:text-[color:var(--fg-1)]"
+              aria-label="Cerrar sugerencia"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+            <p className="m-0 font-semibold text-[color:var(--violet-200)]">¿Alguna duda?</p>
+            <p className="mt-1 mb-0 text-[color:var(--fg-2)]">
+              Escríbeme sobre tu score, plan o vacantes.
+            </p>
+            <button
+              type="button"
+              onClick={() => openCoach()}
+              className="mt-2 text-[12px] font-bold text-[color:var(--violet-200)] underline-offset-2 hover:underline"
+            >
+              Abrir chat
+            </button>
+          </div>
+          <div
+            className="absolute -bottom-1.5 right-6 h-3 w-3 rotate-45"
+            style={{
+              background: 'var(--bg-2)',
+              borderRight: '1px solid rgba(168,85,247,0.35)',
+              borderBottom: '1px solid rgba(168,85,247,0.35)',
+            }}
+            aria-hidden
+          />
+        </div>
+      )}
+
       {open && (
         <div
           className="fixed bottom-24 right-4 z-[100] flex w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-[20px] shadow-2xl sm:right-6"
@@ -53,7 +116,7 @@ export default function CoachChatBubble() {
             </div>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={toggleOpen}
               className="rounded-lg p-1 text-white/80 transition hover:bg-white/10 hover:text-white"
               aria-label="Cerrar chat"
             >
@@ -67,9 +130,16 @@ export default function CoachChatBubble() {
             style={{ minHeight: 200 }}
           >
             {messages.length === 0 && (
-              <p className="m-0 text-center text-[13px] leading-relaxed text-[color:var(--fg-3)]">
-                Pregúntame sobre vacantes, habilidades o tu plan de acción.
-              </p>
+              <div
+                className="mr-auto max-w-[95%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed"
+                style={{
+                  background: 'var(--bg-1)',
+                  border: '1px solid rgba(168,85,247,0.20)',
+                  color: 'var(--fg-2)',
+                }}
+              >
+                {welcomeMessage}
+              </div>
             )}
             {messages.map((msg) => (
               <div
@@ -99,9 +169,9 @@ export default function CoachChatBubble() {
             {error && <p className="m-0 text-[13px] text-[#F87171]">{error}</p>}
           </div>
 
-          {suggestions.length > 0 && (
+          {displaySuggestions.length > 0 && (
             <div className="flex flex-wrap gap-1.5 border-t border-[rgba(168,85,247,0.12)] px-4 py-2">
-              {suggestions.map((s) => (
+              {displaySuggestions.map((s) => (
                 <button
                   key={s}
                   type="button"
@@ -148,8 +218,8 @@ export default function CoachChatBubble() {
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-4 z-[100] flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 sm:right-6"
+        onClick={toggleOpen}
+        className={`fixed bottom-6 right-4 z-[100] flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 sm:right-6 ${fabPulse ? 'coach-fab-pulse' : ''}`}
         style={{
           background: 'var(--grad-cta)',
           boxShadow: '0 12px 32px rgba(236,72,153,0.45)',

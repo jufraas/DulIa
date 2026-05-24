@@ -71,3 +71,19 @@ export const AVAILABILITY_OPTIONS = [
 
 export const CV_MAX_SIZE_MB = 5
 export const CV_ACCEPT = 'application/pdf,.pdf'
+
+/** Sugerencias clicables en el paso de habilidades técnicas */
+export const SUGGESTED_TECH_SKILLS = [
+  'Excel',
+  'Canva',
+  'Marketing digital',
+  'Redes sociales',
+  'Python',
+  'Atención al cliente',
+  'Ventas',
+  'Inglés',
+  'Google Sheets',
+  'Diseño en Figma',
+  'SQL',
+  'Edición de video',
+]

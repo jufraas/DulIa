@@ -1,12 +1,23 @@
 import {
   EDUCATION_LEVEL_OPTIONS,
   HAS_EXPERIENCE_OPTIONS,
+  SUGGESTED_TECH_SKILLS,
 } from '../../constants/onboardingOptions'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
+import TagField from '../ui/TagField'
 import TextArea from '../ui/TextArea'
 
-export default function StepWorkProfile({ form, errors, update }) {
+export default function StepWorkProfile({ form, errors, update, patchForm }) {
+  const handleExperienceChange = (e) => {
+    const hasExperience = e.target.value
+    if (hasExperience === 'si' && form.opportunity_type === 'primer_empleo') {
+      patchForm({ has_experience: hasExperience, opportunity_type: '' })
+      return
+    }
+    update('has_experience')(e)
+  }
+
   return (
     <>
       <Select
@@ -29,7 +40,7 @@ export default function StepWorkProfile({ form, errors, update }) {
         label="¿Has trabajado antes?"
         name="has_experience"
         value={form.has_experience}
-        onChange={update('has_experience')}
+        onChange={handleExperienceChange}
         error={errors.has_experience}
         options={HAS_EXPERIENCE_OPTIONS}
       />
@@ -56,14 +67,15 @@ export default function StepWorkProfile({ form, errors, update }) {
           />
         </>
       )}
-      <TextArea
+      <TagField
         label="Habilidades técnicas"
         name="skills"
-        placeholder="Ej. Python, Excel, Git, atención al cliente..."
+        placeholder="Ej. Python, Excel, Canva…"
         value={form.skills}
         onChange={update('skills')}
         error={errors.skills}
-        hint="Separa con comas — se envían como array al backend"
+        suggestions={SUGGESTED_TECH_SKILLS}
+        hint="Escribe y pulsa Enter, o elige una sugerencia"
       />
       <TextArea
         label="Habilidades blandas (opcional)"

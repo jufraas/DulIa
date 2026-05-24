@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Scoring v1.1 (seniority filter) + Plan 2 + parse-cv + termómetro híbrido.
+**Última actualización:** 2026-05-24 · Scoring v1.1 + termómetro híbrido · Front: PDF por secciones, layout congelado, nav/coach.
 
 ## Base URL
 
@@ -445,7 +445,7 @@ Devuelve el plan personalizado de 4 semanas para el usuario. Requiere perfil pre
 
 **Errores:** `404` sin perfil · `500` error interno.
 
-**Frontend:** `loadResultsBundle()` → store → UI (`ProfileSummary`, `ThirtyDayPlan`, `RadarMatch`, `CareerTimeline`, `CoachChatBubble`) + `generateAnalysisPdf.js`.
+**Frontend:** `loadResultsBundle()` → store → UI + `generateAnalysisPdf.jsx` (PDF por secciones, fondo oscuro uniforme).
 
 ---
 

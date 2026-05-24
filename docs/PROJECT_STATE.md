@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend:** scoring v1.1 (filtro seniority + scores expresivos) + analyze fallback calibrado. Híbrido cache-first + ~380 jobs. **Front:** fix CV PDF + layout `/resultados`. Pendiente: deploy.
+2026-05-24 — **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** PDF por secciones, layout `/resultados` congelado, auth OAuth.
 
 ## Estado por módulo
 
@@ -37,7 +37,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
-| `MarketThermometer` | ✅ | Montado en `/resultados` y `/vacantes`; API expone `por_modalidad` y `por_fuente` |
+| `MarketThermometer` | ✅ | `/resultados` y `/vacantes`; `por_modalidad` + `por_fuente` (Get on Board + Remotive); dashboard personalizado por perfil |
+| `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
 | Navegación resultados ↔ vacantes | ✅ | `OpportunitiesPreview` → `/vacantes`; botón **Volver a mi análisis** → `/resultados` |
@@ -46,16 +47,19 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
 | Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
-| Layout `/resultados` | ✅ | Score+PDF columna izq.; resumen con scroll; `OpportunitiesAndPlan` (altura sync + scroll plan) |
+| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques solo entre/al final; regla `.cursor/rules/results-layout-frozen.mdc` |
+| Nav secciones `/resultados` | ✅ | `ResultsSectionNav` — vertical sticky (desktop) / chips (móvil); 6 anclas agrupadas |
+| Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
+| Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |
-| Coach chat UI | ✅ | `CoachChatBubble` en `/resultados` |
+| Coach chat UI | ✅ | `CoachProvider` + banner, teaser FAB, chips iniciales, `CoachAskLink` en tarjetas |
 | Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
 | Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |
 | Links `url` en vacantes | ✅ | Preview + panel semáforo; mock con URLs demo |
-| Descarga PDF (jsPDF) | ✅ | Score, análisis, plan 30d, radar, jobs, mercado, perfil |
+| Descarga PDF | ✅ | Por secciones `[data-pdf-block]` · fondo `#0D0D0D` en cada hoja · PNG · `flushSync` (`react-dom`) · alerta si falla |
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` |
 

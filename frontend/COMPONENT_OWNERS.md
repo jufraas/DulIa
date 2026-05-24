@@ -9,7 +9,10 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------------|
 | `src/pages/AboutPage.jsx` | Orquestador fino — **tu pantalla principal** |
 | `src/components/about/*` | Secciones de Sobre DulIA (hero, problema, audiencia, modelo, equipo, CTA) |
-| `src/components/onboarding/*` | Wizard + subida CV (`CvUploadZone`) |
+| `src/components/onboarding/*` | Wizard + subida CV (`CvUploadZone`) + pasos con validación |
+| `src/components/ui/TagField.jsx` | Tags habilidades técnicas (paso 1 wizard) |
+| `src/utils/onboardingValidation.js` | Edad mín. 15 + coherencia experiencia/oportunidad |
+| `src/utils/parseTags.js` | Parse CSV ↔ tags para skills |
 | `src/hooks/useOnboardingForm.js` | POST profile + `loadResultsBundle` + borrador wizard |
 | `src/services/api.js` | Cliente Axios + Plan 2 + fallbacks |
 | `src/services/mockResultsBundle.js` | Mocks personalizados (jobs, market, plan, radar, timeline) |
@@ -22,9 +25,17 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/utils/analysisDisplay.js` | Parser respuesta analyze |
 | `src/utils/timelineDisplay.js` | Parser timeline API |
 | `src/utils/radarApi.js` | Parser radar API |
-| `src/utils/generateAnalysisPdf.js` | PDF completo (analyze, plan, radar, …) |
+| `src/utils/marketDisplay.js` | Labels modalidad/fuente (Get on Board, Remotive) para termómetro y PDF |
+| `src/components/shared/ProcessStatusBar.jsx` | Barra fija inferior — CV, submit wizard, PDF |
+| `src/utils/generateAnalysisPdf.jsx` | PDF — React + html2canvas → jsPDF (lazy desde `usePdfDownload`) |
+| `src/components/pdf/*` | `AnalysisPdfDocument`, `PdfSection`, `pdf-document.css` |
+| `src/components/results/AnalysisOverviewGrid.jsx` | Grid score+PDF vs resumen (580px desktop) |
 | `src/store/useProfileStore.js` | Estado global + persistencia cache |
-| `src/utils/sessionCache.js` | Lectura/escritura localStorage sesión |
+| `src/utils/coachSuggestions.js` | Bienvenida coach + chips iniciales desde perfil |
+| `src/context/CoachProvider.jsx` | Provider coach en `/resultados` |
+| `src/hooks/useCoachContext.js` | Hook contexto coach |
+| `src/constants/resultsSections.js` | Anclas nav `/resultados` |
+| `src/hooks/useResultsSectionNav.js` | Scroll + sección activa |
 
 ## Joufra — landing, resultados, vacantes
 
@@ -36,9 +47,19 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — semáforo; **Volver a mi análisis** → `/resultados` |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Resultados: `OpportunitiesAndPlan`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
+| `src/components/results/*` | Resultados: `AnalysisOverviewGrid`, `ResultsSectionNav`, `CoachPromptBanner`, `CoachAskLink`, `OpportunitiesAndPlan`, `MarketThermometer`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
+
+### Layout congelado (`/resultados`)
+
+**No modificar** tamaños, grid, alturas ni espaciado de componentes ya existentes sin pedido explícito. Diseño fijado 2026-05-24:
+
+- `AnalysisOverviewGrid`: 2 cols lg, contenedores 580px, score embedded + PDF + resumen (scroll interno).
+- Orden: hero → coach banner → nav → análisis → mercado → vacantes/plan → radar → timeline → coach FAB → banner PDF.
+- **Nuevos componentes**: insertar entre secciones o al final en `ResultsPage.jsx`.
+
+Regla Cursor: `.cursor/rules/results-layout-frozen.mdc`.
 
 ## Compartido (avisar antes de tocar)
 
@@ -46,7 +67,7 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------|
 | `src/pages/WelcomePage.jsx` | Landing — splash + fases (`splash`/`exit`/`done`) |
 | `src/pages/OnboardingPage.jsx` | Wizard |
-| `src/pages/ResultsPage.jsx` | Resultados — orquesta score, analyze, plan, radar, timeline, coach, PDF |
+| `src/pages/ResultsPage.jsx` | Resultados — nav secciones, coach, score/resumen, plan, radar, PDF |
 | `src/App.jsx` | Rutas (`/sobre` = Migue) |
 | `src/index.css` / `src/styles/*` | Design system (`dulia-tokens.css`, `dulia-kit.css`) |
 | `ReBrand/` | Referencia visual — no editar para producción |
@@ -73,7 +94,7 @@ Contenido movido al kit ReBrand o a `/sobre`; no importados en la app:
 
 Deploy prod, login, pipeline jobs reales: [docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
 
-**Coach:** `CoachChatBubble` + `useCoachChat.js` — implementado en `/resultados`.
+**Coach:** `CoachProvider` + `CoachChatBubble` + `CoachAskLink` + `useCoachChat.js` — solo `/resultados`.
 
 ## Flujo Git
 

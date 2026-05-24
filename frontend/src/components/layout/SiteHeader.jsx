@@ -1,12 +1,46 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import DuliaLogo from '../brand/DuliaLogo'
 import Button from '../ui/Button'
+import { supabase } from '../../services/supabase'
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [userInfo, setUserInfo] = useState(/** @type {{initial: string, fullName: string, email: string} | null} */(null))
   const location = useLocation()
+  const navigate = useNavigate()
+  const dropdownRef = useRef(/** @type {HTMLDivElement | null} */(null))
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data?.user
+      if (!u) return
+      const nombre = u.user_metadata?.nombre || ''
+      const apellido = u.user_metadata?.apellido || ''
+      const fullName = [nombre, apellido].filter(Boolean).join(' ') || u.email?.split('@')[0] || ''
+      setUserInfo({ initial: fullName.charAt(0).toUpperCase(), fullName, email: u.email || '' })
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!dropdownOpen) return
+    function handleClick(/** @type {MouseEvent} */ e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(/** @type {Node} */(e.target))) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [dropdownOpen])
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    setUserInfo(null)
+    setDropdownOpen(false)
+    navigate('/')
+  }
 
   const featuresHref = location.pathname === '/' ? '#features' : '/#features'
 
@@ -24,6 +58,92 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {userInfo ? (
+            <div style={{ position: 'relative' }} ref={dropdownRef} className="hidden sm:block">
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(v => !v)}
+                aria-label="Menú de usuario"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 16,
+                  flexShrink: 0,
+                }}
+              >
+                {userInfo.initial}
+              </button>
+
+              {dropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 10px)',
+                  right: 0,
+                  width: 240,
+                  backgroundColor: 'rgba(26,26,36,0.97)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(168,85,247,0.3)',
+                  borderRadius: 16,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+                  overflow: 'hidden',
+                  zIndex: 100,
+                }}>
+                  <div style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 999,
+                      background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                    }}>
+                      {userInfo.initial}
+                    </div>
+                    <div style={{ overflow: 'hidden' }}>
+                      <p style={{ color: '#F1F0FB', fontSize: 14, fontWeight: 600, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {userInfo.fullName}
+                      </p>
+                      <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {userInfo.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ padding: '8px' }}>
+                    <Link
+                      to="/perfil"
+                      onClick={() => setDropdownOpen(false)}
+                      style={{ display: 'block', padding: '10px 12px', borderRadius: 10, color: 'rgba(255,255,255,0.8)', fontSize: 14, textDecoration: 'none' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                    >
+                      Mi perfil
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 10, color: '#F87171', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login" className="hidden sm:block text-[color:var(--fg-2)] hover:text-[color:var(--fg-1)] text-sm font-medium px-3 py-2 transition-colors">
+              Iniciar sesión
+            </Link>
+          )}
           <Link to="/comenzar" className="hidden sm:block">
             <Button variant="primary" size="sm">
               Empezar

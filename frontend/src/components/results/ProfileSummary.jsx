@@ -1,5 +1,6 @@
 import { CheckCircle2, Lightbulb, Sparkles, TrendingUp } from 'lucide-react'
 import SkillsChips from './SkillsChips'
+import CoachAskLink from './CoachAskLink'
 
 /**
  * @param {{
@@ -27,7 +28,7 @@ export default function ProfileSummary({
 
   return (
     <div
-      className={`card-dl flex max-h-[480px] min-h-[320px] flex-col overflow-hidden p-0 sm:max-h-[520px] lg:h-[580px] lg:max-h-none ${className}`}
+      className={`card-dl profile-summary-card flex min-h-[320px] flex-col overflow-hidden p-0 max-lg:max-h-[480px] sm:max-lg:max-h-[520px] lg:min-h-0 lg:overflow-hidden ${className}`}
     >
       <div className="shrink-0 border-b border-[rgba(168,85,247,0.12)] px-7 py-5">
         <div className="eyebrow-dl mb-0">
@@ -36,7 +37,7 @@ export default function ProfileSummary({
         </div>
       </div>
 
-      <div className="results-summary-scroll flex-1 overflow-y-auto px-7 py-5">
+      <div className="results-summary-scroll min-h-0 flex-1 overflow-y-auto px-7 py-5">
         <p className="m-0 text-[17px] leading-relaxed text-[color:var(--fg-2)]">
         {profile?.nombre && (
           <>
@@ -133,6 +134,10 @@ export default function ProfileSummary({
           )}
         </div>
       )}
+
+      <div className="mt-4 border-t border-[rgba(168,85,247,0.12)] pt-4">
+        <CoachAskLink question="Explícame mis fortalezas y qué debería mejorar primero" />
+      </div>
 
       <SkillsChips skills={skills} />
       </div>

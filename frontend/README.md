@@ -34,19 +34,19 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 |------|----------|-------------|
 | `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
-| `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF opcional |
-| `/resultados` | Resultados | Score, análisis IA, termómetro, plan 30-60-90, radar, timeline, coach, PDF |
+| `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
+| `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
 | `/vacantes` | Vacantes | Termómetro + semáforo; **Volver a mi análisis** → `/resultados` |
 
 ## Flujo de datos
 
-1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; opcional: CV → `parseCvPdf` → `normalizeCvParseResponse` → merge formulario).
+1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; CV opcional; **habilidades en tags** con sugerencias; validación edad ≥15 y coherencia experiencia/tipo de oportunidad).
 2. **POST** `/api/profile` con `session_id` (UUID en `localStorage`, clave `dulia_session_id`).
 3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
 6. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
-7. PDF (`generateAnalysisPdf.js`): score, análisis, plan, radar, vacantes, mercado, perfil.
+7. PDF (`generateAnalysisPdf.jsx`): bloques por sección → html2canvas (PNG) → jsPDF; fondo oscuro en cada hoja (lazy).
 
 Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
 
@@ -68,18 +68,19 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 ```
 src/
 ├── pages/
-├── components/         # about/, welcome/, onboarding/, results/, vacancies/, motion/, …
+├── components/         # about/, welcome/, onboarding/, results/, pdf/, vacancies/, motion/, …
 ├── components/motion/
 │   └── RevealOnScroll.jsx   # Framer Motion: mount (hero) | scroll (secciones)
-├── hooks/              # useOnboardingForm, useResultsData, useSessionHydration, …
+├── hooks/              # useOnboardingForm, useResultsSectionNav, useCoachContext, …
 ├── services/
 │   ├── api.js
 │   ├── mockResultsBundle.js   # fallbacks Plan 2 personalizados
 │   ├── sessionHydration.js
 │   └── mock*.js
-├── constants/colombiaLocations.js
+├── constants/colombiaLocations.js, resultsSections.js
+├── context/CoachProvider.jsx
 ├── store/useProfileStore.js
-├── utils/              # session, sessionCache, planDisplay, radarApi, …
+├── utils/              # session, marketDisplay, coachSuggestions, planDisplay, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 
@@ -96,23 +97,64 @@ Referencia de diseño (no producción): `ReBrand/DulIA Design System (1)/`.
 
 Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../docs/decisions/2026-05-23-frontend-landing-animations.md).
 
+## Wizard (`/comenzar`)
+
+| Paso | Campos destacados |
+|------|-------------------|
+| 0 — Quién eres | CV PDF opcional, DANE, edad (mín. 15) |
+| 1 — Perfil laboral | `TagField` habilidades técnicas + sugerencias |
+| 2 — Qué buscas | Sin "primer empleo junior" si ya tiene experiencia |
+
+Validación: `onboardingValidation.js` + `validateOnboardingStep.js`.
+
+Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessStatusBar`** — barra fija inferior con mensaje y nombre de archivo.
+
 ## Resultados (`/resultados`)
+
+### Navegación por secciones
+
+| Nav (6 ítems) | Contenido |
+|---------------|-----------|
+| Tu análisis | `AnalysisOverviewGrid` — contenedor único izq. (score + PDF) = resumen (580px desktop) |
+| Mercado | `MarketThermometer` |
+| Vacantes y plan | `OpportunitiesAndPlan` |
+| Radar match | `RadarMatch` |
+| Timeline | `CareerTimeline` |
+| Descargar PDF | Banner final |
+
+- Desktop: `ResultsSectionNav` vertical sticky (`dulia-kit.css`).
+- Móvil: chips horizontales sticky bajo el header.
+- Anclas: `constants/resultsSections.js` + `useResultsSectionNav`.
+
+### Coach (solo `/resultados`)
+
+| Pieza | Rol |
+|-------|-----|
+| `CoachProvider` | Estado chat + banner/teaser |
+| `CoachPromptBanner` | Aviso inline dismissible (no sticky) |
+| `CoachChatBubble` | FAB + teaser auto-ocultable + bienvenida personalizada |
+| `CoachAskLink` | CTAs en score, resumen, mercado, radar, plan |
+| `coachSuggestions.js` | Mensaje y chips iniciales desde perfil |
+
+### Secciones (detalle)
 
 | Sección | Componente |
 |---------|------------|
-| Score + PDF | `ScoreCard`, `PdfDownloadCard` (columna izq.); badge comparativa sin truncar |
-| Resumen IA | `ProfileSummary` — scroll interno (`.results-summary-scroll`) |
-| Termómetro mercado | `MarketThermometer.jsx` — `GET .../market/dashboard` o store |
-| Vacantes + plan | `OpportunitiesAndPlan.jsx` — oportunidades define altura; `ThirtyDayPlan` igual alto + scroll |
-| Match radar | `RadarMatch.jsx` — 5 ejes usuario vs mercado vía `GET .../radar-data` |
-| Timeline + coach | `CareerTimeline.jsx`, `CoachChatBubble.jsx` |
-| PDF | `generateAnalysisPdf.js` — score, análisis, plan, radar, jobs, mercado |
+| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` embedded + `PdfDownloadCard`) vs `ProfileSummary` |
+| Termómetro mercado | `MarketThermometer` — modalidad/fuente (`marketDisplay.js`) |
+| Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
+| Match radar | `RadarMatch` |
+| Timeline + coach FAB | `CareerTimeline`, `CoachChatBubble` |
+| PDF | `AnalysisPdfDocument` + `generateAnalysisPdf.jsx` — captura por `[data-pdf-block]`, fondo uniforme |
+| Carga larga | `ProcessStatusBar` — generación PDF |
 
 ## División de trabajo
 
 Ver [COMPONENT_OWNERS.md](./COMPONENT_OWNERS.md).
 
 Post-MVP (login, timeline plan, pitch): [../docs/EXTRA_IDEAS/post-mvp-roadmap.md](../docs/EXTRA_IDEAS/post-mvp-roadmap.md).
+
+**Layout congelado:** el diseño visual de `/resultados` no se modifica sin pedido explícito — ver `.cursor/rules/results-layout-frozen.mdc`.
 
 ## Deploy (Vercel)
 

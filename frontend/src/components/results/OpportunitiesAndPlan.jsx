@@ -32,11 +32,11 @@ export default function OpportunitiesAndPlan({ jobs }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-      <div ref={oppsRef}>
+      <div ref={oppsRef} className="min-w-0">
         <OpportunitiesPreview jobs={jobs} />
       </div>
       <div
-        className="flex min-h-0 flex-col"
+        className="flex min-h-0 min-w-0 flex-col"
         style={pairedHeight != null ? { height: pairedHeight } : undefined}
       >
         <ThirtyDayPlan />

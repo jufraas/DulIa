@@ -10,7 +10,7 @@ import { mergeCvPrefillIntoForm } from '../services/mockCvPrefill'
 import { EMPTY_ONBOARDING_FORM } from '../constants/emptyForm'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
 import { buildProfilePayload } from '../utils/buildProfilePayload'
-import { validateOnboardingStep } from '../utils/validateOnboardingStep'
+import { validateOnboardingStep, validateOnboardingForm } from '../utils/validateOnboardingStep'
 import { getOrCreateSessionId } from '../utils/session'
 import {
   clearWizardDraft,
@@ -122,11 +122,13 @@ export function useOnboardingForm() {
       setCvParsing(true)
       setCvError('')
       setCvSuccessMessage('')
+      setCvFileName(file.name)
 
       try {
         const result = await parseCvPdf(file)
         applyCvResult(result, file.name)
       } catch (err) {
+        setCvFileName(null)
         setCvError(
           err instanceof Error ? err.message : 'No pudimos leer tu CV. Intenta de nuevo.',
         )
@@ -168,7 +170,9 @@ export function useOnboardingForm() {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault()
-      if (!validateCurrentStep()) return
+      const allErrors = validateOnboardingForm(form)
+      setErrors(allErrors)
+      if (Object.keys(allErrors).length > 0) return
 
       setLoading(true)
       setApiError('')
@@ -202,7 +206,6 @@ export function useOnboardingForm() {
       }
     },
     [
-      validateCurrentStep,
       form,
       setSavedProfile,
       setFormSnapshot,
@@ -217,7 +220,7 @@ export function useOnboardingForm() {
     ],
   )
 
-  const progress = ((step + 1) / WIZARD_STEPS.length) * 100
+  const progress = step === 0 ? 0 : step >= WIZARD_STEPS.length - 1 ? 90 : (step / WIZARD_STEPS.length) * 100
 
   return {
     step,

@@ -74,4 +74,13 @@ export const mockMarket = {
   crecimiento_semanal_pct: 12.4,
   ciudad_filtro: 'Barranquilla',
   sector_filtro: null,
+  por_modalidad: {
+    remoto: 128,
+    presencial: 7,
+    hibrido: 0,
+  },
+  por_fuente: {
+    getonbrd: 127,
+    remotive: 8,
+  },
 }

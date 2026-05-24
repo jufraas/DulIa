@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Fix parse-cv real + layout resultados + timeouts 120s.
+**Última actualización:** 2026-05-24 · PDF por secciones + layout resultados congelado.
 
 ---
 
@@ -16,15 +16,20 @@
 | `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
 | `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
 | `GET .../timeline-data` | ✅ | `CareerTimeline` |
-| `GET market/dashboard` | ✅ | Termómetro; fallback si `jobs.city` vacío |
+| `GET market/dashboard` | ✅ | Termómetro; `por_modalidad` + `por_fuente` en UI y PDF |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
-| Layout `/resultados` | ✅ | `OpportunitiesAndPlan` — plan = alto oportunidades + scroll interno |
+| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
+| Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
+| Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
+| Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
+| Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
+| `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
-| PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
+| PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
 
@@ -69,6 +74,17 @@ POST /api/profile                    ← guardar perfil
 En **mock** (`USE_MOCK_DATA=true`): no hace falta Supabase; analyze, action-plan, radar y timeline responden con datos de ejemplo.
 
 En **modo real**: orden estricto para timeline → `profile` → `analyze` → `action-plan` → `radar-data` / `timeline-data`.
+
+### Validaciones del wizard (`/comenzar`)
+
+| Regla | Implementación |
+|-------|----------------|
+| Edad mínima **15 años** | `validateAgeFields()` — edad exacta o rango |
+| Habilidades técnicas | `TagField` — mín. 1 tag; sugerencias en `SUGGESTED_TECH_SKILLS` |
+| Coherencia experiencia | Si `has_experience=si`, oculta y bloquea `opportunity_type=primer_empleo` |
+| Envío final | `validateOnboardingForm()` — valida los 3 pasos antes de `POST /profile` |
+
+Archivos: `utils/onboardingValidation.js`, `utils/validateOnboardingStep.js`, `components/ui/TagField.jsx`.
 
 ---
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { buildMockRadarFromProfile } from '../../services/mockResultsBundle'
 import { radarAxesFromApi } from '../../utils/radarApi'
+import CoachAskLink from './CoachAskLink'
 
 const R_MAX = 200
 
@@ -173,7 +174,10 @@ export default function RadarMatch({ profile = null, jobs = [], radar = null }) 
 
   if (!chartData || !axes.length) {
     return (
-      <section className="card-dl anim-in-delay-3 mt-12 p-6 sm:p-8">
+      <section
+        id="resultados-radar"
+        className="card-dl anim-in-delay-3 mt-12 scroll-mt-[88px] p-6 sm:p-8"
+      >
         <p className="eyebrow-dl mb-2">Match Radar</p>
         <p className="m-0 text-[15px] text-[color:var(--fg-2)]">
           Completa el wizard para ver tu radar de compatibilidad con el mercado.
@@ -190,7 +194,11 @@ export default function RadarMatch({ profile = null, jobs = [], radar = null }) 
   ).length
 
   return (
-    <section className="card-dl anim-in-delay-3 mt-12 p-6 sm:p-8" aria-labelledby="radar-match-title">
+    <section
+      id="resultados-radar"
+      className="card-dl anim-in-delay-3 mt-12 scroll-mt-[88px] p-6 sm:p-8"
+      aria-labelledby="radar-match-title"
+    >
       <header className="mb-6">
         <p className="eyebrow-dl mb-2">Match Radar</p>
         <h2
@@ -202,6 +210,10 @@ export default function RadarMatch({ profile = null, jobs = [], radar = null }) 
         <p className="mt-2 mb-0 text-[15px] text-[color:var(--fg-2)]">
           Tu perfil vs el promedio del mercado en {axes.length} dimensiones (datos del backend).
         </p>
+        <CoachAskLink
+          question="¿Qué habilidad me falta más según mi radar?"
+          className="mt-3"
+        />
       </header>
 
       {jobCards.length > 0 && (
