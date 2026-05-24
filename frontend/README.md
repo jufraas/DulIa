@@ -57,7 +57,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
 | `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
-| `/vacantes` | Vacantes | Termómetro + semáforo; **Volver a mi análisis** → `/resultados` |
+| `/vacantes` | Vacantes | Semáforo de confianza; **Volver a mi análisis** → `/resultados` |
 
 ## Flujo de datos
 
@@ -66,7 +66,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market (`sessionId`) + radar + timeline.
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
 5. Rehidratación al refresh vía `sessionHydration.js` + cache `dulia_session_data`.
-6. `/resultados` y `/vacantes` **refetch** market + jobs al montar (datos frescos del backend).
+6. `/resultados` refetch market + jobs al montar; `/vacantes` refetch solo jobs.
 7. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
 8. PDF (`generateAnalysisPdf.jsx`): bloques por sección → html2canvas (PNG) → jsPDF; fondo oscuro en cada hoja (lazy).
 

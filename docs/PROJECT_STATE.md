@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front:** coach global (`AppCoachShell`), proxy Vite `/api`, fix upload CV. **Backend:** `pdfplumber` en requirements.
+2026-05-24 — **Front:** termómetro solo en `/resultados`; `/vacantes` semáforo + jobs. Coach global, proxy CV (commit previo).
 
 ## Estado por módulo
 
@@ -27,7 +27,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/sobre` | Sobre DulIA | Migue | ✅ |
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
 | `/resultados` | Score, perfil, **termómetro**, jobs, plan 30-60-90, **RadarMatch**, timeline, **coach**, PDF completo | Joufra / Migue | ✅ |
-| `/vacantes` | **Termómetro** + semáforo; **Volver → `/resultados`** | Joufra | ✅ |
+| `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -37,7 +37,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
-| `MarketThermometer` | ✅ | `/resultados` y `/vacantes`; endpoint `GET /market/dashboard/{session_id}`; geo + skills demandadas + modalidad/fuente; refetch sin cache stale |
+| `MarketThermometer` | ✅ | Solo `/resultados`; endpoint `GET /market/dashboard/{session_id}`; geo + skills demandadas + modalidad/fuente; refetch sin cache stale |
 | `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
@@ -55,7 +55,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas/debilidades con labels humanizados (`humanizeArea`); score `nivel_preparacion` |
-| Refetch market + jobs | ✅ | `VacanciesPage` + `useResultsData` — siempre al montar; evita 1 vacante vieja en localStorage |
+| Refetch market + jobs | ✅ | `useResultsData` (market + jobs); `VacanciesPage` solo jobs al montar |
 | Coach chat UI | ✅ | Coach global + banner en resultados; chips, teaser FAB, `CoachAskLink` |
 | Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |

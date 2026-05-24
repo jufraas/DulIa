@@ -193,8 +193,8 @@ curl -s "http://localhost:8000/api/jobs/recommended/b58ddc86-9717-45dd-9b02-6e5d
 
 En UI:
 1. Borrar `dulia_session_data` o incógnito.
-2. `/vacantes` → termómetro con skills demandadas + sectores del perfil.
-3. Lista de vacantes refetch sin quedarse en 1 job viejo.
+2. `/resultados` → sección Mercado: termómetro con skills demandadas + sectores del perfil.
+3. `/vacantes` → semáforo + lista; refetch jobs sin quedarse en 1 job viejo (sin termómetro).
 
 ---
 
@@ -205,7 +205,7 @@ En UI:
 | `services/api.js` | `getMarketDashboard` con `sessionId` → endpoint personalizado |
 | `components/results/MarketThermometer.jsx` | Scope perfil, skills demandadas, desglose geo |
 | `store/useProfileStore.js` | Typedef ampliado |
-| `pages/VacanciesPage.jsx` | Refetch + endpoint personalizado |
+| `pages/VacanciesPage.jsx` | Refetch jobs al montar (sin termómetro) |
 | `pages/ResultsPage.jsx` / `loadResultsBundle` | Pasar `sessionId` al fetch de market |
 
 ---

@@ -3,7 +3,6 @@ import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Briefcase, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
-import MarketThermometer from '../components/results/MarketThermometer'
 import CoachAskLink from '../components/results/CoachAskLink'
 import {
   FilterChip,
@@ -15,7 +14,7 @@ import IconBox from '../components/brand/IconBox'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import SessionLoading from '../components/shared/SessionLoading'
-import { getMarketDashboard, getRecommendedJobs } from '../services/api'
+import { getRecommendedJobs } from '../services/api'
 import { useProfileStore } from '../store/useProfileStore'
 import { getOrCreateSessionId } from '../utils/session'
 import { useSessionHydration } from '../hooks/useSessionHydration'
@@ -26,36 +25,9 @@ export default function VacanciesPage() {
   const location = useLocation()
   const jobs = useProfileStore((s) => s.jobs)
   const savedProfile = useProfileStore((s) => s.savedProfile)
-  const market = useProfileStore((s) => s.market)
   const setJobs = useProfileStore((s) => s.setJobs)
-  const setMarket = useProfileStore((s) => s.setMarket)
   const [filter, setFilter] = useState('all')
-  const [loadingMarket, setLoadingMarket] = useState(true)
   const [loadingJobs, setLoadingJobs] = useState(true)
-
-  useEffect(() => {
-    if (!savedProfile) return undefined
-    let cancelled = false
-
-    ;(async () => {
-      setLoadingMarket(true)
-      try {
-        const sessionId = getOrCreateSessionId()
-        const data = await getMarketDashboard(
-          { city: savedProfile?.ciudad },
-          savedProfile,
-          sessionId,
-        )
-        if (!cancelled) setMarket(data)
-      } finally {
-        if (!cancelled) setLoadingMarket(false)
-      }
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [savedProfile, setMarket])
 
   useEffect(() => {
     if (!savedProfile) return undefined
@@ -76,7 +48,7 @@ export default function VacanciesPage() {
     }
   }, [savedProfile, setJobs])
 
-  const loading = loadingMarket || loadingJobs
+  const loading = loadingJobs
   const rows = useMemo(() => jobs.map(mapJobToVacancyRow), [jobs])
 
   const counts = useMemo(
@@ -129,14 +101,6 @@ export default function VacanciesPage() {
                 Volver a mi análisis
               </Button>
             </Link>
-          </div>
-
-          <div className="anim-in-delay-1 mb-6">
-            {loadingMarket && !market ? (
-              <p className="text-sm text-[color:var(--fg-3)]">Actualizando termómetro del mercado…</p>
-            ) : (
-              <MarketThermometer market={market} />
-            )}
           </div>
 
           <div className="anim-in-delay-1 mb-6 grid gap-4 md:grid-cols-3">

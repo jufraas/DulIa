@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Proxy Vite `/api`, coach global, fix upload CV (fetch + venv backend).
+**Última actualización:** 2026-05-24 · Termómetro solo en `/resultados`; `/vacantes` semáforo + refetch jobs.
 
 ---
 
@@ -16,7 +16,7 @@
 | `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
 | `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
 | `GET .../timeline-data` | ✅ | `CareerTimeline` |
-| `GET market/dashboard/{session_id}` | ✅ | Termómetro **personalizado** (ciudad + sectores + `top_skills_demandadas`) |
+| `GET market/dashboard/{session_id}` | ✅ | Termómetro **solo `/resultados`** (ciudad + sectores + `top_skills_demandadas`) |
 | `GET market/dashboard?city=...` | ✅ | Fallback global; reservado para anónimo sin perfil |
 | Labels analyze (`area`) | ✅ | `humanizeArea()` en `analysisDisplay.js` — snake_case → español legible |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
@@ -32,7 +32,7 @@
 | Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
-| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch** market/jobs al montar (sin cache stale) |
+| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch jobs** al montar (sin cache stale) |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
@@ -176,7 +176,7 @@ GET /api/market/dashboard?city=Barranquilla   ← fallback global
 | `por_fuente` | Get on Board, Remotive, Demo |
 | `crecimiento_semanal_pct` | Stat + hint semanal |
 
-**Implementado:** `getMarketDashboard(filters, profile, sessionId)` en `api.js`; `loadResultsBundle` pasa `sessionId`; refetch al montar en `VacanciesPage` y `useResultsData` (`/resultados`). Helpers en `utils/marketDisplay.js`.
+**Implementado:** `getMarketDashboard(filters, profile, sessionId)` en `api.js`; `loadResultsBundle` pasa `sessionId`; refetch market en `useResultsData` (`/resultados`); `VacanciesPage` refetch solo jobs. UI termómetro: **solo** sección Mercado en `/resultados`. Helpers en `utils/marketDisplay.js`.
 
 La lista de vacantes puede ser **más corta** que `total_vacantes_activas` del termómetro (seniority solo aplica a jobs recomendados).
 
