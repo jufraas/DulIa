@@ -23,13 +23,57 @@ NIVEL_ORDEN = {
     "posgrado": 4,
 }
 
-TOP_N = 20
+TOP_N = int(os.getenv("RECOMMENDED_TOP_N", "0"))  # 0 = todas las compatibles scoreadas
+SENIORITY_TOLERANCE = 2  # años de holgura exp_req vs perfil (perfiles junior)
+YOUTH_BOOST = 5
+JUNIOR_EXP_THRESHOLD = 2.0
+SKILLS_MAX_PTS = 40
+SKILLS_EMPTY_PTS = 15
+CIUDAD_REMOTO_PTS = 15
+CIUDAD_EXACTA_PTS = 20
+CIUDAD_DEPTO_PTS = 10
+SECTOR_MATCH_PTS = 10
+
+_SENIOR_TITLE_MARKERS = (
+    "senior",
+    "sr ",
+    "sr.",
+    " ssr",
+    "lead",
+    "tech lead",
+    "team lead",
+    "manager",
+    "director",
+    "head of",
+    "principal",
+    "staff ",
+    "architect",
+    "vp ",
+    "vice president",
+)
+
+_JUNIOR_TITLE_MARKERS = (
+    "junior",
+    "jr ",
+    "jr.",
+    "entry level",
+    "entry-level",
+    "trainee",
+    "intern",
+    "graduate",
+    "no experience",
+    "new grad",
+    "practicante",
+    "becario",
+    "estudiante",
+)
 
 
 async def recomendar_jobs(session_id: str) -> list[JobOut]:
     """
     Lee el perfil del usuario y las vacantes activas de Supabase,
-    calcula el score de compatibilidad y devuelve el top 20.
+    calcula el score de compatibilidad y devuelve el top N (default 50).
+    Sector y ciudad influyen en el score, no excluyen vacantes del listado.
     """
     if USE_MOCK:
         return _mock_jobs()
@@ -42,14 +86,26 @@ async def recomendar_jobs(session_id: str) -> list[JobOut]:
         return []
     perfil = perfil_res.data[0]
 
-    jobs, encolado = _resolver_jobs_cache(perfil, supabase)
+    jobs, encolado = _prepare_jobs_pool(perfil, supabase)
+    compatible = [raw for raw in jobs if _seniority_compatible(perfil, raw)]
+    excluded = len(jobs) - len(compatible)
+    if excluded:
+        logger.info(
+            f"Filtro seniority: {excluded} vacantes excluidas — session_id={session_id}"
+        )
+    if not compatible:
+        logger.warning(
+            f"Sin vacantes compatibles por seniority — session_id={session_id}"
+        )
+        return []
+
     logger.info(
-        f"Calculando score para {len(jobs)} vacantes — session_id={session_id}, "
+        f"Calculando score para {len(compatible)} vacantes — session_id={session_id}, "
         f"encolado={encolado}"
     )
 
     resultados = []
-    for raw in jobs:
+    for raw in compatible:
         job_out, score_out = _calcular_score(perfil, raw)
         job_out.score_compatibilidad = score_out.score
         job_out.habilidades_match = _skills_match(perfil, raw)
@@ -57,7 +113,8 @@ async def recomendar_jobs(session_id: str) -> list[JobOut]:
         resultados.append((score_out.score, job_out))
 
     resultados.sort(key=lambda x: x[0], reverse=True)
-    return [j for _, j in resultados[:TOP_N]]
+    limit = TOP_N if TOP_N > 0 else len(resultados)
+    return [j for _, j in resultados[:limit]]
 
 
 def _perfil_sector(perfil: dict) -> str | None:
@@ -76,6 +133,7 @@ def _normalize_text(value: str) -> str:
 _SECTOR_KEYWORDS: dict[str, set[str]] = {
     "tecnologia": {
         "tecnologia",
+        "technology",
         "programming",
         "software",
         "developer",
@@ -84,7 +142,6 @@ _SECTOR_KEYWORDS: dict[str, set[str]] = {
         "data",
         "mobile",
         "machine learning",
-        "design",
         "sysadmin",
         "qa",
         "tech",
@@ -93,11 +150,46 @@ _SECTOR_KEYWORDS: dict[str, set[str]] = {
         "automatizacion",
         "ia",
         "scraping",
+        "engineer",
+        "engineering",
+        "full stack",
+        "fullstack",
+        "backend",
+        "frontend",
+        "innovation",
+    },
+    "ux": {
+        "ux",
+        "user experience",
+        "ui",
+        "ui/ux",
+        "product design",
+        "figma",
+        "designer",
+        "design",
     },
     "fintech": {"fintech", "finance", "banco", "bank", "pagos", "payments"},
     "marketing": {"marketing", "growth", "content", "seo", "social"},
     "agricultura": {"agricultura", "agro", "agriculture", "farm", "campo"},
 }
+
+# Sectores que el LLM puede devolver en inglés → clave canónica en _SECTOR_KEYWORDS
+_SECTOR_ALIASES: dict[str, str] = {
+    "technology": "tecnologia",
+    "tech": "tecnologia",
+    "software": "tecnologia",
+    "software engineering": "tecnologia",
+    "information technology": "tecnologia",
+    "innovation": "tecnologia",
+    "user experience": "ux",
+    "operational efficiency": "tecnologia",
+}
+
+
+def _sector_keywords(sector: str) -> set[str]:
+    canonical = _SECTOR_ALIASES.get(sector, sector)
+    base = _SECTOR_KEYWORDS.get(canonical, _SECTOR_KEYWORDS.get(sector, set()))
+    return base | {sector, canonical}
 
 
 def _sector_matches(perfil_sector: str, haystack: str) -> bool:
@@ -107,7 +199,7 @@ def _sector_matches(perfil_sector: str, haystack: str) -> bool:
         return True
     if sector in text:
         return True
-    keywords = _SECTOR_KEYWORDS.get(sector, {sector})
+    keywords = _sector_keywords(sector)
     return any(kw in text for kw in keywords)
 
 
@@ -140,13 +232,13 @@ def _matches_profile(raw_job: dict, perfil: dict) -> bool:
     """Filtro flexible por ciudad/sector del perfil (incluye remoto como match de ciudad)."""
     job = normalize_job_row(raw_job)
     ciudad = _normalize_text(perfil.get("ciudad") or "")
-    sector = _perfil_sector(perfil) or ""
+    sectores = [_normalize_text(s) for s in (perfil.get("sectores_interes") or []) if s]
 
-    if not ciudad and not sector:
+    if not ciudad and not sectores:
         return True
 
     sector_ok = True
-    if sector:
+    if sectores:
         haystack = " ".join(
             [
                 job.get("sector") or "",
@@ -154,7 +246,7 @@ def _matches_profile(raw_job: dict, perfil: dict) -> bool:
                 job.get("description") or "",
             ]
         )
-        sector_ok = _sector_matches(sector, haystack)
+        sector_ok = any(_sector_matches(s, haystack) for s in sectores)
 
     city_ok = True
     if ciudad:
@@ -185,6 +277,48 @@ def _scrape_filters_from_perfil(perfil: dict) -> dict:
     }
 
 
+def _job_sector_relevant(perfil: dict, job: dict) -> bool:
+    sectores = [_normalize_text(s) for s in (perfil.get("sectores_interes") or []) if s]
+    if not sectores:
+        return True
+    haystack = " ".join(
+        [
+            job.get("sector") or "",
+            job.get("title") or "",
+            job.get("description") or "",
+        ]
+    )
+    return any(_sector_matches(s, haystack) for s in sectores)
+
+
+def _prepare_jobs_pool(perfil: dict, supabase) -> tuple[list[dict], bool]:
+    """
+    Devuelve todo el cache activo para scorear (más vacantes, match bajo incluido).
+    El scrape queue sigue usando vacantes frescas relevantes al perfil.
+    """
+    cutoff = _freshness_cutoff()
+    all_active = _fetch_active_jobs(supabase)
+    fresh_relevant = [
+        j for j in all_active if _is_fresh(j, cutoff) and _matches_profile(j, perfil)
+    ]
+
+    encolado = False
+    if len(fresh_relevant) >= MIN_FRESH_JOBS:
+        logger.info(
+            f"Cache fresh OK: {len(fresh_relevant)} vacantes relevantes (< {FRESH_HORIZON_HOURS}h)"
+        )
+    else:
+        logger.info(
+            f"Pocas vacantes frescas ({len(fresh_relevant)} < {MIN_FRESH_JOBS}), "
+            "encolando scrape"
+        )
+        request_scrape(_scrape_filters_from_perfil(perfil), priority=1)
+        encolado = True
+
+    logger.info(f"Pool de score: {len(all_active)} vacantes activas")
+    return all_active, encolado
+
+
 def _resolver_jobs_cache(perfil: dict, supabase) -> tuple[list[dict], bool]:
     """
     Cache-first: vacantes frescas y relevantes al perfil.
@@ -210,6 +344,50 @@ def _resolver_jobs_cache(perfil: dict, supabase) -> tuple[list[dict], bool]:
     return all_active, True
 
 
+def _perfil_experiencia(perfil: dict) -> float:
+    return float(perfil.get("experiencia_anios") or 0)
+
+
+def _job_hires_youth(job: dict) -> bool:
+    return bool(job.get("hires_youth"))
+
+
+def _title_suggests_senior(title: str) -> bool:
+    t = _normalize_text(title)
+    return any(marker in t for marker in _SENIOR_TITLE_MARKERS)
+
+
+def _title_suggests_junior(title: str) -> bool:
+    t = _normalize_text(title)
+    return any(marker in t for marker in _JUNIOR_TITLE_MARKERS)
+
+
+def _seniority_compatible(perfil: dict, raw_job: dict) -> bool:
+    """
+    Perfiles junior (≤2 años): excluye roles senior o con exp_req muy alta.
+    hires_youth=true rescata vacantes explícitamente orientadas a jóvenes.
+    Perfiles con más experiencia: sin filtro duro.
+    """
+    exp_usuario = _perfil_experiencia(perfil)
+    if exp_usuario > JUNIOR_EXP_THRESHOLD:
+        return True
+
+    job = normalize_job_row(raw_job)
+    exp_req = float(job.get("experience_required") or 0)
+    hires_youth = _job_hires_youth(job)
+    title = job.get("title") or ""
+
+    if _title_suggests_senior(title):
+        if _title_suggests_junior(title):
+            return True
+        return False
+
+    if exp_req > exp_usuario + SENIORITY_TOLERANCE:
+        return hires_youth
+
+    return True
+
+
 def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     """Calcula el score 0-100 para un par perfil-vacante (columnas EN en BD)."""
     job = normalize_job_row(raw_job)
@@ -219,10 +397,9 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
 
     if skills_req:
         match_ratio = len(set(skills_perfil) & set(skills_req)) / len(skills_req)
+        pts_skills = round(match_ratio * SKILLS_MAX_PTS)
     else:
-        match_ratio = 1.0
-
-    pts_skills = round(match_ratio * 40)
+        pts_skills = SKILLS_EMPTY_PTS
 
     ciudad_perfil = (perfil.get("ciudad") or "").lower().strip()
     ciudad_job = job_city(raw_job).lower()
@@ -231,22 +408,22 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     modalidad_job = (job.get("modality") or "").lower()
 
     if modalidad_job == "remoto":
-        pts_ciudad = 20
+        pts_ciudad = CIUDAD_REMOTO_PTS
     elif ciudad_perfil and ciudad_job and ciudad_perfil == ciudad_job:
-        pts_ciudad = 20
+        pts_ciudad = CIUDAD_EXACTA_PTS
     elif depto_perfil and depto_job and depto_perfil == depto_job:
-        pts_ciudad = 10
+        pts_ciudad = CIUDAD_DEPTO_PTS
     else:
         pts_ciudad = 0
 
-    exp_usuario = float(perfil.get("experiencia_anios") or 0)
+    exp_usuario = _perfil_experiencia(perfil)
     exp_req = float(job.get("experience_required") or 0)
 
     if exp_usuario >= exp_req:
         pts_exp = 25
     else:
         brecha = exp_req - exp_usuario
-        pts_exp = max(0, round(25 - (brecha / 3) * 25))
+        pts_exp = max(0, round(25 - brecha * 8))
 
     nivel_usuario = NIVEL_ORDEN.get(perfil.get("nivel_educativo") or "", 0)
     nivel_req = NIVEL_ORDEN.get(job.get("education_level_req") or "", 0)
@@ -258,7 +435,16 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     else:
         pts_edu = 0
 
-    score_total = pts_skills + pts_ciudad + pts_exp + pts_edu
+    pts_youth = 0
+    if exp_usuario <= JUNIOR_EXP_THRESHOLD and _job_hires_youth(job):
+        pts_youth = YOUTH_BOOST
+
+    pts_sector = SECTOR_MATCH_PTS if _job_sector_relevant(perfil, job) else 0
+
+    raw_total = min(
+        100, pts_skills + pts_ciudad + pts_exp + pts_edu + pts_youth + pts_sector
+    )
+    score_total = round(raw_total / 5) * 5
 
     job_out = row_to_job_out(raw_job)
 
@@ -271,6 +457,7 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
             ciudad=pts_ciudad,
             experiencia=pts_exp,
             educacion=pts_edu,
+            youth=pts_youth,
         ),
         recomendaciones=_generar_recomendaciones(pts_skills, pts_ciudad, pts_exp, pts_edu, job),
     )
