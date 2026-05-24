@@ -20,11 +20,13 @@ npm run lint         # ESLint (solo src/ + config; ver abajo)
 |----------|-------------|
 | `VITE_API_URL` | `http://localhost:8000/api` |
 
-Crear `frontend/.env.local` si el backend corre en otro puerto:
+Crear `frontend/.env.local` si el backend corre en otro puerto (p. ej. `8001`):
 
 ```
-VITE_API_URL=http://localhost:8000/api
+VITE_API_URL=http://127.0.0.1:8001/api
 ```
+
+Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeout **120s** en `api.js`.
 
 ## Rutas de la app
 
@@ -98,9 +100,10 @@ Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../
 
 | Sección | Componente |
 |---------|------------|
-| Score + resumen | `ScoreCard`, `ProfileSummary` |
+| Score + PDF | `ScoreCard`, `PdfDownloadCard` (columna izq.); badge comparativa sin truncar |
+| Resumen IA | `ProfileSummary` — scroll interno (`.results-summary-scroll`) |
 | Termómetro mercado | `MarketThermometer.jsx` — `GET .../market/dashboard` o store |
-| Vacantes + plan | `OpportunitiesPreview`, `ThirtyDayPlan` |
+| Vacantes + plan | `OpportunitiesAndPlan.jsx` — oportunidades define altura; `ThirtyDayPlan` igual alto + scroll |
 | Match radar | `RadarMatch.jsx` — 5 ejes usuario vs mercado vía `GET .../radar-data` |
 | Timeline + coach | `CareerTimeline.jsx`, `CoachChatBubble.jsx` |
 | PDF | `generateAnalysisPdf.js` — score, análisis, plan, radar, jobs, mercado |

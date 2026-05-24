@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-23 · Backend Fase 1 Plan 2 verificada + Front Plan 2 UI + normalización `parse-cv`.
+**Última actualización:** 2026-05-24 · Fix parse-cv real + layout resultados + timeouts 120s.
 
 ---
 
@@ -20,7 +20,9 @@
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
-| `POST /profile/parse-cv` | ✅ | `normalizeCvParseResponse` + merge wizard paso 0 |
+| `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
+| Layout `/resultados` | ✅ | `OpportunitiesAndPlan` — plan = alto oportunidades + scroll interno |
+| Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
 | PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 

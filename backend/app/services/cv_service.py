@@ -83,7 +83,7 @@ async def parse_cv_pdf(file_bytes: bytes, filename: str, content_type: str | Non
 
 
 async def _extraer_cv_con_gemini(cv_markdown: str) -> dict:
-    model = get_gemini_model("gemini-1.5-flash")
+    model = get_gemini_model("gemini-3.1-flash-lite")
     prompt = PROMPT_CV.format(cv_markdown=cv_markdown[:12000])
 
     try:
