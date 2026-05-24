@@ -30,6 +30,16 @@ export function extractApiErrorMessage(err, fallback = 'No pudimos completar la 
   return fallback
 }
 
+/** Backend caído o sin red — no incluye 4xx/5xx con respuesta HTTP. */
+export function isBackendUnreachable(err) {
+  if (err instanceof TypeError) return true
+  if (!axios.isAxiosError(err)) return false
+  if (!err.response) return true
+  if (err.code === 'ECONNABORTED') return true
+  if (err.message.includes('Network Error')) return true
+  return false
+}
+
 /** @returns {boolean} */
 export function isForceProgressMock() {
   const flag = import.meta.env.VITE_FORCE_PROGRESS_MOCK

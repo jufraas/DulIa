@@ -7,20 +7,18 @@ import {
   buildMockRadarFromProfile,
   buildMockAnalysisFromProfile,
   buildMockTimelineFromProfile,
-  fillResultsFallbacks,
 } from './mockResultsBundle'
 import { buildMockPlanFromProfile } from './mockPlan'
 import { buildMockProfileFromPayload } from './mockProfileFromPayload'
 import { normalizeActionPlanOut } from '../utils/planDisplay'
 import { parseRadarApiResponse } from '../utils/radarApi'
 import { getOrCreateSessionId } from '../utils/session'
-import { extractApiErrorMessage, isForceProgressMock } from '../utils/apiErrors'
+import { extractApiErrorMessage, isBackendUnreachable, isForceProgressMock } from '../utils/apiErrors'
 import {
   addMockTasksFromWeakSkills,
   ensureMockProgress,
   getMockProgress,
   initMockProgress,
-  mockHasProfileDemo,
   normalizeProgressResponse,
   toggleMockTask,
 } from '../mocks/mockProgress'
@@ -139,6 +137,7 @@ async function withProgressFallback(apiCall, mockCall, label, forcedMockReason) 
     const data = await apiCall()
     return { data, dataSource: 'api' }
   } catch (err) {
+    if (!isBackendUnreachable(err)) throw err
     logOfflineFallback(label, err)
     const data = await mockCall()
     return {
@@ -146,6 +145,23 @@ async function withProgressFallback(apiCall, mockCall, label, forcedMockReason) 
       dataSource: 'mock',
       fallbackDetail: extractApiErrorMessage(err, 'Usando datos locales'),
     }
+  }
+}
+
+/**
+ * Mock solo si el backend no responde (red). Errores HTTP se propagan.
+ * @template T
+ * @param {() => Promise<T>} apiCall
+ * @param {() => T | Promise<T>} mockCall
+ * @param {string} label
+ */
+async function withOfflineMockFallback(apiCall, mockCall, label) {
+  try {
+    return await apiCall()
+  } catch (err) {
+    if (!isBackendUnreachable(err)) throw err
+    logOfflineFallback(label, err)
+    return mockCall()
   }
 }
 
@@ -168,6 +184,7 @@ export async function createProfile(payload) {
     const { data } = await api.post('/profile', payload, { timeout: 120000 })
     return data
   } catch (err) {
+    if (!isBackendUnreachable(err)) throw err
     logOfflineFallback('createProfile', err)
     return buildMockProfileFromPayload(payload)
   }
@@ -313,13 +330,14 @@ export async function postProfileAnalyze(
   sessionId = getOrCreateSessionId(),
   profile = null,
 ) {
-  try {
-    const { data } = await api.post(`/profile/${sessionId}/analyze`, {}, { timeout: 120000 })
-    return data
-  } catch (err) {
-    logOfflineFallback('postProfileAnalyze', err)
-    return buildMockAnalysisFromProfile(profile)
-  }
+  return withOfflineMockFallback(
+    async () => {
+      const { data } = await api.post(`/profile/${sessionId}/analyze`, {}, { timeout: 120000 })
+      return data
+    },
+    () => buildMockAnalysisFromProfile(profile),
+    'postProfileAnalyze',
+  )
 }
 
 /**
@@ -331,15 +349,16 @@ export async function postActionPlan(
   sessionId = getOrCreateSessionId(),
   profile = null,
 ) {
-  try {
-    const { data } = await api.post(`/profile/${sessionId}/action-plan`, {}, { timeout: 120000 })
-    const normalized = normalizeActionPlanOut(data)
-    if (!normalized) throw new Error('Respuesta de action-plan inválida')
-    return normalized
-  } catch (err) {
-    logOfflineFallback('postActionPlan', err)
-    return buildMockPlanFromProfile(profile)
-  }
+  return withOfflineMockFallback(
+    async () => {
+      const { data } = await api.post(`/profile/${sessionId}/action-plan`, {}, { timeout: 120000 })
+      const normalized = normalizeActionPlanOut(data)
+      if (!normalized) throw new Error('Respuesta de action-plan inválida')
+      return normalized
+    },
+    () => buildMockPlanFromProfile(profile),
+    'postActionPlan',
+  )
 }
 
 /**
@@ -353,15 +372,16 @@ export async function getRadarData(
   profile = null,
   jobs = [],
 ) {
-  try {
-    const { data } = await api.get(`/profile/${sessionId}/radar-data`)
-    const parsed = parseRadarApiResponse(data)
-    if (!parsed) throw new Error('Respuesta radar inválida')
-    return parsed
-  } catch (err) {
-    logOfflineFallback('getRadarData', err)
-    return buildMockRadarFromProfile(profile, jobs)
-  }
+  return withOfflineMockFallback(
+    async () => {
+      const { data } = await api.get(`/profile/${sessionId}/radar-data`)
+      const parsed = parseRadarApiResponse(data)
+      if (!parsed) throw new Error('Respuesta radar inválida')
+      return parsed
+    },
+    () => buildMockRadarFromProfile(profile, jobs),
+    'getRadarData',
+  )
 }
 
 /**
@@ -377,17 +397,18 @@ export async function getTimelineData(
   plan = null,
   jobs = [],
 ) {
-  try {
-    const { data } = await api.get(`/profile/${sessionId}/timeline-data`)
-    return data?.timeline ?? data ?? null
-  } catch (err) {
-    logOfflineFallback('getTimelineData', err)
-    return buildMockTimelineFromProfile(profile, plan, jobs)
-  }
+  return withOfflineMockFallback(
+    async () => {
+      const { data } = await api.get(`/profile/${sessionId}/timeline-data`)
+      return data?.timeline ?? data ?? null
+    },
+    () => buildMockTimelineFromProfile(profile, plan, jobs),
+    'getTimelineData',
+  )
 }
 
 /**
- * Secuencia Plan 2 tras POST /profile. Si el backend/BD falla, rellena mocks al perfil.
+ * Secuencia Plan 2 tras POST /profile. Cada endpoint usa mock solo si el backend no responde.
  * @param {string} sessionId
  * @param {import('../store/useProfileStore').SavedProfile | null} [profile]
  */
@@ -395,21 +416,13 @@ export async function loadResultsBundle(sessionId, profile = null) {
   const city = profile?.ciudad
 
   const analysis = await postProfileAnalyze(sessionId, profile)
-
   const jobs = await getRecommendedJobs(sessionId, profile)
   const market = await getMarketDashboard(city ? { city } : {}, profile, sessionId)
   const plan = await postActionPlan(sessionId, profile)
   const radar = await getRadarData(sessionId, profile, jobs)
   const timeline = await getTimelineData(sessionId, profile, plan, jobs)
 
-  if (!profile) {
-    return { jobs, market, plan, radar, timeline, analysis }
-  }
-
-  return fillResultsFallbacks(
-    { jobs, market, plan, radar, timeline, analysis },
-    profile,
-  )
+  return { jobs, market, plan, radar, timeline, analysis }
 }
 
 /**
@@ -433,13 +446,14 @@ export async function getRecommendedJobs(
   sessionId = getOrCreateSessionId(),
   profile = null,
 ) {
-  try {
-    const { data } = await api.get(`/jobs/recommended/${sessionId}`)
-    return Array.isArray(data) && data.length ? data : buildMockJobsFromProfile(profile)
-  } catch (err) {
-    logOfflineFallback('getRecommendedJobs', err)
-    return buildMockJobsFromProfile(profile)
-  }
+  return withOfflineMockFallback(
+    async () => {
+      const { data } = await api.get(`/jobs/recommended/${sessionId}`)
+      return Array.isArray(data) ? data : []
+    },
+    () => buildMockJobsFromProfile(profile),
+    'getRecommendedJobs',
+  )
 }
 
 /**
@@ -449,17 +463,18 @@ export async function getRecommendedJobs(
  * @returns {Promise<import('../store/useProfileStore').MarketDashboard>}
  */
 export async function getMarketDashboard(filters = {}, profile = null, sessionId = null) {
-  try {
-    if (sessionId) {
-      const { data } = await api.get(`/market/dashboard/${sessionId}`)
+  return withOfflineMockFallback(
+    async () => {
+      if (sessionId) {
+        const { data } = await api.get(`/market/dashboard/${sessionId}`)
+        return data
+      }
+      const { data } = await api.get('/market/dashboard', { params: filters })
       return data
-    }
-    const { data } = await api.get('/market/dashboard', { params: filters })
-    return data
-  } catch (err) {
-    logOfflineFallback('getMarketDashboard', err)
-    return buildMockMarketFromProfile({ ...profile, ciudad: filters.city ?? profile?.ciudad })
-  }
+    },
+    () => buildMockMarketFromProfile({ ...profile, ciudad: filters.city ?? profile?.ciudad }),
+    'getMarketDashboard',
+  )
 }
 
 /**
@@ -488,8 +503,9 @@ export async function hasProfile(userId) {
       session_id: data?.session_id ?? null,
     }
   } catch (err) {
+    if (!isBackendUnreachable(err)) throw err
     logOfflineFallback('hasProfile', err)
-    return mockHasProfileDemo()
+    return { has_profile: false, session_id: null }
   }
 }
 
@@ -504,16 +520,32 @@ export async function getProgress(
   plan = null,
   profile = null,
 ) {
-  return withProgressFallback(
-    async () => {
-      const { data } = await api.get(`/progress/${sessionId}`)
-      const normalized = normalizeProgressResponse(data)
-      if (!normalized) throw new Error('Respuesta de progreso inválida')
-      return normalized
-    },
-    () => getMockProgress(sessionId, plan, profile),
-    'getProgress',
-  )
+  if (isForceProgressMock()) {
+    const data = getMockProgress(sessionId, plan, profile)
+    return {
+      data,
+      dataSource: 'mock',
+      fallbackDetail: 'Modo demo forzado (VITE_FORCE_PROGRESS_MOCK)',
+    }
+  }
+
+  try {
+    const { data } = await api.get(`/progress/${sessionId}`)
+    const normalized = normalizeProgressResponse(data)
+    if (!normalized) throw new Error('Respuesta de progreso inválida')
+    return { data: normalized, dataSource: 'api' }
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      return { data: null, dataSource: 'api' }
+    }
+    if (!isBackendUnreachable(err)) throw err
+    logOfflineFallback('getProgress', err)
+    return {
+      data: getMockProgress(sessionId, plan, profile),
+      dataSource: 'mock',
+      fallbackDetail: extractApiErrorMessage(err, 'Usando datos locales'),
+    }
+  }
 }
 
 /**
@@ -605,7 +637,10 @@ export async function startInterview(skill, role = null, sessionId = getOrCreate
       })
       const normalized = buildApiInterviewSession(interviewId)
       if (!normalized) throw new Error('Respuesta entrevista inválida')
-      return normalized
+      const questionTexts = questions.map((q) =>
+        String(/** @type {{ texto?: string, text?: string }} */ (q).texto ?? q.text ?? ''),
+      )
+      return { ...normalized, question_texts: questionTexts }
     },
     () => startMockInterview(sessionId, skill, role),
     'startInterview',

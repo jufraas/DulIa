@@ -257,7 +257,7 @@ export function buildMockAnalysisFromProfile(profile) {
 }
 
 /**
- * Completa cualquier hueco del bundle con mocks personalizados al perfil.
+ * @deprecated Ya no rellena vacíos con mock. Usar solo en tests legacy.
  * @param {{
  *   jobs?: import('../store/useProfileStore').Job[]
  *   market?: import('../store/useProfileStore').MarketDashboard | null
@@ -266,17 +266,14 @@ export function buildMockAnalysisFromProfile(profile) {
  *   timeline?: unknown
  *   analysis?: unknown
  * }} partial
- * @param {import('../store/useProfileStore').SavedProfile | null | undefined} profile
  */
-export function fillResultsFallbacks(partial, profile) {
-  const jobs =
-    partial.jobs?.length ? partial.jobs : buildMockJobsFromProfile(profile)
-  const market = partial.market ?? buildMockMarketFromProfile(profile)
-  const plan = partial.plan ?? buildMockPlanFromProfile(profile)
-  const radar = partial.radar ?? buildMockRadarFromProfile(profile, jobs)
-  const timeline =
-    partial.timeline ?? buildMockTimelineFromProfile(profile, plan, jobs)
-  const analysis = partial.analysis ?? buildMockAnalysisFromProfile(profile)
-
-  return { jobs, market, plan, radar, timeline, analysis }
+export function fillResultsFallbacks(partial) {
+  return {
+    jobs: partial.jobs ?? [],
+    market: partial.market ?? null,
+    plan: partial.plan ?? null,
+    radar: partial.radar ?? null,
+    timeline: partial.timeline ?? null,
+    analysis: partial.analysis ?? null,
+  }
 }

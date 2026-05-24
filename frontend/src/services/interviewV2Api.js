@@ -1,6 +1,5 @@
-import axios from 'axios'
 import api from './api'
-import { extractApiErrorMessage, isForceProgressMock } from '../utils/apiErrors'
+import { extractApiErrorMessage, isBackendUnreachable, isForceProgressMock } from '../utils/apiErrors'
 import {
   abortMockInterviewV2,
   fetchMockInterviewStateV2,
@@ -44,9 +43,7 @@ async function withInterviewV2Fallback(apiCall, mockCall, label) {
   try {
     return { data: await apiCall(), dataSource: 'api' }
   } catch (err) {
-    if (axios.isAxiosError(err) && err.response?.status === 404 && label.includes('start')) {
-      throw err
-    }
+    if (!isBackendUnreachable(err)) throw err
     logFallback(label, err)
     return {
       data: await mockCall(),

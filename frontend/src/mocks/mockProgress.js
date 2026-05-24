@@ -1,5 +1,6 @@
 import { buildMockPlanFromProfile } from '../services/mockPlan.js'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../utils/planDisplay.js'
+import { computeCurrentDay, resolveNextMilestone } from '../utils/progressDay.js'
 
 /** @typedef {'30' | '60' | '90'} PlanPhase */
 
@@ -38,6 +39,8 @@ import { planPhaseToDisplay, planToDisplayWeeks } from '../utils/planDisplay.js'
  * @property {PhaseProgress[]} phases
  * @property {ProgressMilestone | null} next_milestone
  * @property {number} unlock_threshold_pct
+ * @property {string} [started_at] — mock/offline: inicio del plan (ISO)
+ * @property {ProgressMilestone[]} [milestones_catalog] — mock: hitos del plan para recalcular
  */
 
 export const UNLOCK_THRESHOLD_PCT = 80
@@ -191,6 +194,33 @@ export function tasksFromPlan(plan, options = {}) {
 }
 
 /**
+ * Recalcula current_day y next_milestone desde started_at (paridad con GET /progress API).
+ * @param {ProgressState} state
+ */
+function syncProgressDay(state) {
+  state.current_day = computeCurrentDay(state.started_at)
+  if (state.milestones_catalog?.length) {
+    state.next_milestone = resolveNextMilestone(state.milestones_catalog, state.current_day)
+  }
+  return state
+}
+
+/**
+ * @param {unknown[]} milestones
+ * @returns {ProgressMilestone[]}
+ */
+function normalizeMilestones(milestones) {
+  if (!Array.isArray(milestones)) return []
+  return milestones
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => {
+      const m = /** @type {{ dia?: number, logro?: string }} */ (item)
+      return { dia: Number(m.dia ?? 0), logro: String(m.logro ?? '') }
+    })
+    .filter((m) => m.dia > 0)
+}
+
+/**
  * @param {string} sessionId
  * @param {import('../store/useProfileStore').ActionPlan | null | undefined} plan
  * @param {import('../store/useProfileStore').SavedProfile | null | undefined} [profile]
@@ -199,34 +229,22 @@ export function tasksFromPlan(plan, options = {}) {
 export function buildMockProgressState(sessionId, plan, profile = null) {
   const resolvedPlan = plan?.semanas?.length ? plan : buildMockPlanFromProfile(profile)
   const tasks = tasksFromPlan(resolvedPlan, { precompleteFirst: 2 })
-  const milestones = Array.isArray(resolvedPlan.milestones) ? resolvedPlan.milestones : []
+  const milestones = normalizeMilestones(resolvedPlan.milestones)
+  const started_at = new Date().toISOString()
+  const current_day = computeCurrentDay(started_at)
   const global_pct = globalCompletionPct(tasks)
   const active_phase = resolveActivePhase(tasks)
 
-  /** @type {ProgressMilestone | null} */
-  let next_milestone = null
-  for (const item of milestones) {
-    if (!item || typeof item !== 'object') continue
-    const m = /** @type {{ dia?: number, logro?: string }} */ (item)
-    const dia = Number(m.dia ?? 0)
-    if (dia > 12) {
-      next_milestone = { dia, logro: String(m.logro ?? '') }
-      break
-    }
-  }
-  if (!next_milestone && milestones[0]) {
-    const m = /** @type {{ dia?: number, logro?: string }} */ (milestones[0])
-    next_milestone = { dia: Number(m.dia ?? 30), logro: String(m.logro ?? '') }
-  }
-
   return {
     session_id: sessionId,
-    current_day: 12,
+    started_at,
+    current_day,
     global_pct,
     active_phase,
     tasks,
     phases: buildPhaseProgress(tasks),
-    next_milestone,
+    milestones_catalog: milestones,
+    next_milestone: resolveNextMilestone(milestones, current_day),
     unlock_threshold_pct: UNLOCK_THRESHOLD_PCT,
   }
 }
@@ -238,7 +256,11 @@ export function buildMockProgressState(sessionId, plan, profile = null) {
  */
 export function ensureMockProgress(sessionId, plan = null, profile = null) {
   const existing = progressBySession.get(sessionId)
-  if (existing) return structuredClone(existing)
+  if (existing) {
+    syncProgressDay(existing)
+    progressBySession.set(sessionId, existing)
+    return structuredClone(existing)
+  }
 
   const created = buildMockProgressState(sessionId, plan, profile)
   progressBySession.set(sessionId, created)
@@ -285,6 +307,7 @@ export function toggleMockTask(sessionId, taskId, completed) {
   state.global_pct = globalCompletionPct(state.tasks)
   state.active_phase = resolveActivePhase(state.tasks)
   state.phases = buildPhaseProgress(state.tasks)
+  syncProgressDay(state)
   progressBySession.set(sessionId, state)
   return structuredClone(state)
 }
@@ -296,6 +319,8 @@ export function toggleMockTask(sessionId, taskId, completed) {
 export function addMockTasksFromWeakSkills(sessionId, weakSkills) {
   const state = progressBySession.get(sessionId)
   if (!state) return null
+
+  syncProgressDay(state)
 
   const skills = (weakSkills ?? []).map((s) => String(s).trim()).filter(Boolean)
   skills.forEach((skill, i) => {
@@ -312,6 +337,7 @@ export function addMockTasksFromWeakSkills(sessionId, weakSkills) {
 
   state.global_pct = globalCompletionPct(state.tasks)
   state.phases = buildPhaseProgress(state.tasks)
+  syncProgressDay(state)
   progressBySession.set(sessionId, state)
   return structuredClone(state)
 }
@@ -349,7 +375,7 @@ export function normalizeProgressResponse(data) {
 
   return {
     session_id: String(raw.session_id ?? ''),
-    current_day: Number(raw.current_day ?? 1),
+    current_day: Math.min(Math.max(Number(raw.current_day ?? 1), 1), 90),
     global_pct: Number(raw.global_pct ?? 0),
     active_phase: /** @type {PlanPhase} */ (raw.active_phase ?? '30'),
     tasks: tasks.map((item, index) => {

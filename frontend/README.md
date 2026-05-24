@@ -12,9 +12,10 @@ npm install
 npm run dev          # http://localhost:5173
 npm run build        # verificar antes de push
 npm run lint         # ESLint (solo src/ + config; ver abajo)
-npm run test:progress   # mini tests mocks progreso/entrevista (11 tests, sin Vitest)
-npm run test:interview-v2   # smoke entrevista conversacional V2 (5 tests)
-npm run test:progress:api   # smoke E2E contra backend :8000 (opcional)
+npm run test:progress        # progreso + entrevista quiz (13 tests, sin Vitest)
+npm run test:api-fallback    # política API-first / isBackendUnreachable (5 tests)
+npm run test:interview-v2    # smoke entrevista conversacional V2 (5 tests)
+npm run test:progress:api    # smoke E2E contra backend :8000 (opcional)
 ```
 
 ## Variables de entorno
@@ -80,7 +81,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 7. `/resultados` → análisis IA, plan (tabs), radar, timeline, coach; enlace a `/vacantes`.
 8. PDF (`generateAnalysisPdf.jsx`): bloques por sección → html2canvas (PNG) → jsPDF; fondo oscuro en cada hoja (lazy).
 
-Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizados al perfil. El plan 30d en mock usa plantilla (`mockPlan.js`); con backend OK llega desde `POST .../action-plan`.
+Si el backend **no responde** (sin red), `api.js` usa mocks personalizados al perfil (`mockResultsBundle.js`, `mockProgress.js`, etc.). Errores HTTP (4xx/5xx) se propagan; respuestas vacías del API (`[]`, `null`) no se rellenan con demo. `current_day` del progreso: backend desde `started_at`; mock en `utils/progressDay.js`.
 
 ### API cliente (`services/api.js`)
 
@@ -95,13 +96,13 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `getRadarData` | GET `/profile/{id}/radar-data` |
 | `postCoachChat` | POST `/coach/chat` |
 | `linkSession` | POST `/auth/link-session` (tras login, best-effort) |
-| `hasProfile` | GET `/user/has-profile` (guard post-login; mock demo) |
+| `hasProfile` | GET `/user/has-profile` (guard post-login; offline → `has_profile: false`) |
 | `getProgress` / `toggleTask` / `initProgress` | Progreso del plan 30-60-90 — API o mock (`dataSource` en store) |
 | `startInterview` / `submitAnswer` / `finishInterview` | Mock interview quiz V1 por skill |
 | `interviewV2Api` / `useInterviewV2Store` | Entrevista conversacional V2 — mock fallback hasta B8 |
 | `interviewHistory` / `addTasksFromWeakSkills` | Historial + tareas desde skills débiles |
 
-Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`, `src/mocks/mockInterviewV2.js`. Stores: `useProgressStore`, `useInterviewStore`, `useInterviewV2Store`. UI progreso: `components/progress/`. Entrevista V2: `components/interview/v2/`, `pages/InterviewV2Page.jsx`. Utilidades: `utils/apiErrors.js`, `utils/progressScroll.js`, `utils/interviewV2Display.js`. Env: `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local; `VITE_INTERVIEW_VERSION=v2` (default).
+Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`, `src/mocks/mockInterviewV2.js`. Stores: `useProgressStore`, `useInterviewStore`, `useInterviewV2Store`. UI progreso: `components/progress/`. Entrevista V2: `components/interview/v2/`, `pages/InterviewV2Page.jsx`. Utilidades: `utils/apiErrors.js` (`isBackendUnreachable`), `utils/progressDay.js`, `utils/progressScroll.js`, `utils/interviewV2Display.js`. Env: `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local; `VITE_INTERVIEW_VERSION=v2` (default).
 
 ### Nav global (`SiteHeader`)
 

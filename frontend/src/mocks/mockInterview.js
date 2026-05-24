@@ -22,6 +22,7 @@
  * @property {InterviewQuestion} current_question
  * @property {number} answers_count
  * @property {'active' | 'finished'} status
+ * @property {string[]} [question_texts]
  */
 
 /**
@@ -75,6 +76,7 @@ function questionText(skill, index) {
  */
 export function startMockInterview(sessionId, skill, role = null) {
   const id = `mock-interview-${sessionCounter++}`
+  const question_texts = INTERVIEW_QUESTION_TEMPLATES.map((_, i) => questionText(skill, i))
   const session = {
     id,
     session_id: sessionId,
@@ -82,9 +84,10 @@ export function startMockInterview(sessionId, skill, role = null) {
     role: role ?? null,
     current_question: {
       index: 1,
-      text: questionText(skill, 0),
-      total: INTERVIEW_QUESTION_TEMPLATES.length,
+      text: question_texts[0],
+      total: question_texts.length,
     },
+    question_texts,
     answers_count: 0,
     status: /** @type {'active'} */ ('active'),
     answers: [],

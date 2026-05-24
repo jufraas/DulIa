@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · UX polish (nav, copy, CTA progreso) + Entrevista V2 (M4) + Mi Progreso (M2/M3).
+**Última actualización:** 2026-05-23 · Política API-first (mock solo offline) + `current_day` dinámico en progreso.
 
 ---
 
@@ -20,7 +20,8 @@
 | `GET market/dashboard?city=...` | ✅ | Fallback global; reservado para anónimo sin perfil |
 | Labels analyze (`area`) | ✅ | `humanizeArea()` en `analysisDisplay.js` — snake_case → español legible |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
-| Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
+| Fallbacks offline | ✅ | Solo sin red (`isBackendUnreachable`); 4xx/5xx propagan error |
+| `current_day` progreso | ✅ | Backend: desde `started_at` (día 1…90); mock: `utils/progressDay.js` |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
 | Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
@@ -72,6 +73,7 @@ Script opcional: `../scripts/setup-env.sh`. Reiniciar uvicorn y `npm run dev` tr
 | `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend (opcional) |
 | `VITE_INTERVIEW_VERSION` | `v2` (default chat) o `v1`; quiz legacy también en `?legacy=1` |
 | `VITE_FORCE_INTERVIEW_MOCK` | `true` — fuerza `mockInterviewV2` sin llamar a `/interview/v2/*` |
+| `VITE_FORCE_PROGRESS_MOCK` | `true` — fuerza mock en progreso + entrevista quiz V1 |
 
 | Infra local | Comando / nota |
 |-------------|----------------|
@@ -374,10 +376,23 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 ### Modo real — qué esperar tras Fase 1 backend
 
 1. Tras el wizard, Network debe mostrar **200** en: `analyze`, `action-plan`, `radar-data`, `timeline-data`, `dashboard`.
-2. Si alguno falla, el front **sigue mostrando UI** con mocks (`mockPlan.js`, `ProfileSummary` fijo) — no confundir con IA.
-3. **Coach:** si ves «fortalecer una habilidad técnica esta semana…» es `mockCoachChat.js` — revisa Network en `/coach/chat` (timeout 15 s → 60 s; errores API ya no caen al mock).
-4. Limpiar cache: borrar claves `dulia_*` en `localStorage` y repetir wizard.
-5. Troubleshooting detallado: [ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse](ENDPOINTS.md).
+2. Si algún endpoint responde **4xx/5xx**, el front muestra el error — **no** sustituye mocks silenciosamente. Mock local solo si no hay respuesta HTTP (backend caído / red).
+3. Respuestas **200 vacías** (p. ej. `GET /jobs/recommended` → `[]`) se respetan; no se inventan vacantes demo.
+4. **Progreso:** `GET /progress/{id}` → **404** dispara `POST /progress/init` en `/progreso`; mock offline no bloquea el init.
+5. **Coach:** mock solo si no hay red **y** `/health` indica `mock_data: true`.
+6. Limpiar cache: borrar claves `dulia_*` en `localStorage` y repetir wizard.
+7. Troubleshooting detallado: [ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse](ENDPOINTS.md).
+
+### Política mock (frontend)
+
+| Situación | Comportamiento |
+|-----------|----------------|
+| API responde 200 (aunque vacío) | Usar respuesta real |
+| API responde 4xx/5xx | Error al usuario; sin mock |
+| Sin red / timeout | Mock offline (`withOfflineMockFallback`, `withProgressFallback`) |
+| `VITE_FORCE_*_MOCK=true` | Mock forzado (solo dev) |
+
+Utilidad: `utils/apiErrors.js` → `isBackendUnreachable()`. Tests: `npm run test:api-fallback`, `npm run test:progress`.
 
 ---
 

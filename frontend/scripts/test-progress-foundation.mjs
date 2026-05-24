@@ -23,6 +23,7 @@ import {
 import { buildMockPlanFromProfile } from '../src/services/mockPlan.js'
 import { getTaskScrollTargetId } from '../src/utils/progressScroll.js'
 import { extractApiErrorMessage } from '../src/utils/apiErrors.js'
+import { computeCurrentDay, resolveNextMilestone } from '../src/utils/progressDay.js'
 
 let passed = 0
 let failed = 0
@@ -79,11 +80,34 @@ await test('findProgressTaskByLabel resuelve tarea del plan', () => {
   assert(found?.id === sample.id, 'debe resolver por fase + label')
 })
 
-await test('mock progress calcula % global', () => {
+await test('mock progress calcula % global y día 1 al iniciar', () => {
   const state = buildMockProgressState('sess-test', plan, profile)
   assert(state.global_pct >= 0 && state.global_pct <= 100, 'pct inválido')
-  assert(state.current_day === 12, 'día demo esperado 12')
+  assert(state.current_day === 1, `día inicial esperado 1, got ${state.current_day}`)
+  assert(state.started_at, 'debe guardar started_at')
   assert(state.phases.length === 3, '3 fases')
+})
+
+await test('computeCurrentDay avanza por días calendario (tope 90)', () => {
+  const start = new Date(2026, 0, 1)
+  const nextDay = new Date(2026, 0, 2)
+  const farFuture = new Date(2026, 0, 1)
+  farFuture.setDate(farFuture.getDate() + 200)
+
+  assert(computeCurrentDay(start, start) === 1, 'mismo día → 1')
+  assert(computeCurrentDay(start, nextDay) === 2, 'día siguiente → 2')
+  assert(computeCurrentDay(start, farFuture) === 90, 'más de 90 días → tope 90')
+})
+
+await test('resolveNextMilestone usa current_day, no valor fijo', () => {
+  const milestones = [
+    { dia: 7, logro: 'Semana 1' },
+    { dia: 30, logro: 'Mes 1' },
+  ]
+  const next = resolveNextMilestone(milestones, 1)
+  assert(next?.dia === 7, 'día 1 → próximo hito día 7')
+  assert(resolveNextMilestone(milestones, 7)?.dia === 30, 'día 7 → próximo hito día 30')
+  assert(resolveNextMilestone(milestones, 90) === null, 'día 90 → sin hitos futuros')
 })
 
 await test('fase 60 bloqueada si fase 30 < 80%', () => {
