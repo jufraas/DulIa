@@ -177,7 +177,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Nav (6 ítems) | Contenido |
 |---------------|-----------|
-| Tu análisis | `AnalysisOverviewGrid` — score + PDF + **Registrar mi progreso** + resumen (580px desktop) |
+| Tu análisis | `AnalysisOverviewGrid` — score compacto + PDF (`pdf-card-in-grid`) + **Registrar mi progreso** (compacto) + resumen (580px desktop) |
 | Mercado | `MarketThermometer` |
 | Oportunidades | `OpportunitiesAndPlan` (vacantes + plan 30d) |
 | Radar match | `RadarMatch` |
@@ -204,7 +204,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Sección | Componente |
 |---------|------------|
-| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` + `PdfDownloadCard` + `RegisterProgressButton`) vs `ProfileSummary` |
+| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq.: `ScoreCard` embedded + `PdfDownloadCard` (altura natural, clase `pdf-card-in-grid`) + `RegisterProgressButton` compact vs `ProfileSummary` |
 | Termómetro mercado | `MarketThermometer` — scope perfil, desglose geo, skills demandadas (`tienes`), modalidad/fuente (`marketDisplay.js`) |
 | Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
 | Match radar | `RadarMatch` |

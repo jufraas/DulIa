@@ -29,8 +29,12 @@ export default function AnalysisOverviewGrid({
       <div className="card-dl analysis-overview-grid__left">
         <ScoreCard score={topScore} comparativa={comparativa} embedded />
         <div className="analysis-overview-grid__actions">
-          <PdfDownloadCard onDownload={onDownloadPdf} downloading={downloadingPdf} />
-          <RegisterProgressButton />
+          <PdfDownloadCard
+            onDownload={onDownloadPdf}
+            downloading={downloadingPdf}
+            className="pdf-card-in-grid"
+          />
+          <RegisterProgressButton compact className="w-full" />
         </div>
       </div>
       <ProfileSummary

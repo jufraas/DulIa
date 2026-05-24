@@ -23,7 +23,7 @@ El export PDF usaba jsPDF imperativo (~230 líneas) difícil de mantener y desal
 ### 2. Layout «Tu análisis»
 
 - Nuevo `AnalysisOverviewGrid.jsx`: grid 2 columnas en desktop.
-- Columna izquierda: **un solo** `card-dl` con `ScoreCard` (`embedded`) + `PdfDownloadCard` (`flex-1`).
+- Columna izquierda: **un solo** `card-dl` con `ScoreCard` (`embedded`, compacto) + `PdfDownloadCard` (`pdf-card-in-grid`, altura natural) + `RegisterProgressButton` (compacto).
 - Columna derecha: `ProfileSummary` (`profile-summary-card`).
 - CSS en `dulia-kit.css`: ambas columnas **580px** en `lg+`; scroll interno solo en el resumen.
 
@@ -39,7 +39,7 @@ El export PDF usaba jsPDF imperativo (~230 líneas) difícil de mantener y desal
 |---------|---------|
 | Bundle PDF | Chunk lazy ~600KB (html2canvas) al descargar |
 | Mantenimiento | Misma estructura visual que pantalla; cambios en JSX del PDF |
-| Desktop | Score fijo arriba; PDF llena el resto del contenedor izquierdo |
+| Desktop | Score fijo arriba; PDF + CTA progreso apilados sin estirar (`flex: 0 0 auto`) para evitar recorte en 580px |
 | Móvil | Columnas apiladas; resumen con `max-height` y scroll |
 
 ## Referencias

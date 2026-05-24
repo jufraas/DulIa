@@ -18,7 +18,7 @@ export default function ScoreCard({ score, comparativa, embedded = false, classN
     <div
       className={
         embedded
-          ? `flex min-h-[320px] shrink-0 flex-col items-center justify-center gap-3 border-b border-[rgba(168,85,247,0.12)] px-6 py-5 ${className}`
+          ? `flex min-h-[296px] shrink-0 flex-col items-center justify-center gap-2.5 border-b border-[rgba(168,85,247,0.12)] px-6 py-4 ${className}`
           : `card-dl flex min-h-[360px] shrink-0 flex-col items-center justify-center gap-3 p-6 ${className}`
       }
       style={embedded ? undefined : { boxShadow: 'var(--glow-violet-strong)' }}

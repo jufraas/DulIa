@@ -7,7 +7,7 @@ import { Download } from 'lucide-react'
 export default function PdfDownloadCard({ onDownload, downloading = false, className = '' }) {
   return (
     <div
-      className={`pdf-card-anim relative flex min-h-[168px] flex-1 flex-col overflow-hidden rounded-[24px] p-5 ${className}`}
+      className={`pdf-card-anim relative flex flex-col overflow-hidden rounded-[24px] p-5 ${className.includes('pdf-card-in-grid') ? '' : 'min-h-[168px] flex-1'} ${className}`}
       style={{
         background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 60%, #7C3AED 100%)',
         backgroundSize: '200% 200%',

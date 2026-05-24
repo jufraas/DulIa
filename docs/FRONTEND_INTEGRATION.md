@@ -24,7 +24,7 @@
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
 | `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
 | Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
-| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
+| Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; PDF en grid sin `flex-1` (evita recorte); `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones resultados | ✅ | 6 secciones; label **Oportunidades** (antes «Vacantes y plan»); `RegisterProgressButton` en análisis + PDF |
 | Nav global (`SiteHeader`) | ✅ | «Oportunidades» → `/vacantes`; **sin** link Entrevistas en header (acceso vía `/progreso`) |
 | Copy orientado al usuario | ✅ | Sin `session_id` en UI; banners offline/progreso sin jerga de backend; `PrivacyNotice` según auth |
