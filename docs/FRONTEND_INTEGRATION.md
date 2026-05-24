@@ -263,6 +263,13 @@ const { jobs, market, plan, radar, timeline, analysis } =
 // coach → CoachChatBubble (POST /coach/chat aparte del bundle)
 ```
 
+### Coach chat (`POST /coach/chat`)
+
+- **Timeout recomendado:** 60 s (Gemini + function calling puede tardar ~30–45 s).
+- **No usar mock silencioso** en errores 4xx/5xx: mostrar el mensaje de error al usuario.
+- Mock local (`mockCoachChat.js`) solo si el backend no responde **y** `/health` indica `mock_data: true`.
+- Preguntas como «buscar vacantes en Videojuegos» activan `buscar_vacantes_filtradas` en el backend; la respuesta debe mencionar vacantes reales o la ausencia de ellas, no el texto genérico del mock.
+
 ---
 
 ## Rate limits y errores
@@ -280,8 +287,9 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 
 1. Tras el wizard, Network debe mostrar **200** en: `analyze`, `action-plan`, `radar-data`, `timeline-data`, `dashboard`.
 2. Si alguno falla, el front **sigue mostrando UI** con mocks (`mockPlan.js`, `ProfileSummary` fijo) — no confundir con IA.
-3. Limpiar cache: borrar claves `dulia_*` en `localStorage` y repetir wizard.
-4. Troubleshooting detallado: [ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse](ENDPOINTS.md).
+3. **Coach:** si ves «fortalecer una habilidad técnica esta semana…» es `mockCoachChat.js` — revisa Network en `/coach/chat` (timeout 15 s → 60 s; errores API ya no caen al mock).
+4. Limpiar cache: borrar claves `dulia_*` en `localStorage` y repetir wizard.
+5. Troubleshooting detallado: [ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse](ENDPOINTS.md).
 
 ---
 
