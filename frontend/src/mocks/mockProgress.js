@@ -202,6 +202,7 @@ export function buildMockProgressState(sessionId, plan, profile = null) {
   const milestones = Array.isArray(resolvedPlan.milestones) ? resolvedPlan.milestones : []
   const global_pct = globalCompletionPct(tasks)
   const active_phase = resolveActivePhase(tasks)
+  const current_day = 1
 
   /** @type {ProgressMilestone | null} */
   let next_milestone = null
@@ -209,7 +210,7 @@ export function buildMockProgressState(sessionId, plan, profile = null) {
     if (!item || typeof item !== 'object') continue
     const m = /** @type {{ dia?: number, logro?: string }} */ (item)
     const dia = Number(m.dia ?? 0)
-    if (dia > 12) {
+    if (dia > current_day) {
       next_milestone = { dia, logro: String(m.logro ?? '') }
       break
     }
@@ -221,7 +222,7 @@ export function buildMockProgressState(sessionId, plan, profile = null) {
 
   return {
     session_id: sessionId,
-    current_day: 12,
+    current_day,
     global_pct,
     active_phase,
     tasks,

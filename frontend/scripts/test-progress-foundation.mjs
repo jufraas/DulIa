@@ -82,7 +82,7 @@ await test('findProgressTaskByLabel resuelve tarea del plan', () => {
 await test('mock progress calcula % global', () => {
   const state = buildMockProgressState('sess-test', plan, profile)
   assert(state.global_pct >= 0 && state.global_pct <= 100, 'pct inválido')
-  assert(state.current_day === 12, 'día demo esperado 12')
+  assert(state.current_day === 1, 'día inicial esperado 1')
   assert(state.phases.length === 3, '3 fases')
 })
 

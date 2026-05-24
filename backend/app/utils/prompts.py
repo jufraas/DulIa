@@ -1,11 +1,27 @@
 """Carga de system prompts desde docs/PROMPTS.md."""
 
+import os
 import re
 from pathlib import Path
 
-# repo root: backend/app/utils -> parents[3]
-_PROMPTS_FILE = Path(__file__).resolve().parents[3] / "docs" / "PROMPTS.md"
 _cache: dict[str, str] = {}
+
+
+def _resolve_prompts_file() -> Path:
+    """Monorepo local: docs/PROMPTS.md. Railway (root=backend): backend/prompts/PROMPTS.md."""
+    env_path = os.getenv("PROMPTS_FILE", "").strip()
+    if env_path:
+        return Path(env_path)
+
+    here = Path(__file__).resolve()
+    candidates = [
+        here.parents[2] / "prompts" / "PROMPTS.md",
+        here.parents[3] / "docs" / "PROMPTS.md",
+    ]
+    for path in candidates:
+        if path.is_file():
+            return path
+    return candidates[0]
 
 
 def get_prompt(name: str) -> str:
@@ -16,10 +32,11 @@ def get_prompt(name: str) -> str:
     if name in _cache:
         return _cache[name]
 
-    if not _PROMPTS_FILE.is_file():
-        raise FileNotFoundError(f"No se encontró {_PROMPTS_FILE}")
+    prompts_file = _resolve_prompts_file()
+    if not prompts_file.is_file():
+        raise FileNotFoundError(f"No se encontró {prompts_file}")
 
-    contenido = _PROMPTS_FILE.read_text(encoding="utf-8")
+    contenido = prompts_file.read_text(encoding="utf-8")
     # Coincide: ## `CAREER_COACH_SYSTEM` v1.0 ... ``` ... ```
     # Acepta múltiples líneas de metadatos (las que empiezan con >)
     # Permite líneas vacías entre metadatos y backticks
@@ -28,7 +45,7 @@ def get_prompt(name: str) -> str:
     if not match:
         # Debug: mostrar qué encontró
         print(f"DEBUG: Buscando prompt '{name}'")
-        print(f"DEBUG: Archivo existe: {_PROMPTS_FILE.is_file()}")
+        print(f"DEBUG: Archivo existe: {prompts_file.is_file()}")
         print(f"DEBUG: Primeros 200 chars: {contenido[:200]}")
         raise ValueError(f"Prompt '{name}' no encontrado en PROMPTS.md")
 

@@ -140,13 +140,24 @@ def build_phase_progress(tasks: list[dict]) -> list[dict]:
     return phases
 
 
-def _next_milestone(plan: dict) -> Optional[dict]:
+def _current_day_from_started(started_at: datetime | None) -> int:
+    """Días transcurridos desde started_at (1-indexed, cap 90)."""
+    if not started_at:
+        return 1
+    if started_at.tzinfo is None:
+        started_at = started_at.replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    elapsed = (now.date() - started_at.date()).days
+    return max(1, min(90, elapsed + 1))
+
+
+def _next_milestone(plan: dict, current_day: int) -> Optional[dict]:
     milestones = plan.get("milestones") or []
     for item in milestones:
         if not isinstance(item, dict):
             continue
         dia = int(item.get("dia") or 0)
-        if dia > 12:
+        if dia > current_day:
             return {"dia": dia, "logro": str(item.get("logro") or "")}
     if milestones and isinstance(milestones[0], dict):
         m = milestones[0]
@@ -187,14 +198,15 @@ def progress_response_to_m3(
     catalog = build_task_catalog(plan_data)
     completed_b3 = set(stats.completed_tasks)
     tasks = build_m3_tasks(catalog, completed_b3, updated_at=stats.started_at)
+    current_day = _current_day_from_started(stats.started_at)
 
     return {
         "session_id": session_id,
-        "current_day": 12,
+        "current_day": current_day,
         "global_pct": global_completion_pct(tasks),
         "active_phase": resolve_active_phase(tasks),
         "tasks": tasks,
         "phases": build_phase_progress(tasks),
-        "next_milestone": _next_milestone(plan_data or {}),
+        "next_milestone": _next_milestone(plan_data or {}, current_day),
         "unlock_threshold_pct": UNLOCK_THRESHOLD_PCT,
     }
