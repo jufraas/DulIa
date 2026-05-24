@@ -13,6 +13,7 @@ import { useProfileStore } from './useProfileStore'
 /** @typedef {import('../mocks/mockProgress').ProgressState} ProgressState */
 /** @typedef {import('../mocks/mockProgress').ProgressTask} ProgressTask */
 /** @typedef {'week' | 'pending' | 'completed'} TaskFilter */
+/** @typedef {'api' | 'mock'} ProgressDataSource */
 
 /**
  * @param {ProgressTask[]} tasks
@@ -38,6 +39,8 @@ export const useProgressStore = create((set, get) => ({
   loading: false,
   togglingTaskId: /** @type {string | null} */ (null),
   error: '',
+  dataSource: /** @type {ProgressDataSource} */ ('api'),
+  dataSourceDetail: '',
   focusRequest: /** @type {TaskFocusRequest | null} */ (null),
   highlightedTaskId: /** @type {string | null} */ (null),
 
@@ -58,9 +61,14 @@ export const useProgressStore = create((set, get) => ({
     const { savedProfile, plan } = useProfileStore.getState()
     set({ loading: true, error: '' })
     try {
-      const progress = await getProgress(sessionId, plan, savedProfile)
-      set({ progress, loading: false })
-      return progress
+      const result = await getProgress(sessionId, plan, savedProfile)
+      set({
+        progress: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+        loading: false,
+      })
+      return result.data
     } catch (err) {
       set({
         loading: false,
@@ -74,9 +82,14 @@ export const useProgressStore = create((set, get) => ({
     const { savedProfile, plan } = useProfileStore.getState()
     set({ loading: true, error: '' })
     try {
-      const progress = await initProgressApi(sessionId, plan, savedProfile)
-      set({ progress, loading: false })
-      return progress
+      const result = await initProgressApi(sessionId, plan, savedProfile)
+      set({
+        progress: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+        loading: false,
+      })
+      return result.data
     } catch (err) {
       set({
         loading: false,
@@ -125,15 +138,20 @@ export const useProgressStore = create((set, get) => ({
     const sessionId = savedProfile?.session_id ?? getOrCreateSessionId()
 
     try {
-      const progress = await toggleTaskApi(
+      const result = await toggleTaskApi(
         taskId,
         !task.completed,
         sessionId,
         plan,
         savedProfile,
       )
-      set({ progress, togglingTaskId: null })
-      return progress
+      set({
+        progress: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+        togglingTaskId: null,
+      })
+      return result.data
     } catch (err) {
       set({
         progress: previous,
@@ -151,6 +169,8 @@ export const useProgressStore = create((set, get) => ({
       loading: false,
       togglingTaskId: null,
       error: '',
+      dataSource: 'api',
+      dataSourceDetail: '',
       focusRequest: null,
       highlightedTaskId: null,
     }),

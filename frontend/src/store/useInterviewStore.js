@@ -8,10 +8,12 @@ import {
 } from '../services/api'
 import { getOrCreateSessionId } from '../utils/session'
 import { useProfileStore } from './useProfileStore'
+import { useProgressStore } from './useProgressStore'
 
 /** @typedef {import('../mocks/mockInterview').ActiveInterviewSession} ActiveInterviewSession */
 /** @typedef {import('../mocks/mockInterview').InterviewResult} InterviewResult */
 /** @typedef {import('../mocks/mockInterview').InterviewHistoryItem} InterviewHistoryItem */
+/** @typedef {'api' | 'mock'} InterviewDataSource */
 
 export const useInterviewStore = create((set, get) => ({
   activeSession: /** @type {ActiveInterviewSession | null} */ (null),
@@ -20,13 +22,20 @@ export const useInterviewStore = create((set, get) => ({
   loading: false,
   submitting: false,
   error: '',
+  dataSource: /** @type {InterviewDataSource} */ ('api'),
+  dataSourceDetail: '',
 
   fetchHistory: async (userId) => {
     set({ loading: true, error: '' })
     try {
-      const history = await interviewHistoryApi(userId ?? 'demo-user')
-      set({ history, loading: false })
-      return history
+      const result = await interviewHistoryApi(userId ?? 'demo-user')
+      set({
+        history: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+        loading: false,
+      })
+      return result.data
     } catch (err) {
       set({
         loading: false,
@@ -41,9 +50,14 @@ export const useInterviewStore = create((set, get) => ({
       useProfileStore.getState().savedProfile?.session_id ?? getOrCreateSessionId()
     set({ loading: true, error: '', lastResult: null })
     try {
-      const activeSession = await startInterviewApi(skill, role, sessionId)
-      set({ activeSession, loading: false })
-      return activeSession
+      const result = await startInterviewApi(skill, role, sessionId)
+      set({
+        activeSession: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+        loading: false,
+      })
+      return result.data
     } catch (err) {
       set({
         loading: false,
@@ -59,9 +73,14 @@ export const useInterviewStore = create((set, get) => ({
 
     set({ submitting: true, error: '' })
     try {
-      const updated = await submitAnswerApi(session.id, answer)
-      set({ activeSession: updated, submitting: false })
-      return updated
+      const result = await submitAnswerApi(session.id, answer)
+      set({
+        activeSession: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+        submitting: false,
+      })
+      return result.data
     } catch (err) {
       set({
         submitting: false,
@@ -77,14 +96,16 @@ export const useInterviewStore = create((set, get) => ({
 
     set({ loading: true, error: '' })
     try {
-      const lastResult = await finishInterviewApi(session.id, userId ?? 'demo-user')
+      const result = await finishInterviewApi(session.id, userId ?? 'demo-user')
       set({
-        lastResult,
+        lastResult: result.data,
         activeSession: null,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
         loading: false,
       })
       await get().fetchHistory(userId)
-      return lastResult
+      return result.data
     } catch (err) {
       set({
         loading: false,
@@ -94,12 +115,17 @@ export const useInterviewStore = create((set, get) => ({
     }
   },
 
-  addTasksFromWeakSkills: async (weakSkills, userId) => {
+  addTasksFromWeakSkills: async (weakSkills) => {
     const { savedProfile, plan } = useProfileStore.getState()
     const sessionId = savedProfile?.session_id ?? getOrCreateSessionId()
     set({ loading: true, error: '' })
     try {
-      await addTasksFromWeakSkills(weakSkills, sessionId, plan, savedProfile)
+      const result = await addTasksFromWeakSkills(weakSkills, sessionId, plan, savedProfile)
+      useProgressStore.setState({
+        progress: result.data,
+        dataSource: result.dataSource,
+        dataSourceDetail: result.fallbackDetail ?? '',
+      })
       set({ loading: false })
       return true
     } catch (err) {
@@ -108,8 +134,6 @@ export const useInterviewStore = create((set, get) => ({
         error: err instanceof Error ? err.message : 'No pudimos agregar tareas al plan.',
       })
       return false
-    } finally {
-      void userId
     }
   },
 
@@ -123,5 +147,7 @@ export const useInterviewStore = create((set, get) => ({
       loading: false,
       submitting: false,
       error: '',
+      dataSource: 'api',
+      dataSourceDetail: '',
     }),
 }))

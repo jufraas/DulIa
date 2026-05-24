@@ -2,12 +2,12 @@
 
 - **Fecha:** 2026-05-24
 - **Área:** frontend
-- **Estado:** activa — Bloque 2 ✅ (M2.4–M2.8); M3 E2E backend pendiente
+- **Estado:** activa — Bloque 2 ✅ (M2.4–M2.8); **M3 E2E backend ✅**
 - **Autor/es:** Migue (foundation + PlanTimeline), Jufra (auth guard + mock interview UI)
 
 ## Contexto
 
-Con auth opcional Supabase, usuarios que ya completaron el wizard necesitan **seguir su plan 30-60-90** (tareas checkeables, fases bloqueadas) y **practicar entrevistas** por skill. El backend de progreso/interview aún no está en producción; la demo no puede depender de Gemini en vivo.
+Con auth opcional Supabase, usuarios que ya completaron el wizard necesitan **seguir su plan 30-60-90** (tareas checkeables, fases bloqueadas) y **practicar entrevistas** por skill. La demo no puede depender de Gemini en vivo para entrevistas; el backend M3 expone endpoints mock alineados al contrato frontend.
 
 ## Decisión
 
@@ -20,7 +20,7 @@ Con auth opcional Supabase, usuarios que ya completaron el wizard necesitan **se
 | Stores | `useProgressStore.js`, `useInterviewStore.js` |
 | Ruta | `/progreso` protegida con `ProtectedRoute` |
 | Página | `ProgressPage.jsx` — header + barras fase + lista tareas (sin tocar `ThirtyDayPlan` en `/resultados`) |
-| Tests | `npm run test:progress` → `scripts/test-progress-foundation.mjs` (10 tests) |
+| Tests | `npm run test:progress` (11 unit) · `npm run test:progress:api` (smoke E2E) · `pytest tests/test_m3_progress_api.py` (6) |
 
 ### Timeline checkeable (Migue — Bloque 2, M2.4)
 
@@ -66,7 +66,22 @@ Comportamiento M2.4: tabs 30/60/90, checkbox por tarea, UI optimista vía `usePr
 - Mocks no silenciosos en éxito parcial; errores de red caen a demo estable.
 - Unlock fases: **80%** de la fase anterior (`UNLOCK_THRESHOLD_PCT`).
 
-### Contrato API previsto (backend pendiente)
+### E2E backend (Migue — Bloque 3, M3)
+
+| Pieza | Ubicación |
+|-------|-----------|
+| Servicio progreso | `backend/app/services/progress_service.py` — store en memoria, unlock 80%, carga plan vía `action_plan_service` |
+| Servicio entrevista | `backend/app/services/interview_service.py` — 5 preguntas mock, score/feedback |
+| Rutas | `backend/app/routes/progress.py`, `routes/user.py` (progreso + interview + has-profile) |
+| Registro | `backend/main.py` — routers bajo `/api` |
+| Fallback frontend | `withProgressFallback()` en `api.js` — retorna `{ data, dataSource, fallbackDetail? }` |
+| Env demo | `VITE_FORCE_PROGRESS_MOCK=true` en `.env.local` |
+| Banner mock | `ProgressDataSourceBanner.jsx` en `/progreso` |
+| Errores API | `utils/apiErrors.js` — `extractApiErrorMessage()` |
+| Loader entrevista | `components/interview/GeminiThinkingLoader.jsx` (listo para UI J2) |
+| Stores | `dataSource` + `dataSourceDetail` en `useProgressStore`, `useInterviewStore` |
+
+### Contrato API (backend ✅ M3)
 
 ```
 GET    /api/user/has-profile?user_id=
@@ -86,7 +101,7 @@ GET    /api/interview/history?user_id=
 |-------|-------|
 | `useProfileCheck`, redirect post-login | Stores + mocks + `/progreso` shell |
 | Mock Interview UI (J2) | Timeline checkeable en Bloque 2 (`PlanTimeline`) |
-| Nav “Mi Progreso”, empty states | E2E backend real (Bloque 3) |
+| Nav “Mi Progreso”, empty states | E2E backend real (Bloque 3) ✅ |
 
 ## Por qué
 
@@ -94,6 +109,8 @@ GET    /api/interview/history?user_id=
 - No modifica layout congelado de `/resultados`.
 - Mismo patrón mock fallback que el resto del MVP.
 
-## Pendiente (Bloque 3)
+## Pendiente (post-M3)
 
-- M3 — E2E backend real; mocks solo como fallback en demo
+- Persistencia Supabase de `plan_progress` e historial entrevistas (post-MVP)
+- UI entrevista mock (Jufra — J2) consumiendo API + `GeminiThinkingLoader`
+- Gemini real para feedback de entrevista (post-pitch)

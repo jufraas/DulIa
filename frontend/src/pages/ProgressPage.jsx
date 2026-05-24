@@ -8,6 +8,7 @@ import Button from '../components/ui/Button'
 import PlanTimeline from '../components/progress/PlanTimeline'
 import ProgressOverview from '../components/progress/ProgressOverview'
 import TaskList from '../components/progress/TaskList'
+import ProgressDataSourceBanner from '../components/progress/ProgressDataSourceBanner'
 import { useProfileStore } from '../store/useProfileStore'
 import { useProgressStore } from '../store/useProgressStore'
 import ProtectedRoute from '../components/auth/ProtectedRoute'
@@ -18,6 +19,8 @@ function ProgressPageContent() {
   const progress = useProgressStore((s) => s.progress)
   const loading = useProgressStore((s) => s.loading)
   const error = useProgressStore((s) => s.error)
+  const dataSource = useProgressStore((s) => s.dataSource)
+  const dataSourceDetail = useProgressStore((s) => s.dataSourceDetail)
   const fetchProgress = useProgressStore((s) => s.fetchProgress)
   const initProgressAction = useProgressStore((s) => s.initProgress)
 
@@ -66,6 +69,8 @@ function ProgressPageContent() {
               {error}
             </p>
           )}
+
+          <ProgressDataSourceBanner dataSource={dataSource} detail={dataSourceDetail} />
 
           {progress && (
             <>

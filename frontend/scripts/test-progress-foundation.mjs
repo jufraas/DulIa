@@ -22,6 +22,7 @@ import {
 } from '../src/mocks/mockInterview.js'
 import { buildMockPlanFromProfile } from '../src/services/mockPlan.js'
 import { getTaskScrollTargetId } from '../src/utils/progressScroll.js'
+import { extractApiErrorMessage } from '../src/utils/apiErrors.js'
 
 let passed = 0
 let failed = 0
@@ -148,6 +149,11 @@ await test('phaseCompletionPct y globalCompletionPct', () => {
   const pct = globalCompletionPct(tasks)
   assert(pct > 0, 'pct global > 0')
   assert(buildPhaseProgress(tasks).length === 3, 'buildPhaseProgress ok')
+})
+
+await test('extractApiErrorMessage — Error y fallback', () => {
+  assert(extractApiErrorMessage(new Error('falló red')) === 'falló red', 'usa message')
+  assert(extractApiErrorMessage(null, 'fallback') === 'fallback', 'fallback')
 })
 
 console.log('')

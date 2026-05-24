@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:progress": "node scripts/test-progress-foundation.mjs",
+    "test:progress:api": "node scripts/test-progress-api.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

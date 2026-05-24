@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front:** Mi Progreso Bloque 2 completo (M2.4–M2.8). M3 E2E backend pendiente.
+2026-05-24 — **Front + Back:** Mi Progreso M3 E2E completo — API progreso/entrevista en memoria, fallback mock, tests.
 
 ## Estado por módulo
 
@@ -30,7 +30,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
-| `/progreso` | Plan checkeable + fases (protegida) | Migue | ✅ Bloque 2 UI; M3 backend pendiente |
+| `/progreso` | Plan checkeable + fases (protegida) | Migue | ✅ Bloque 2 UI + M3 E2E API |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -69,13 +69,14 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
 | Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
+| Mi Progreso — M3 E2E | ✅ | Backend in-memory; `dataSource` banner; `test:progress:api`; pytest M3 |
 
 ### Pendiente UI (pre-pitch)
 
 | Pieza | Prioridad | Notas |
 |-------|-----------|-------|
 | Deploy Vercel + backend prod | Alta | `VITE_API_URL`, CORS |
-| Prueba E2E back real | Alta | `USE_MOCK_DATA=false` |
+| Prueba E2E back real | ✅ | Progreso + interview smoke (`test:progress:api`); persistencia Supabase post-MVP |
 | Copy landing hardcode | Baja | Prototipos kit `Landing.jsx` / `Wizard.jsx` (huérfanos) |
 
 Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
@@ -97,6 +98,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
 | Híbrido | Cache-first + scrape_queue | ✅ Migraciones 008–009, `queue_service`, `run_queue.py` |
 | Scoring v1.1 | Seniority filter + scores expresivos | ✅ Fases A–D (2026-05-24) |
+| M3 Progreso + interview | Endpoints in-memory + has-profile | ✅ `progress_service`, `interview_service`, rutas `/api/progress/*`, `/api/interview/*` |
 
 ## Leyenda
 
