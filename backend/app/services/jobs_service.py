@@ -1,14 +1,19 @@
 import os
+import unicodedata
+from datetime import datetime, timedelta, timezone
 
 from app.db.jobs_row import normalize_job_row, job_city, job_department
 from app.db.supabase import get_supabase
 from app.models.job import JobOut, ScoreBreakdown, ScoreOut
 from app.services.job_mapper import row_to_job_out
+from app.services.queue_service import request_scrape
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 USE_MOCK = os.getenv("USE_MOCK_DATA", "false").lower() == "true"
+FRESH_HORIZON_HOURS = int(os.getenv("FRESH_HORIZON_HOURS", "48"))
+MIN_FRESH_JOBS = int(os.getenv("MIN_FRESH_JOBS", "10"))
 
 NIVEL_ORDEN = {
     "bachiller": 0,
@@ -37,15 +42,11 @@ async def recomendar_jobs(session_id: str) -> list[JobOut]:
         return []
     perfil = perfil_res.data[0]
 
-    jobs_res = (
-        supabase.table("jobs")
-        .select("*")
-        .eq("active", True)
-        .neq("status", "red")
-        .execute()
+    jobs, encolado = _resolver_jobs_cache(perfil, supabase)
+    logger.info(
+        f"Calculando score para {len(jobs)} vacantes — session_id={session_id}, "
+        f"encolado={encolado}"
     )
-    jobs = jobs_res.data
-    logger.info(f"Calculando score para {len(jobs)} vacantes — session_id={session_id}")
 
     resultados = []
     for raw in jobs:
@@ -59,6 +60,156 @@ async def recomendar_jobs(session_id: str) -> list[JobOut]:
     return [j for _, j in resultados[:TOP_N]]
 
 
+def _perfil_sector(perfil: dict) -> str | None:
+    sectores = perfil.get("sectores_interes") or []
+    return sectores[0] if sectores else None
+
+
+def _normalize_text(value: str) -> str:
+    text = (value or "").strip().lower()
+    return "".join(
+        c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn"
+    )
+
+
+# Palabras clave por sector de perfil (sin acentos) para match flexible en title/desc/sector del job
+_SECTOR_KEYWORDS: dict[str, set[str]] = {
+    "tecnologia": {
+        "tecnologia",
+        "programming",
+        "software",
+        "developer",
+        "desarrollador",
+        "devops",
+        "data",
+        "mobile",
+        "machine learning",
+        "design",
+        "sysadmin",
+        "qa",
+        "tech",
+        "ingenier",
+        "analista",
+        "automatizacion",
+        "ia",
+        "scraping",
+    },
+    "fintech": {"fintech", "finance", "banco", "bank", "pagos", "payments"},
+    "marketing": {"marketing", "growth", "content", "seo", "social"},
+    "agricultura": {"agricultura", "agro", "agriculture", "farm", "campo"},
+}
+
+
+def _sector_matches(perfil_sector: str, haystack: str) -> bool:
+    sector = _normalize_text(perfil_sector)
+    text = _normalize_text(haystack)
+    if not sector:
+        return True
+    if sector in text:
+        return True
+    keywords = _SECTOR_KEYWORDS.get(sector, {sector})
+    return any(kw in text for kw in keywords)
+
+
+def _freshness_cutoff() -> datetime:
+    return datetime.now(timezone.utc) - timedelta(hours=FRESH_HORIZON_HOURS)
+
+
+def _parse_scraped_at(raw_job: dict) -> datetime | None:
+    raw = raw_job.get("scraped_at")
+    if not raw:
+        return None
+    if isinstance(raw, datetime):
+        dt = raw
+    else:
+        try:
+            dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def _is_fresh(raw_job: dict, cutoff: datetime) -> bool:
+    scraped = _parse_scraped_at(raw_job)
+    return scraped is not None and scraped >= cutoff
+
+
+def _matches_profile(raw_job: dict, perfil: dict) -> bool:
+    """Filtro flexible por ciudad/sector del perfil (incluye remoto como match de ciudad)."""
+    job = normalize_job_row(raw_job)
+    ciudad = _normalize_text(perfil.get("ciudad") or "")
+    sector = _perfil_sector(perfil) or ""
+
+    if not ciudad and not sector:
+        return True
+
+    sector_ok = True
+    if sector:
+        haystack = " ".join(
+            [
+                job.get("sector") or "",
+                job.get("title") or "",
+                job.get("description") or "",
+            ]
+        )
+        sector_ok = _sector_matches(sector, haystack)
+
+    city_ok = True
+    if ciudad:
+        jc = _normalize_text(job_city(raw_job))
+        modality = _normalize_text(job.get("modality") or "")
+        city_ok = modality == "remoto" or (bool(jc) and (ciudad in jc or jc in ciudad))
+
+    return sector_ok and city_ok
+
+
+def _fetch_active_jobs(supabase) -> list[dict]:
+    res = (
+        supabase.table("jobs")
+        .select("*")
+        .eq("active", True)
+        .neq("status", "red")
+        .execute()
+    )
+    return res.data or []
+
+
+def _scrape_filters_from_perfil(perfil: dict) -> dict:
+    skills = [s for s in (perfil.get("habilidades") or []) if s][:5]
+    return {
+        "city": perfil.get("ciudad"),
+        "sector": _perfil_sector(perfil),
+        "skills": skills,
+    }
+
+
+def _resolver_jobs_cache(perfil: dict, supabase) -> tuple[list[dict], bool]:
+    """
+    Cache-first: vacantes frescas y relevantes al perfil.
+    Si hay pocas, devuelve todo el cache activo y encola scrape (best-effort).
+    """
+    cutoff = _freshness_cutoff()
+    all_active = _fetch_active_jobs(supabase)
+    fresh_relevant = [
+        j for j in all_active if _is_fresh(j, cutoff) and _matches_profile(j, perfil)
+    ]
+
+    if len(fresh_relevant) >= MIN_FRESH_JOBS:
+        logger.info(
+            f"Cache fresh OK: {len(fresh_relevant)} vacantes (< {FRESH_HORIZON_HOURS}h)"
+        )
+        return fresh_relevant, False
+
+    logger.info(
+        f"Pocas vacantes frescas ({len(fresh_relevant)} < {MIN_FRESH_JOBS}), "
+        "usando cache completo y encolando scrape"
+    )
+    request_scrape(_scrape_filters_from_perfil(perfil), priority=1)
+    return all_active, True
+
+
 def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     """Calcula el score 0-100 para un par perfil-vacante (columnas EN en BD)."""
     job = normalize_job_row(raw_job)
@@ -69,8 +220,7 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     if skills_req:
         match_ratio = len(set(skills_perfil) & set(skills_req)) / len(skills_req)
     else:
-        # No skills specified → neutral score (can't assess fit)
-        match_ratio = 0.5
+        match_ratio = 1.0
 
     pts_skills = round(match_ratio * 40)
 

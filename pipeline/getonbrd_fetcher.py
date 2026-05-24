@@ -17,7 +17,8 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from supabase import create_client
 
-load_dotenv()
+_HERE = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_HERE, "..", "backend", ".env"))
 sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 API_BASE = "https://www.getonbrd.com/api/v0"
@@ -127,7 +128,7 @@ def _map_row(job: dict) -> dict:
         "department": department,
         "salary_min": _to_cop(attrs.get("min_salary")),
         "salary_max": _to_cop(attrs.get("max_salary")),
-        "description": description[:2000],  # cap to avoid DB limits
+        "description": description[:2000],
         "skills_required": skills,
         "sector": attrs.get("category_name"),
         "experience_required": experience_required,
@@ -136,6 +137,7 @@ def _map_row(job: dict) -> dict:
         "source": "getonbrd",
         "url": f"https://www.getonbrd.com/jobs/{job_id}",
         "posted_at": posted_at,
+        "scraped_at": datetime.now(timezone.utc).isoformat(),
         "repost_count": 0,
         "status": "green",
         "hires_youth": None,
@@ -144,40 +146,89 @@ def _map_row(job: dict) -> dict:
     }
 
 
-def run():
+def _normalize_sector(sector: str | None) -> str:
+    return (sector or "").strip().lower()
+
+
+def _is_tech_sector(sector: str | None) -> bool:
+    s = _normalize_sector(sector)
+    if not s:
+        return True
+    tech = {
+        "tecnologia",
+        "tecnología",
+        "tech",
+        "programming",
+        "software",
+        "data",
+        "devops",
+        "mobile",
+        "design",
+        "fintech",
+    }
+    return s in tech or any(k in s for k in ("tech", "program", "software", "data"))
+
+
+def _categories_for_sector(sector: str | None) -> list[str] | None:
+    """None = skip Get on Board (solo tech en esta fuente)."""
+    if not _is_tech_sector(sector):
+        return None
+    s = _normalize_sector(sector)
+    if s in ("data", "datos"):
+        return ["data-science-analytics"]
+    if s in ("design", "diseño", "diseño"):
+        return ["design-ux"]
+    return ["programming", "data-science-analytics"]
+
+
+def _matches_city_filter(row: dict, city: str | None) -> bool:
+    if not city:
+        return True
+    target = city.strip().lower()
+    modality = (row.get("modality") or "").lower()
+    job_city = (row.get("city") or "").lower()
+    return modality == "remoto" or target in job_city or job_city in target
+
+
+def fetch_jobs(
+    limit: int = LIMIT,
+    sector: str | None = None,
+    city: str | None = None,
+) -> list[dict]:
+    """Obtiene vacantes de Get on Board sin escribir en BD."""
+    categories = _categories_for_sector(sector)
+    if categories is None:
+        return []
+
     collected: list[dict] = []
     seen_ids: set[str] = set()
 
-    for category in CATEGORIES:
-        if len(collected) >= LIMIT:
+    for category in categories:
+        if len(collected) >= limit:
             break
 
-        print(f"\nFetching [{category}] ...")
         page = 1
-        while len(collected) < LIMIT:
+        while len(collected) < limit:
             try:
                 jobs = _fetch_category_page(category, page)
-            except Exception as exc:
-                print(f"  Error on page {page}: {exc}")
+            except Exception:
                 break
 
             if not jobs:
                 break
 
-            new_this_page = 0
             for job in jobs:
-                if len(collected) >= LIMIT:
+                if len(collected) >= limit:
                     break
                 job_id = job["id"]
                 if job_id in seen_ids or not _is_relevant(job):
                     continue
+                row = _map_row(job)
+                if not _matches_city_filter(row, city):
+                    continue
                 seen_ids.add(job_id)
-                collected.append(_map_row(job))
-                new_this_page += 1
+                collected.append(row)
 
-            print(f"  page {page}: +{new_this_page} relevant  (total: {len(collected)})")
-
-            # Stop paging if we got fewer than 100 — no more pages
             if len(jobs) < 100:
                 break
             page += 1
@@ -185,14 +236,76 @@ def run():
 
         time.sleep(1)
 
+    return collected
+
+
+def fetch_all_categories(limit: int = 200, city: str | None = None, per_category: int | None = None) -> list[dict]:
+    """Recorre todas las categorías Get on Board (máxima diversidad sectorial)."""
+    collected: list[dict] = []
+    seen_ids: set[str] = set()
+    cap_each = per_category or max(limit // max(len(CATEGORIES), 1), 15)
+
+    for category in CATEGORIES:
+        if per_category is None and len(collected) >= limit:
+            break
+
+        cat_count = 0
+        page = 1
+        cat_limit = per_category if per_category else min(cap_each, limit - len(collected))
+
+        while cat_count < cat_limit:
+            try:
+                jobs = _fetch_category_page(category, page)
+            except Exception:
+                break
+
+            if not jobs:
+                break
+
+            for job in jobs:
+                if cat_count >= cat_limit:
+                    break
+                job_id = job["id"]
+                if job_id in seen_ids or not _is_relevant(job):
+                    continue
+                row = _map_row(job)
+                if not _matches_city_filter(row, city):
+                    continue
+                seen_ids.add(job_id)
+                collected.append(row)
+                cat_count += 1
+
+            if len(jobs) < 100:
+                break
+            page += 1
+            time.sleep(0.5)
+
+        time.sleep(0.5)
+
+    return collected
+
+
+def upsert_jobs(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+    res = sb.table("jobs").upsert(rows, on_conflict="url").execute()
+    return len(res.data or [])
+
+
+def run(limit: int = LIMIT, sector: str | None = None, city: str | None = None, all_categories: bool = False):
+    print(f"\n=== Get on Board fetcher (limit={limit}) ===")
+    if all_categories or (sector is None and city is None):
+        collected = fetch_all_categories(limit=limit, city=city)
+    else:
+        collected = fetch_jobs(limit=limit, sector=sector, city=city)
     if not collected:
-        print("\nNo jobs fetched. Check API connectivity and credentials.")
+        print("\nNo jobs fetched. Check API connectivity, sector, or credentials.")
         return
 
     print(f"\nUpserting {len(collected)} jobs into Supabase ...")
-    res = sb.table("jobs").upsert(collected, on_conflict="url").execute()
-    print(f"Done — {len(res.data)} rows upserted.\n")
-    for v in res.data:
+    inserted = upsert_jobs(collected)
+    print(f"Done — {inserted} rows upserted.\n")
+    for v in collected[:10]:
         flag = "[REMOTO]" if v.get("modality") == "remoto" else "[LOCAL] "
         print(f"  {flag} {v.get('title','?')[:50]:50} — {v.get('company','?')}")
 

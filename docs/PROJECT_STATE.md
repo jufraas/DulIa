@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Fix CV PDF** (`markitdown[pdf]`, fallback pdfplumber) + **layout `/resultados`** (scroll resumen/plan, altura plan = oportunidades). Timeouts API 120s en llamadas Gemini.
+2026-05-24 — **Backend:** arquitectura híbrida cache-first (`user_interests`, `scrape_queue`, `run_queue.py`); pipeline getonbrd + remotive (~380 jobs). **Front:** fix CV PDF + layout `/resultados` + timeouts API 120s. Pendiente: deploy.
 
 ## Estado por módulo
 
@@ -13,9 +13,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
 | Backend (FastAPI) | ✅ Fase 1 Plan 2 | Cadena real verificada (migración 004); deploy pendiente |
 | Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mocks si API falla |
-| Pipeline | 🔁 En progreso | Poblar `jobs.city` (muchas filas null) |
-| Integración Gemini | ✅ | Profile, analyze, plan, coach, CV parse |
-| Base de datos | 🚧 Datos + schema | Tablas Plan 2 + migración 004 aplicada |
+| Pipeline | ✅ Híbrido | getonbrd + remotive; `run_queue.py` + `run_baseline.py`; cache-first en backend |
+| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008**, **009**; ~380 jobs activos |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
@@ -38,7 +37,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
-| `MarketThermometer` | ✅ | Montado en `/resultados` y `/vacantes` |
+| `MarketThermometer` | ✅ | Montado en `/resultados` y `/vacantes`; API expone `por_modalidad` y `por_fuente` |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
 | Navegación resultados ↔ vacantes | ✅ | `OpportunitiesPreview` → `/vacantes`; botón **Volver a mi análisis** → `/resultados` |
@@ -75,9 +74,9 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | 0–1 | Entorno + estructura + CORS | ✅ |
-| 2 | Schema Supabase | 🚧 Tablas ✅, datos pendientes pipeline |
+| 2 | Schema Supabase | ✅ Tablas + datos pipeline (~380 jobs) |
 | 3–5 | Modelos + perfil + Gemini | ✅ |
-| 6–7 | Jobs recomendados + mercado | ✅ |
+| 6–7 | Jobs recomendados + mercado | ✅ (+ `por_modalidad`, `por_fuente` en dashboard) |
 | 8 | Coach conversacional | ✅ |
 | 9–10 | Seguridad + smoke tests | ✅ |
 | 11 | Deploy | 🔲 |
@@ -85,6 +84,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | P2-F1 | Análisis + plan IA | ✅ Real verificado (migración 004) |
 | P2-F3 | Gráficas radar + timeline (API) | ✅ Real verificado |
 | P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
+| Híbrido | Cache-first + scrape_queue | ✅ Migraciones 008–009, `queue_service`, `run_queue.py` |
 
 ## Leyenda
 
@@ -101,7 +101,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 ### Pitch / demo
 1. **Backend:** `USE_MOCK_DATA=false`, migraciones 002+004, uvicorn `:8000` — smoke en [ENDPOINTS.md](ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse)
 2. **E2E:** wizard → resultados — Network con 200 en Plan 2; UI ya consume `analysis`/plan real
-3. Pipeline: enriquecer `jobs.city` al insertar
+3. Pipeline: `run_queue.py --batch 5` tras perfiles exóticos; ver [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md)
 4. Deploy: **pospuesto** — `VITE_API_URL` + `CORS_ORIGINS`
 
 ### Post-MVP (no bloquean pitch)
@@ -115,5 +115,6 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | [ENDPOINTS.md](ENDPOINTS.md) | Contrato API + troubleshooting Plan 2 |
 | [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md) | Fixes RLS, dashboard, JSONB |
 | [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | Handoff Plan 2 (analyze, radar, timeline) |
+| [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md) | Cache-first, cola manual, CLIs |
 | [EXTRA_IDEAS/README.md](EXTRA_IDEAS/README.md) | Ideas fuera del MVP |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Roadmap fase 2 + guion pitch |

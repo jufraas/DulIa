@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from supabase import create_client
 from mock_data import get_mock_vacantes
 
-load_dotenv()
+_HERE = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_HERE, "..", "backend", ".env"))
 sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 vacantes = get_mock_vacantes()
