@@ -35,7 +35,14 @@ function App() {
             <Route path="/comenzar" element={<OnboardingPage />} />
             <Route path="/resultados" element={<ResultsPage />} />
             <Route path="/vacantes" element={<VacanciesPage />} />
-            <Route path="/progreso" element={<ProgressPage />} />
+            <Route
+              path="/progreso"
+              element={(
+                <ProtectedRoute>
+                  <ProgressPage />
+                </ProtectedRoute>
+              )}
+            />
             <Route
               path="/entrevistas"
               element={(

@@ -29,7 +29,6 @@ export default function InterviewPage() {
   const fetchHistory = useInterviewStore((s) => s.fetchHistory)
   const addTasksFromWeakSkills = useInterviewStore((s) => s.addTasksFromWeakSkills)
   const history = useInterviewStore((s) => s.history)
-  const loading = useInterviewStore((s) => s.loading)
   const submitting = useInterviewStore((s) => s.submitting)
   const error = useInterviewStore((s) => s.error)
   const lastResult = useInterviewStore((s) => s.lastResult)

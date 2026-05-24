@@ -1,29 +1,8 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../services/supabase'
 import { linkSession } from '../services/api'
 import { getOrCreateSessionId } from '../utils/session'
-
-/** @typedef {import('@supabase/supabase-js').User} SupabaseUser */
-/** @typedef {import('@supabase/supabase-js').Session} SupabaseSession */
-
-/**
- * @typedef {Object} AuthContextValue
- * @property {SupabaseUser | null} user
- * @property {SupabaseSession | null} session
- * @property {boolean} loading
- * @property {boolean} isConfigured
- * @property {() => Promise<void>} signOut
- */
-
-export const AuthContext = createContext(
-  /** @type {AuthContextValue} */ ({
-    user: null,
-    session: null,
-    loading: false,
-    isConfigured: false,
-    signOut: async () => {},
-  }),
-)
+import { AuthContext } from './AuthContext'
 
 async function tryLinkAnonymousSession(userId) {
   const sessionId = getOrCreateSessionId()
@@ -44,7 +23,6 @@ export default function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!supabase) {
-      setLoading(false)
       return undefined
     }
 
