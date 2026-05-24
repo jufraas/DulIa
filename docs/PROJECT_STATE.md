@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Merge `FRONT` → `main`:** Backend B1–B7 (Supabase progreso + pool entrevistas) + Front M2/M3 + integración Jufra J1–J3.
+2026-05-24 — **Entrevista V2 (Plan F M4):** chat conversacional en `/entrevistas` + mock fallback; backend B8 pendiente.
 
 ## Estado por módulo
 
@@ -31,7 +31,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
 | `/progreso` | Plan checkeable + fases + CTA entrevista (protegida) | Migue + Jufra | ✅ |
-| `/entrevistas` | Simulador entrevista + historial (protegida) | Jufra + Migue | ✅ |
+| `/entrevistas` | Entrevista **V2 chat** (default) o quiz V1 (`?legacy=1`) | Migue | ✅ UI · mock |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -49,7 +49,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `link-session` |
 | Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
 | Mi Progreso — M3 E2E | ✅ | Backend Supabase (`progress_m3_service`); banner `dataSource`; tests |
-| Integración J1–J3 | ✅ | Auth redirect, nav, entrevista UI + `useInterviewStore`, merge fix |
+| Integración J1–J3 | ✅ | Auth redirect, nav, entrevista quiz V1 + store |
+| Entrevista V2 — M4 | ✅ | `InterviewV2Page`, `useInterviewV2Store`, mock + `interviewV2Api`; espera B8 |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 
 ### Pendiente UI (pre-pitch)
@@ -57,7 +58,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Pieza | Prioridad | Notas |
 |-------|-----------|-------|
 | Deploy Vercel + backend prod | Alta | `VITE_API_URL`, CORS |
-| Alinear preguntas entrevista UI ↔ API | Media | Pool por skill vs templates API |
+| Alinear preguntas entrevista UI ↔ API | Media | V2 mock hasta B8; V1 pool vs templates |
+| Backend entrevista V2 (B8) | Alta | `/api/interview/v2/*`, tabla `mock_interviews_v2` |
 | Copy landing hardcode | Baja | Prototipos kit `Landing.jsx` / `Wizard.jsx` (huérfanos) |
 
 Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
@@ -78,6 +80,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | Scoring v1.1 | Seniority filter + scores expresivos | ✅ |
 | **B1–B7** | Progreso + interview Supabase + pool real | ✅ |
 | M3 front + back | `/progreso`, `/entrevistas`, adaptador M3 | ✅ |
+| **B8** | Entrevista conversacional V2 (API + Gemini) | 🔲 |
 
 ## Leyenda
 
@@ -104,4 +107,5 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 |-----|-----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | Contrato API |
 | [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | Handoff front + progreso/entrevista |
+| [INTERVIEW_REDESIGN_PLAN.md](INTERVIEW_REDESIGN_PLAN.md) | Rediseño entrevista V2 (Plan B + F) |
 | [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md) | Mi Progreso + merge |

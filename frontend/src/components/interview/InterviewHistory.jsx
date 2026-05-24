@@ -39,10 +39,10 @@ function EmptyState({ onNuevaEntrevista }) {
         <rect x="22" y="64" width="36" height="4" rx="2" fill="rgba(168,85,247,0.15)" />
       </svg>
       <h3 style={{ color: '#F1F0FB', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
-        Aún no has practicado ninguna entrevista
+        Aún no has practicado
       </h3>
       <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: '0 0 24px' }}>
-        La práctica hace al experto
+        Tu primera entrevista revelará tus fortalezas.
       </p>
       <button
         type="button"
@@ -65,7 +65,7 @@ function EmptyState({ onNuevaEntrevista }) {
   )
 }
 
-export default function InterviewHistory({ historial, onVerFeedback, onNuevaEntrevista }) {
+export default function InterviewHistory({ historial, onVerFeedback, onNuevaEntrevista, showV2Badge = false }) {
   if (!historial?.length) {
     return <EmptyState onNuevaEntrevista={onNuevaEntrevista} />
   }
@@ -96,21 +96,38 @@ export default function InterviewHistory({ historial, onVerFeedback, onNuevaEntr
               }}
             >
               {/* Skill badge */}
-              <span
-                style={{
-                  display: 'inline-block',
-                  alignSelf: 'flex-start',
-                  backgroundColor: `${color}22`,
-                  border: `1px solid ${color}55`,
-                  color,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  padding: '3px 10px',
-                  borderRadius: 999,
-                }}
-              >
-                {item.skill}
-              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    alignSelf: 'flex-start',
+                    backgroundColor: `${color}22`,
+                    border: `1px solid ${color}55`,
+                    color,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    padding: '3px 10px',
+                    borderRadius: 999,
+                  }}
+                >
+                  {item.skill}
+                </span>
+                {showV2Badge && item.version === 2 && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: '3px 8px',
+                      borderRadius: 999,
+                      backgroundColor: 'rgba(168,85,247,0.15)',
+                      border: '1px solid rgba(168,85,247,0.4)',
+                      color: '#C4B5FD',
+                    }}
+                  >
+                    Nuevo formato
+                  </span>
+                )}
+              </div>
 
               {/* Score */}
               <div>

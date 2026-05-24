@@ -13,6 +13,7 @@ npm run dev          # http://localhost:5173
 npm run build        # verificar antes de push
 npm run lint         # ESLint (solo src/ + config; ver abajo)
 npm run test:progress   # mini tests mocks progreso/entrevista (11 tests, sin Vitest)
+npm run test:interview-v2   # smoke entrevista conversacional V2 (5 tests)
 npm run test:progress:api   # smoke E2E contra backend :8000 (opcional)
 ```
 
