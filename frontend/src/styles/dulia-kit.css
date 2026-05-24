@@ -245,15 +245,27 @@ button { font-family: inherit; cursor: pointer; }
     radial-gradient(circle at 90% 110%, rgba(236,72,153,0.18) 0%, transparent 50%),
     radial-gradient(circle at 95% 10%, rgba(168,85,247,0.12) 0%, transparent 40%);
 }
-.landing-splash__inner {
+.landing-splash__stage {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transform: translateZ(0);
+}
+.landing-splash__brand {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 24px;
-  transform: translateZ(0);
+}
+.landing-splash__logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .landing-splash__halo {
   position: absolute;
@@ -271,12 +283,15 @@ button { font-family: inherit; cursor: pointer; }
 }
 .landing-splash__logo {
   position: relative;
+  margin-inline: auto;
   animation: splashLogoIn 0.55s var(--ease-out) both;
   will-change: transform, opacity;
 }
 .landing-splash__tagline {
   position: relative;
   margin: 20px 0 0;
+  width: 100%;
+  text-align: center;
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 600;
@@ -299,6 +314,345 @@ button { font-family: inherit; cursor: pointer; }
   visibility: hidden;
   overflow: hidden;
   max-height: 100vh;
+}
+
+/* ===== Mi Progreso — barras animadas (M2.5) ===== */
+@keyframes progressShimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.progress-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-overview__global-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 48px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--fg-1);
+}
+
+.progress-overview__stat-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.progress-overview__stat-value {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--fg-1);
+}
+
+.progress-overview__milestone {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--fg-2);
+}
+
+.progress-overview__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+.progress-bar-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.15);
+}
+
+.progress-bar-track--lg {
+  height: 12px;
+}
+
+.progress-bar-track--sm {
+  height: 6px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-brand);
+  transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: width;
+}
+
+.progress-bar-fill--global {
+  background: linear-gradient(
+    90deg,
+    #7c3aed 0%,
+    #a855f7 40%,
+    #ec4899 60%,
+    #a855f7 80%,
+    #7c3aed 100%
+  );
+  background-size: 200% auto;
+  animation: progressShimmer 4s linear infinite;
+}
+
+.progress-bar-fill--locked {
+  background: rgba(168, 85, 247, 0.35);
+  animation: none;
+}
+
+.progress-phase__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
+}
+
+.progress-phase__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--fg-2);
+}
+
+.progress-phase__lock {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--violet-400);
+}
+
+.progress-phase__pct {
+  font-weight: 600;
+  color: var(--fg-1);
+}
+
+.progress-phase-strip {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(168, 85, 247, 0.12);
+}
+
+.progress-phase-strip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 12px;
+}
+
+.progress-phase-strip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--fg-2);
+}
+
+.progress-phase-strip__pct {
+  font-weight: 700;
+  color: var(--fg-1);
+}
+
+.progress-phase-strip__meta {
+  margin: 0.35rem 0 0;
+  font-size: 11px;
+  color: var(--fg-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar-fill {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ===== Fase bloqueada — overlay candado (M2.6) ===== */
+.phase-lock-shell {
+  position: relative;
+}
+
+.phase-lock-shell--locked {
+  min-height: 260px;
+}
+
+.phase-lock-shell--locked .phase-lock-shell__content {
+  pointer-events: none;
+  user-select: none;
+  filter: blur(2px) saturate(0.85);
+  opacity: 0.45;
+}
+
+.phase-lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(13, 13, 13, 0.55) 0%,
+    rgba(13, 13, 13, 0.72) 100%
+  );
+  backdrop-filter: blur(4px);
+}
+
+.phase-lock-overlay__card {
+  max-width: 320px;
+  text-align: center;
+  padding: 1.5rem 1.25rem;
+  border-radius: 18px;
+  background: rgba(24, 24, 28, 0.92);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.phase-lock-overlay__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 0.75rem;
+  border-radius: 16px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.phase-lock-overlay__icon {
+  width: 28px;
+  height: 28px;
+  color: var(--violet-300, #c4b5fd);
+}
+
+.phase-lock-overlay__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--fg-1);
+}
+
+.phase-lock-overlay__message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--fg-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-lock-shell--locked .phase-lock-shell__content {
+    filter: none;
+  }
+}
+
+/* ===== TaskList lateral + workspace (M2.7–M2.8) ===== */
+.progress-workspace {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .progress-workspace {
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  }
+}
+
+.task-list {
+  max-height: min(72vh, 640px);
+  overflow: hidden;
+}
+
+.task-list__items {
+  overflow-y: auto;
+  max-height: min(56vh, 520px);
+}
+
+.task-list__item {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.task-list__item:hover {
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.task-list__item--active {
+  background: rgba(168, 85, 247, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.35);
+}
+
+.task-list__item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.task-list__label {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--fg-1);
+}
+
+.task-list__label--done {
+  color: var(--fg-3);
+  text-decoration: line-through;
+}
+
+.task-list__meta {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 11px;
+  color: var(--fg-3);
+}
+
+.task-list__empty {
+  padding: 1.25rem 0.75rem;
+  text-align: center;
+  font-size: 13px;
+  color: var(--fg-3);
+}
+
+@keyframes progressTaskHighlight {
+  0%, 100% { background: rgba(168, 85, 247, 0.18); }
+  50% { background: rgba(236, 72, 153, 0.14); }
+}
+
+.progress-task--highlight label {
+  border-radius: 10px;
+  animation: progressTaskHighlight 1.2s ease-in-out 2;
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-task--highlight label {
+    animation: none;
+    background: rgba(168, 85, 247, 0.12);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
