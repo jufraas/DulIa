@@ -29,7 +29,7 @@
 
 ### Termómetro de mercado en UI
 
-- **Estado:** ✅ `MarketThermometer` en `/resultados` y `/vacantes`.
+- **Estado:** ✅ `MarketThermometer` solo en `/resultados` (sección Mercado).
 
 ### Burbuja / chat del coach
 

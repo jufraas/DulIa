@@ -34,7 +34,7 @@ export default function CvUploadZone({
         onFileSelect(null, validationError)
         return
       }
-      onFileSelect(file)
+      void onFileSelect(file)
     },
     [onFileSelect],
   )

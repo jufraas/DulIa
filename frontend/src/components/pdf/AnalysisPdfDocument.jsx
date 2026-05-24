@@ -4,8 +4,12 @@ import { parseAnalysisResponse, resolveEmployabilityScore } from '../../utils/an
 import { savedProfileToDisplayFields } from '../../utils/formatProfileLabels'
 import { formatSalary } from '../../utils/formatters'
 import {
+  formatGeographicBreakdown,
   formatMarketSourceSummary,
+  formatScopeHeadline,
+  formatScopeSectors,
   getModalityEntries,
+  MARKET_GROWTH_HINT,
 } from '../../utils/marketDisplay'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../../utils/planDisplay'
 import { RADAR_DIMENSION_KEYS, RADAR_DIMENSION_LABELS } from '../../utils/radarApi'
@@ -262,9 +266,16 @@ export default function AnalysisPdfDocument({
 
       {market && (
         <PdfSection eyebrow="Mercado" title="Termómetro laboral">
+          <p className="pdf-market-scope">{formatScopeHeadline(market)}</p>
+          {formatScopeSectors(market) ? (
+            <p className="pdf-market-sectors">{formatScopeSectors(market)}</p>
+          ) : null}
+          {formatGeographicBreakdown(market) ? (
+            <p className="pdf-market-geo">{formatGeographicBreakdown(market)}</p>
+          ) : null}
           <dl className="pdf-stat-grid">
             <div className="pdf-stat-row">
-              <dt>Vacantes activas</dt>
+              <dt>Vacantes en tu campo</dt>
               <dd>{market.total_vacantes_activas ?? '—'}</dd>
             </div>
             {formatMarketSourceSummary(market.por_fuente) ? (
@@ -292,7 +303,9 @@ export default function AnalysisPdfDocument({
             {market.crecimiento_semanal_pct != null ? (
               <div className="pdf-stat-row">
                 <dt>Crecimiento semanal</dt>
-                <dd>{market.crecimiento_semanal_pct}%</dd>
+                <dd>
+                  {market.crecimiento_semanal_pct}% — {MARKET_GROWTH_HINT}
+                </dd>
               </div>
             ) : null}
             {market.ciudad_filtro ? (
@@ -302,6 +315,18 @@ export default function AnalysisPdfDocument({
               </div>
             ) : null}
           </dl>
+          {(market.top_skills_demandadas ?? []).length > 0 ? (
+            <div className="pdf-market-skills">
+              <p className="pdf-market-skills__title">Skills más demandadas en tu campo</p>
+              <ul>
+                {(market.top_skills_demandadas ?? []).slice(0, 6).map(({ skill, count, tienes }) => (
+                  <li key={skill}>
+                    {skill} · {count} vacantes{tienes ? ' ✓' : ''}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </PdfSection>
       )}
 

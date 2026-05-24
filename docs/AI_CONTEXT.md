@@ -97,7 +97,8 @@ backend/
 | POST | `/api/profile/parse-cv` | ✅ |
 | GET | `/api/profile/{session_id}` | ✅ |
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
-| GET | `/api/market/dashboard` | ✅ (+ `por_modalidad`, `por_fuente`) |
+| GET | `/api/market/dashboard` | ✅ global (`?city=`) — fallback |
+| GET | `/api/market/dashboard/{session_id}` | ✅ personalizado — `top_skills_demandadas`, sectores, geo |
 | POST | `/api/coach/chat` | ✅ |
 | GET | `/api/plan/{session_id}` | ⚠️ legacy — no usar en front |
 | GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |
@@ -110,7 +111,9 @@ backend/
 | Archivo | Para qué |
 |---------|----------|
 | [ENDPOINTS.md](ENDPOINTS.md) | **Contrato API — fuente de verdad** |
-| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | **Handoff frontend — flujo Plan 2 + recharts** |
+| [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | **Handoff frontend — flujo Plan 2 + termómetro personalizado** |
+| [handoff-frontend-termometro-vacantes.md](handoff-frontend-termometro-vacantes.md) | Handoff termómetro + refetch (implementado) |
+| [handoff-frontend-analysis-labels.md](handoff-frontend-analysis-labels.md) | Handoff labels analyze (implementado) |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Módulos y flujo |
 | [SCHEMA.md](SCHEMA.md) | Tablas Supabase |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Estado por módulo |
@@ -124,10 +127,24 @@ backend/
 
 ## Variables de entorno
 
-| Variable | Dónde | Valor dev |
-|----------|-------|-----------|
-| `VITE_API_URL` | frontend | `http://localhost:8000/api` |
-| `USE_MOCK_DATA` | backend | `true` (dev sin credenciales) |
+Hay **dos archivos** locales (gitignored), uno por capa:
+
+| Archivo | Plantilla |
+|---------|-----------|
+| `backend/.env` | `backend/.env.example` |
+| `frontend/.env.local` | `frontend/.env.example` |
+
+| Variable | Archivo | Valor dev |
+|----------|---------|-----------|
+| `SUPABASE_URL` | backend | URL del proyecto |
+| `SUPABASE_KEY` | backend | Anon key (Settings → API) |
+| `GEMINI_API_KEY` | backend | Google AI Studio |
+| `USE_MOCK_DATA` | backend | `true` sin credenciales; `false` modo real |
+| `VITE_API_URL` | frontend | `/api` (dev, proxy Vite) · URL absoluta en prod |
+| `VITE_SUPABASE_URL` | frontend | Igual que `SUPABASE_URL` (login Google) |
+| `VITE_SUPABASE_ANON_KEY` | frontend | Igual que `SUPABASE_KEY` (login Google) |
+
+Sin `VITE_SUPABASE_*` el front anónimo sigue; auth en `/login` queda deshabilitada con mensaje claro.
 
 ## Desarrollo local
 

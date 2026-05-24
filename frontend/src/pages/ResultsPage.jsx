@@ -4,7 +4,6 @@ import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
 import AnalysisOverviewGrid from '../components/results/AnalysisOverviewGrid'
 import CareerTimeline from '../components/results/CareerTimeline'
-import CoachChatBubble from '../components/results/CoachChatBubble'
 import CoachPromptBanner from '../components/results/CoachPromptBanner'
 import MarketThermometer from '../components/results/MarketThermometer'
 import OpportunitiesAndPlan from '../components/results/OpportunitiesAndPlan'
@@ -16,7 +15,6 @@ import Container from '../components/ui/Container'
 import SessionLoading from '../components/shared/SessionLoading'
 import ProcessStatusBar from '../components/shared/ProcessStatusBar'
 import { RESULTS_SECTION_IDS } from '../constants/resultsSections'
-import { CoachProvider } from '../context/CoachProvider'
 import { usePdfDownload } from '../hooks/usePdfDownload'
 import { useResultsData } from '../hooks/useResultsData'
 import { useResultsSectionNav } from '../hooks/useResultsSectionNav'
@@ -39,16 +37,10 @@ export default function ResultsPage() {
   }
 
   return (
-    <CoachProvider
-      profile={savedProfile}
-      topScore={topScore}
-      topJob={topJob}
-      insights={insights}
-    >
-      <PageShell>
-        <SiteHeader />
+    <PageShell>
+      <SiteHeader />
 
-        <main className="relative z-[1] flex-1 pb-28 pt-14">
+      <main className="relative z-[1] flex-1 pb-28 pt-14">
           <Container>
             <div className="anim-in mb-10 text-center">
               <div className="eyebrow-dl mb-3.5 inline-flex">
@@ -106,8 +98,6 @@ export default function ResultsPage() {
                   <CareerTimeline />
                 </ResultsSection>
 
-                <CoachChatBubble />
-
                 <ResultsSection id="resultados-pdf" className="anim-in-delay-3 mt-12">
                   <div
                     className="flex flex-col items-center justify-between gap-6 rounded-[24px] p-9 sm:flex-row"
@@ -148,6 +138,5 @@ export default function ResultsPage() {
           />
         )}
       </PageShell>
-    </CoachProvider>
   )
 }

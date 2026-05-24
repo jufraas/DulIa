@@ -5,10 +5,7 @@ import {
   useState,
 } from 'react'
 import { useCoachChat } from '../hooks/useCoachChat'
-import {
-  buildCoachStarterSuggestions,
-  buildCoachWelcomeMessage,
-} from '../utils/coachSuggestions'
+import { buildCoachPageContent } from '../utils/coachPageContext'
 import {
   CoachContext,
   SESSION_BANNER,
@@ -23,9 +20,17 @@ import {
  *   topScore?: number,
  *   topJob?: import('../store/useProfileStore').Job | null,
  *   insights?: import('../utils/analysisDisplay').AnalysisInsights | null,
+ *   routePath?: string,
  * }} props
  */
-export function CoachProvider({ children, profile, topScore, topJob, insights }) {
+export function CoachProvider({
+  children,
+  profile,
+  topScore,
+  topJob,
+  insights,
+  routePath = '/',
+}) {
   const chat = useCoachChat()
   const [open, setOpen] = useState(false)
   const [showTeaser, setShowTeaser] = useState(false)
@@ -39,8 +44,16 @@ export function CoachProvider({ children, profile, topScore, topJob, insights })
     insights,
   ])
 
-  const welcomeMessage = useMemo(() => buildCoachWelcomeMessage(ctx), [ctx])
-  const starterSuggestions = useMemo(() => buildCoachStarterSuggestions(ctx), [ctx])
+  const pageContent = useMemo(
+    () => buildCoachPageContent(routePath, ctx),
+    [routePath, ctx],
+  )
+
+  const welcomeMessage = pageContent.welcomeMessage
+  const starterSuggestions = pageContent.starterSuggestions
+  const teaserTitle = pageContent.teaserTitle
+  const teaserBody = pageContent.teaserBody
+  const teaserDelayMs = pageContent.teaserDelayMs
 
   const markOpened = useCallback(() => {
     sessionStorage.setItem(SESSION_OPENED, '1')
@@ -56,10 +69,10 @@ export function CoachProvider({ children, profile, topScore, topJob, insights })
 
     const showTimer = window.setTimeout(() => {
       setShowTeaser(true)
-    }, 2800)
+    }, teaserDelayMs)
 
     return () => window.clearTimeout(showTimer)
-  }, [])
+  }, [routePath, teaserDelayMs])
 
   useEffect(() => {
     if (!showTeaser || open) return undefined
@@ -116,6 +129,8 @@ export function CoachProvider({ children, profile, topScore, topJob, insights })
       fabPulse,
       welcomeMessage,
       starterSuggestions,
+      teaserTitle,
+      teaserBody,
     }),
     [
       chat,
@@ -133,6 +148,8 @@ export function CoachProvider({ children, profile, topScore, topJob, insights })
       fabPulse,
       welcomeMessage,
       starterSuggestions,
+      teaserTitle,
+      teaserBody,
     ],
   )
 

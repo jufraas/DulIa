@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AppCoachShell from './components/coach/AppCoachShell'
 import AboutPage from './pages/AboutPage'
 import ConstruccionPage from './pages/ConstruccionPage'
 import LoginPage from './pages/LoginPage'
@@ -25,24 +26,26 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/sobre" element={<AboutPage />} />
-          <Route path="/comenzar" element={<OnboardingPage />} />
-          <Route path="/resultados" element={<ResultsPage />} />
-          <Route path="/vacantes" element={<VacanciesPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro" element={<RegisterPage />} />
-          <Route
-            path="/perfil"
-            element={(
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            )}
-          />
-          <Route path="/construccion" element={<ConstruccionPage />} />
-        </Routes>
+        <AppCoachShell>
+          <Routes>
+            <Route path="/" element={<WelcomePage />} />
+            <Route path="/sobre" element={<AboutPage />} />
+            <Route path="/comenzar" element={<OnboardingPage />} />
+            <Route path="/resultados" element={<ResultsPage />} />
+            <Route path="/vacantes" element={<VacanciesPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/registro" element={<RegisterPage />} />
+            <Route
+              path="/perfil"
+              element={(
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              )}
+            />
+            <Route path="/construccion" element={<ConstruccionPage />} />
+          </Routes>
+        </AppCoachShell>
       </BrowserRouter>
     </AuthProvider>
   )

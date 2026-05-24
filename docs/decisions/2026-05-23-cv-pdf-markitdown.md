@@ -73,7 +73,8 @@ Flujo: usuario sube PDF → backend extrae campos → frontend merge en formular
 
 | Problema | Solución |
 |----------|----------|
-| `422` al subir PDF | Instalar `markitdown[pdf]` (incluye pdfplumber); reiniciar uvicorn |
+| `422` al subir PDF | Instalar deps en **`.venv`** (`markitdown[pdf]`, `pdfplumber`); reiniciar uvicorn con `.\.venv\Scripts\uvicorn.exe` — no Python del sistema |
+| CORS / “no envía CV” en dev | `VITE_API_URL=/api` + proxy Vite; `parseCvPdf` con `fetch` (no axios) |
 | PDF escaneado sin texto | Mensaje 422 claro; usuario completa wizard manual |
 | Gemini modelo CV | `gemini-3.1-flash-lite` en `cv_service.py` |
 | Windows no reconoce MIME PDF | `validateCvFile.js` acepta `.pdf` / `octet-stream` |

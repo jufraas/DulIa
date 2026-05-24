@@ -126,9 +126,16 @@ export function useOnboardingForm() {
 
       try {
         const result = await parseCvPdf(file)
+        if (!result?.prefill || Object.keys(result.prefill).length === 0) {
+          throw new Error(
+            result?.message ??
+              'No detectamos datos en tu CV. Prueba otro PDF o completa el formulario manualmente.',
+          )
+        }
         applyCvResult(result, file.name)
       } catch (err) {
         setCvFileName(null)
+        setCvFieldsCount(0)
         setCvError(
           err instanceof Error ? err.message : 'No pudimos leer tu CV. Intenta de nuevo.',
         )

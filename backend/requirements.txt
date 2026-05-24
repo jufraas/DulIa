@@ -8,3 +8,4 @@ pydantic>=2.14.0a1
 slowapi==0.1.9
 python-multipart==0.0.20
 markitdown[pdf]>=0.1.5
+pdfplumber>=0.11.0

@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { loadResultsBundle } from '../services/api'
+import {
+  getMarketDashboard,
+  getRecommendedJobs,
+  loadResultsBundle,
+} from '../services/api'
 import { getOrCreateSessionId } from '../utils/session'
 import {
   parseAnalysisResponse,
@@ -25,8 +29,34 @@ export function useResultsData() {
   const insights = useMemo(() => parseAnalysisResponse(analysis), [analysis])
 
   useEffect(() => {
-    const hasBundle = jobs.length > 0 && market && plan && radar && analysis
-    if (!savedProfile || hasBundle) return undefined
+    if (!savedProfile) return undefined
+
+    let cancelled = false
+    const sessionId = getOrCreateSessionId()
+
+    ;(async () => {
+      try {
+        const [marketData, jobsData] = await Promise.all([
+          getMarketDashboard({ city: savedProfile?.ciudad }, savedProfile, sessionId),
+          getRecommendedJobs(sessionId, savedProfile),
+        ])
+        if (!cancelled) {
+          setMarket(marketData)
+          setJobs(jobsData)
+        }
+      } catch {
+        /* fallbacks ya manejados en api.js */
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [savedProfile, setMarket, setJobs])
+
+  useEffect(() => {
+    const hasSlowBundle = plan && radar && analysis
+    if (!savedProfile || hasSlowBundle) return undefined
 
     let cancelled = false
     const sessionId = getOrCreateSessionId()
@@ -34,17 +64,15 @@ export function useResultsData() {
     ;(async () => {
       setLoading(true)
       try {
-        if (jobs.length && market && plan && radar && analysis) return
-
         const bundle = await loadResultsBundle(sessionId, savedProfile)
         if (cancelled) return
 
-        if (!jobs.length && bundle.jobs.length) setJobs(bundle.jobs)
-        if (!market && bundle.market) setMarket(bundle.market)
-        if (!plan && bundle.plan) setPlan(bundle.plan)
-        if (!radar && bundle.radar) setRadar(bundle.radar)
+        if (bundle.jobs.length) setJobs(bundle.jobs)
+        if (bundle.market) setMarket(bundle.market)
+        if (bundle.plan) setPlan(bundle.plan)
+        if (bundle.radar) setRadar(bundle.radar)
         if (bundle.timeline) setTimeline(bundle.timeline)
-        if (!analysis && bundle.analysis) setAnalysis(bundle.analysis)
+        if (bundle.analysis) setAnalysis(bundle.analysis)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -55,8 +83,6 @@ export function useResultsData() {
     }
   }, [
     savedProfile,
-    jobs,
-    market,
     plan,
     radar,
     analysis,

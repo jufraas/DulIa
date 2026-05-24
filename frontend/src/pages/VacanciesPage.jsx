@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Briefcase, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
-import MarketThermometer from '../components/results/MarketThermometer'
+import CoachAskLink from '../components/results/CoachAskLink'
 import {
   FilterChip,
   TrafficStat,
@@ -14,7 +14,7 @@ import IconBox from '../components/brand/IconBox'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import SessionLoading from '../components/shared/SessionLoading'
-import { getMarketDashboard, getRecommendedJobs } from '../services/api'
+import { getRecommendedJobs } from '../services/api'
 import { useProfileStore } from '../store/useProfileStore'
 import { getOrCreateSessionId } from '../utils/session'
 import { useSessionHydration } from '../hooks/useSessionHydration'
@@ -25,48 +25,30 @@ export default function VacanciesPage() {
   const location = useLocation()
   const jobs = useProfileStore((s) => s.jobs)
   const savedProfile = useProfileStore((s) => s.savedProfile)
-  const market = useProfileStore((s) => s.market)
   const setJobs = useProfileStore((s) => s.setJobs)
-  const setMarket = useProfileStore((s) => s.setMarket)
   const [filter, setFilter] = useState('all')
-  const [loading, setLoading] = useState(!jobs.length)
+  const [loadingJobs, setLoadingJobs] = useState(true)
 
   useEffect(() => {
-    if (market) return undefined
+    if (!savedProfile) return undefined
     let cancelled = false
 
     ;(async () => {
-      const data = await getMarketDashboard(
-        { city: savedProfile?.ciudad },
-        savedProfile,
-      )
-      if (!cancelled) setMarket(data)
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [market, savedProfile, setMarket])
-
-  useEffect(() => {
-    if (jobs.length) return undefined
-    let cancelled = false
-
-    ;(async () => {
-      setLoading(true)
+      setLoadingJobs(true)
       try {
         const data = await getRecommendedJobs(getOrCreateSessionId(), savedProfile)
         if (!cancelled) setJobs(data)
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) setLoadingJobs(false)
       }
     })()
 
     return () => {
       cancelled = true
     }
-  }, [jobs.length, savedProfile, setJobs])
+  }, [savedProfile, setJobs])
 
+  const loading = loadingJobs
   const rows = useMemo(() => jobs.map(mapJobToVacancyRow), [jobs])
 
   const counts = useMemo(
@@ -119,10 +101,6 @@ export default function VacanciesPage() {
                 Volver a mi análisis
               </Button>
             </Link>
-          </div>
-
-          <div className="anim-in-delay-1 mb-6">
-            <MarketThermometer market={market} />
           </div>
 
           <div className="anim-in-delay-1 mb-6 grid gap-4 md:grid-cols-3">
@@ -221,6 +199,12 @@ export default function VacanciesPage() {
               <p className="mt-1 text-sm leading-relaxed text-[color:var(--fg-2)]">
                 Cruzamos cada vacante con históricos de reclutadores y patrones de fraude. Si
                 algo no cuadra, lo marcamos antes de que apliques.
+              </p>
+              <p className="mt-3">
+                <CoachAskLink
+                  question="¿Cómo interpreto el semáforo de vacantes?"
+                  label="¿Dudas con una vacante? Pregúntale al coach"
+                />
               </p>
             </div>
           </div>

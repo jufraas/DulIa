@@ -186,11 +186,23 @@ GROUP BY city ORDER BY n DESC LIMIT 10;
 ### 3.1 Backend arriba
 
 ```bash
-cd /home/krl0s/Documents/DulIa/backend
-./venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+cd backend
+# Linux/macOS:
+./.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+# Windows:
+.\.venv\Scripts\uvicorn.exe main:app --reload --port 8000
+
 # Otra terminal:
 curl -s http://localhost:8000/api/health | python -m json.tool
 # mock_data debe ser false
+```
+
+### 3.1b Frontend + CV (smoke)
+
+```bash
+cd frontend && npm run dev
+# .env.local: VITE_API_URL=/api (proxy → :8000)
+# Probar subida PDF en http://localhost:5173/comenzar
 ```
 
 ### 3.2 Termómetro — números reales

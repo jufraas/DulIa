@@ -1,11 +1,13 @@
 import { MessageCircle, Sparkles, X } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { useCoachContext } from '../../hooks/useCoachContext'
 import Button from '../ui/Button'
 
 export default function CoachPromptBanner() {
+  const { pathname } = useLocation()
   const { showBanner, dismissBanner, openCoach, profile, topScore } = useCoachContext()
 
-  if (!showBanner) return null
+  if (pathname !== '/resultados' || !showBanner) return null
 
   const name = profile?.nombre?.split(' ')[0]
 

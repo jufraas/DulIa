@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Auth opcional Supabase + PDF por secciones.
+**Última actualización:** 2026-05-24 · Auth Supabase opcional, coach global, proxy `/api`, termómetro solo en `/resultados`.
 
 ---
 
@@ -16,19 +16,23 @@
 | `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
 | `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
 | `GET .../timeline-data` | ✅ | `CareerTimeline` |
-| `GET market/dashboard` | ✅ | Termómetro; `por_modalidad` + `por_fuente` en UI y PDF |
+| `GET market/dashboard/{session_id}` | ✅ | Termómetro **solo `/resultados`** (ciudad + sectores + `top_skills_demandadas`) |
+| `GET market/dashboard?city=...` | ✅ | Fallback global; reservado para anónimo sin perfil |
+| Labels analyze (`area`) | ✅ | `humanizeArea()` en `analysisDisplay.js` — snake_case → español legible |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
-| `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
+| `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
+| Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
 | Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
+| Coach global SPA | ✅ | `AppCoachShell` + `coachPageContext.js`; FAB en landing, wizard, vacantes |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
 | Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
-| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
+| Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch jobs** al montar (sin cache stale) |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro`, `/perfil` protegida, `linkSession` |
 
@@ -38,16 +42,31 @@ Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026
 
 ## Configuración local
 
-| Variable | Valor dev |
-|----------|-----------|
-| `VITE_API_URL` | `http://localhost:8000/api` |
-| `VITE_SUPABASE_URL` | URL del proyecto (opcional) |
-| `VITE_SUPABASE_ANON_KEY` | Anon key (misma del backend) |
-| Backend | `cd backend && USE_MOCK_DATA=false uvicorn main:app --reload --port 8000` |
+### Dos archivos `.env`
+
+| Archivo | Variables clave |
+|---------|-----------------|
+| `backend/.env` | `SUPABASE_URL`, `SUPABASE_KEY`, `GEMINI_API_KEY`, `USE_MOCK_DATA=false` |
+| `frontend/.env.local` | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+
+Copiar plantillas: `cp backend/.env.example backend/.env` y `cp frontend/.env.example frontend/.env.local`.  
+Script opcional: `../scripts/setup-env.sh`. Reiniciar uvicorn y `npm run dev` tras editar.
+
+| Variable (frontend) | Valor dev |
+|---------------------|-----------|
+| `VITE_API_URL` | `/api` (proxy Vite → `:8000`; en prod URL absoluta del backend) |
+| `VITE_SUPABASE_URL` | = `SUPABASE_URL` del backend (opcional) |
+| `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend (opcional) |
+
+| Infra local | Comando / nota |
+|-------------|----------------|
+| Backend | `cd backend && .\.venv\Scripts\uvicorn.exe main:app --reload --port 8000` (Windows) |
+| Frontend | `cd frontend && npm run dev` — proxy `/api` en `vite.config.js` |
 | Migraciones | `002`, `004`, `008`, `009`, **`010`**, **`011`** en Supabase SQL Editor |
 | Swagger | http://localhost:8000/docs |
 
-**`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.
+**`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.  
+**Auth (opcional):** `services/supabase.js` — si faltan `VITE_SUPABASE_*`, `supabase = null` y el flujo anónimo no se rompe.
 
 ---
 
@@ -64,8 +83,9 @@ POST /api/profile                    ← guardar perfil
     ├── POST /api/profile/{id}/analyze      ← análisis IA (Plan 2)
     ├── POST /api/profile/{id}/action-plan  ← plan 30-60-90 (Plan 2)
     │
-    ├── GET /api/jobs/recommended/{id}      ← vacantes con score
-    ├── GET /api/market/dashboard?city=...  ← termómetro
+    ├── GET /api/jobs/recommended/{id}      ← vacantes con score (refetch en /vacantes)
+    ├── GET /api/market/dashboard/{id}      ← termómetro personalizado (preferido)
+    ├── GET /api/market/dashboard?city=...  ← fallback global
     │
     ├── GET /api/profile/{id}/radar-data    ← gráfica radar (Plan 2)
     └── GET /api/profile/{id}/timeline-data ← gráfica timeline (Plan 2)
@@ -98,8 +118,9 @@ Archivos: `utils/onboardingValidation.js`, `utils/validateOnboardingStep.js`, `c
 | Wizard paso 0 (opcional) | POST | `/profile/parse-cv` | `CvParseOut` → prefill formulario |
 | Tras wizard | POST | `/profile` | Perfil (`ProfileOut`) |
 | Recargar perfil | GET | `/profile/{session_id}` | Mismo shape (404 en mock) |
-| Pantalla vacantes | GET | `/jobs/recommended/{session_id}` | Array de vacantes + score |
-| Termómetro / PDF | GET | `/market/dashboard?city=...` | Stats agregadas |
+| Pantalla vacantes | GET | `/jobs/recommended/{session_id}` | Array de vacantes + score (seniority en backend) |
+| Termómetro / PDF | GET | `/market/dashboard/{session_id}` | Pool personalizado por perfil |
+| Termómetro (fallback) | GET | `/market/dashboard?city=...` | Agregado global por ciudad |
 | Coach chat | POST | `/coach/chat` | `{ respuesta, sugerencias_rapidas }` |
 
 Detalle JSON: [ENDPOINTS.md](ENDPOINTS.md).
@@ -133,7 +154,34 @@ POST /api/profile/{session_id}/analyze?regenerate=true   ← forzar nuevo
 
 **UI sugerida:** cards de fortalezas/debilidades; badge con `nivel_preparacion.overall` (0–100).
 
-**Implementado:** `utils/analysisDisplay.js` → `ProfileSummary`, `ScoreCard`, PDF.
+**Implementado:** `utils/analysisDisplay.js` → `ProfileSummary`, `ScoreCard`, PDF.  
+**Labels `area`:** el backend envía snake_case fijo (`educacion`, `soft_skills`, `habilidades_tecnicas`, …). La UI humaniza con `humanizeArea()` / `AREA_LABELS` — ver [handoff-frontend-analysis-labels.md](handoff-frontend-analysis-labels.md).
+
+---
+
+### 1b. Termómetro de mercado (personalizado)
+
+```
+GET /api/market/dashboard/{session_id}     ← preferido cuando hay perfil
+GET /api/market/dashboard?city=Barranquilla   ← fallback global
+```
+
+**Campos clave en UI** (`MarketThermometer`, PDF):
+
+| Campo | Uso en pantalla |
+|-------|-----------------|
+| `sectores_filtro` | Subtítulo del scope del perfil |
+| `vacantes_locales` / `remotas` / `nacionales` | Desglose geo (*3 en Barranquilla · 350 remoto · …*) |
+| `top_skills_demandadas` | Lista con `tienes` → check / "Ya la tienes" |
+| `por_modalidad` | Chips Remoto / Presencial / Híbrido |
+| `por_fuente` | Get on Board, Remotive, Demo |
+| `crecimiento_semanal_pct` | Stat + hint semanal |
+
+**Implementado:** `getMarketDashboard(filters, profile, sessionId)` en `api.js`; `loadResultsBundle` pasa `sessionId`; refetch market en `useResultsData` (`/resultados`); `VacanciesPage` refetch solo jobs. UI termómetro: **solo** sección Mercado en `/resultados`. Helpers en `utils/marketDisplay.js`.
+
+La lista de vacantes puede ser **más corta** que `total_vacantes_activas` del termómetro (seniority solo aplica a jobs recomendados).
+
+Ver [handoff-frontend-termometro-vacantes.md](handoff-frontend-termometro-vacantes.md) · contrato: [ENDPOINTS.md](ENDPOINTS.md).
 
 ---
 
@@ -327,7 +375,19 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 | Analyze / plan / radar / timeline | Datos fijos realistas | Gemini + BD |
 | Jobs | 2 vacantes ejemplo | Pipeline + Supabase |
 
-**Deploy backend:** Fase 11 pendiente. Cuando exista URL prod, solo cambiar `VITE_API_URL` y configurar `CORS_ORIGINS` en el backend.
+**Deploy backend:** Fase 11 pendiente. Cuando exista URL prod, cambiar `VITE_API_URL` a la URL absoluta (sin proxy) y configurar `CORS_ORIGINS` en el backend.
+
+### Troubleshooting — subida de CV (`parse-cv`)
+
+| Síntoma | Causa | Solución |
+|---------|-------|----------|
+| Error rojo “No pudimos enviar tu CV…” | Backend caído o CORS | Usar `VITE_API_URL=/api` + `npm run dev`; backend en `:8000` |
+| **422** “No se pudo convertir el CV…” | Uvicorn con Python del sistema | Reiniciar con `backend\.venv\Scripts\uvicorn.exe` |
+| **422** PDF escaneado | Sin texto seleccionable | Exportar PDF con texto o completar wizard manual |
+| **429** | Rate limit Gemini (10/min) | Esperar 1 minuto |
+| Spinner infinito | Timeout red | Reintentar; PDF &lt; 5 MB |
+
+Decisión técnica: [decisions/2026-05-24-frontend-vite-proxy-coach-global.md](decisions/2026-05-24-frontend-vite-proxy-coach-global.md).
 
 ---
 

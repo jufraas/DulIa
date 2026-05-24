@@ -63,7 +63,16 @@ export const mockJobs = [
 
 /** @type {import('../store/useProfileStore').MarketDashboard} */
 export const mockMarket = {
-  total_vacantes_activas: 312,
+  total_vacantes_activas: 375,
+  vacantes_locales: 3,
+  vacantes_remotas: 350,
+  vacantes_nacionales: 22,
+  sectores_filtro: ['technology', 'user experience', 'innovation'],
+  top_skills_demandadas: [
+    { skill: 'Python', count: 87, tienes: false },
+    { skill: 'SQL', count: 76, tienes: false },
+    { skill: 'TypeScript', count: 71, tienes: true },
+  ],
   top_sectores: [
     { sector: 'tecnología', count: 87 },
     { sector: 'comercial', count: 64 },
@@ -75,12 +84,13 @@ export const mockMarket = {
   ciudad_filtro: 'Barranquilla',
   sector_filtro: null,
   por_modalidad: {
-    remoto: 128,
-    presencial: 7,
+    remoto: 350,
+    presencial: 23,
     hibrido: 0,
   },
   por_fuente: {
-    getonbrd: 127,
-    remotive: 8,
+    getonbrd: 346,
+    remotive: 18,
+    mock: 11,
   },
 }

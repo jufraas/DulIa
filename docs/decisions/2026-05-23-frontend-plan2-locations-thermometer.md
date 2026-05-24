@@ -55,10 +55,11 @@ Parser en `utils/radarApi.js`. Vacantes reales arriba del gráfico (score del ba
 
 `MarketThermometer.jsx` montado en:
 
-- `/resultados` — arriba del plan y oportunidades
-- `/vacantes` — debajo del título, antes del semáforo
+- `/resultados` — sección **Mercado** (nav por anclas)
 
-Datos: store `market` o `getMarketDashboard()` al entrar si faltaba.
+Datos: store `market`; refetch en `useResultsData` al montar `/resultados`.
+
+> **2026-05-24:** retirado de `/vacantes` — esa pantalla es solo semáforo + listado.
 
 ### 6. Navegación resultados ↔ vacantes
 

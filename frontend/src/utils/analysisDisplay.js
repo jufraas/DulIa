@@ -20,6 +20,26 @@
  * @property {AnalysisOpportunity[]} oportunidades
  */
 
+const AREA_LABELS = {
+  habilidades_tecnicas: 'Habilidades técnicas',
+  soft_skills: 'Habilidades blandas',
+  educacion: 'Educación',
+  experiencia: 'Experiencia',
+  ubicacion: 'Ubicación',
+}
+
+/**
+ * @param {unknown} area
+ * @param {string} fallback
+ */
+function humanizeArea(area, fallback) {
+  if (!area || typeof area !== 'string') return fallback
+  if (AREA_LABELS[area]) return AREA_LABELS[area]
+  return area
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
 /**
  * @param {unknown} analysis
  * @returns {AnalysisInsights | null}
@@ -51,11 +71,11 @@ export function parseAnalysisResponse(analysis) {
     descripcion: typeof np.descripcion === 'string' ? np.descripcion : null,
     comparativa: typeof np.comparativa === 'string' ? np.comparativa : null,
     fortalezas: mapList(analisis.fortalezas, (f) => ({
-      label: String(f.area ?? 'Fortaleza'),
+      label: humanizeArea(f.area, 'Fortaleza'),
       text: String(f.descripcion ?? f.area ?? ''),
     })),
     debilidades: mapList(analisis.debilidades, (d) => ({
-      label: String(d.area ?? 'A mejorar'),
+      label: humanizeArea(d.area, 'A mejorar'),
       text: String(d.descripcion ?? d.area ?? ''),
     })).slice(0, 2),
     recomendaciones: Array.isArray(analisis.recomendaciones)

@@ -202,6 +202,42 @@
   line-height: 1.45;
 }
 
+.pdf-market-scope {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg-1);
+}
+
+.pdf-market-sectors,
+.pdf-market-geo {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--fg-2);
+}
+
+.pdf-market-skills {
+  margin-top: 12px;
+}
+
+.pdf-market-skills__title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-3);
+}
+
+.pdf-market-skills ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--fg-2);
+}
+
 .pdf-table {
   width: 100%;
   border-collapse: collapse;

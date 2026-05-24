@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Auth opcional MVP** (Supabase + link session). **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs). **Front:** PDF por secciones, layout `/resultados` congelado.
+2026-05-24 — **Front:** auth Supabase opcional, coach global, proxy CV, termómetro solo en `/resultados`. **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs).
 
 ## Estado por módulo
 
@@ -27,7 +27,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/sobre` | Sobre DulIA | Migue | ✅ |
 | `/comenzar` | Wizard onboarding (3 pasos + CV) | Compartido | ✅ |
 | `/resultados` | Score, perfil, **termómetro**, jobs, plan 30-60-90, **RadarMatch**, timeline, **coach**, PDF completo | Joufra / Migue | ✅ |
-| `/vacantes` | **Termómetro** + semáforo; **Volver → `/resultados`** | Joufra | ✅ |
+| `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
 
@@ -39,7 +39,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
-| `MarketThermometer` | ✅ | `/resultados` y `/vacantes`; `por_modalidad` + `por_fuente` (Get on Board + Remotive); dashboard personalizado por perfil |
+| `MarketThermometer` | ✅ | Solo `/resultados`; endpoint `GET /market/dashboard/{session_id}`; geo + skills demandadas + modalidad/fuente; refetch sin cache stale |
 | `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
@@ -48,15 +48,17 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Integración Axios → API | ✅ | `services/api.js` + `mockResultsBundle.js` |
 | `session_id` + rehidratación al refresh | ✅ | `sessionCache.js`, `sessionHydration.js` |
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
-| Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
+| Subida CV PDF | ✅ | `parseCvPdf` vía `fetch` + proxy; backend `.venv` + `markitdown[pdf]`/`pdfplumber` |
+| Coach global SPA | ✅ | `AppCoachShell`, `coachPageContext.js`; FAB en landing/wizard/vacantes; banner solo resultados |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques solo entre/al final; regla `.cursor/rules/results-layout-frozen.mdc` |
 | Nav secciones `/resultados` | ✅ | `ResultsSectionNav` — vertical sticky (desktop) / chips (móvil); 6 anclas agrupadas |
 | Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
 | Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
-| `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |
-| Coach chat UI | ✅ | `CoachProvider` + banner, teaser FAB, chips iniciales, `CoachAskLink` en tarjetas |
+| `analysis` en UI + store | ✅ | Fortalezas/debilidades con labels humanizados (`humanizeArea`); score `nivel_preparacion` |
+| Refetch market + jobs | ✅ | `useResultsData` (market + jobs); `VacanciesPage` solo jobs al montar |
+| Coach chat UI | ✅ | Coach global + banner en resultados; chips, teaser FAB, `CoachAskLink` |
 | Timeline Plan 2 UI | ✅ | `CareerTimeline` — días 0/30/60/90 |
 | Tabs plan 60/90 | ✅ | `ThirtyDayPlan` — pestañas + milestones/recursos |
 | Copy vacantes dinámico | ✅ | `OpportunitiesPreview` ← `market.total_vacantes_activas` |
