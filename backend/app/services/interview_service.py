@@ -434,14 +434,12 @@ async def cerrar_entrevista(interview_id: str) -> InterviewFinishResponse:
 
 
 async def historial_entrevistas(session_id: str) -> list[InterviewHistoryItem]:
-    """Últimas 10 entrevistas del session_id, más recientes primero."""
+    """Últimas 10 entrevistas del session_id (V1 + V2), más recientes primero."""
     if USE_MOCK:
         rows = [
             r for r in _mock_interviews.values()
             if r.get("session_id") == session_id
         ]
-        rows.sort(key=lambda r: r.get("created_at", ""), reverse=True)
-        rows = rows[:10]
     else:
         supabase = get_supabase()
         res = (
@@ -464,9 +462,27 @@ async def historial_entrevistas(session_id: str) -> list[InterviewHistoryItem]:
                 global_score=row.get("global_score"),
                 created_at=_parse_datetime(row.get("created_at")),
                 status=row.get("status", "in_progress"),
+                version=1,
             )
         )
-    return items
+
+    from app.services.interview_v2 import service as interview_v2_service
+
+    for row in await interview_v2_service.historial_v2(session_id):
+        items.append(
+            InterviewHistoryItem(
+                id=row.id,
+                target_skill=row.target_skill,
+                target_role=row.target_role,
+                global_score=row.global_score,
+                created_at=row.created_at,
+                status=row.status,
+                version=2,
+            )
+        )
+
+    items.sort(key=lambda i: i.created_at, reverse=True)
+    return items[:10]
 
 
 def _perfil_resumen(perfil: dict) -> str:

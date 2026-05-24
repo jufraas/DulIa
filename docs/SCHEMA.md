@@ -1,8 +1,8 @@
 # SCHEMA — Base de datos DulIA
 
-> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009). Auth opcional: `user_accounts` + `profiles.user_id` (migraciones 010–011). Progreso plan + mock interviews: migraciones **012–013**.
+> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009). Auth opcional: `user_accounts` + `profiles.user_id` (migraciones 010–011). Progreso plan + mock interviews: migraciones **012–016**.
 > **BD:** PostgreSQL 17 vía Supabase (proyecto DulIA)
-> **Última actualización:** 2026-05-24 (B1 — progreso + entrevistas)
+> **Última actualización:** 2026-05-24 (B8 — entrevista conversacional V2)
 
 ---
 
@@ -16,7 +16,8 @@ profiles ──< scoring_history >── jobs
 profiles ── (demanda) ──> scrape_queue ──> jobs (pipeline CLI)
     │
     ├── plan_progress (1:1 por profile_id)
-    └── mock_interviews (1:N)
+    ├── mock_interviews (1:N — quiz V1)
+    └── mock_interviews_v2 (1:N — conversacional V2, B8)
 
 user_accounts ── FK auth.users (cuenta opcional, separada del coach)
 
@@ -282,6 +283,38 @@ Sesiones del simulador de entrevistas con IA. Migración `012_progress_and_inter
 | `completed_at` | `timestamptz` | SÍ | — | Cierre de la entrevista |
 
 **Índices:** `user_id`, `profile_id`
+
+---
+
+## Tabla: `mock_interviews_v2`
+
+Entrevistas conversacionales con IA entrevistadora por etapas. Migración `016_interview_v2_state.sql` (B8).
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | PK |
+| `profile_id` | `uuid` | NO | — | FK → `profiles.id` ON DELETE CASCADE |
+| `user_id` | `uuid` | SÍ | — | FK → `auth.users(id)` ON DELETE SET NULL |
+| `session_id` | `text` | NO | — | Sesión del browser |
+| `target_skill` | `text` | SÍ | — | Skill objetivo |
+| `target_role` | `text` | SÍ | — | Rol objetivo |
+| `target_sector` | `text` | NO | — | Sector normalizado (tecnologia, ventas, …) |
+| `persona` | `jsonb` | NO | — | Entrevistador IA: nombre, rol, estilo, saludo |
+| `stage` | `text` | NO | `'rapport'` | `rapport`, `tecnica`, `behavioral`, `cierre`, `finalizada` |
+| `stage_state` | `jsonb` | NO | `'{}'` | Estado interno de la etapa actual |
+| `turns` | `jsonb` | NO | `'[]'` | Historial conversacional `{role, text, stage, t}` |
+| `pool_snapshot` | `jsonb` | NO | `'[]'` | Preguntas+rúbricas tomadas al iniciar |
+| `stage_scores` | `jsonb` | NO | `'{}'` | Scores parciales por etapa |
+| `global_score` | `integer` | SÍ | — | Score global 0–100 al finalizar |
+| `weak_skills` | `text[]` | SÍ | `'{}'` | Skills débiles detectadas |
+| `summary` | `jsonb` | SÍ | — | Resumen final estructurado (etapas + próximos pasos) |
+| `status` | `text` | NO | `'in_progress'` | `in_progress`, `completed`, `aborted` |
+| `version` | `smallint` | NO | `2` | Versión del simulador |
+| `created_at` | `timestamptz` | NO | `now()` | Inicio |
+| `updated_at` | `timestamptz` | NO | `now()` | Última actividad |
+| `completed_at` | `timestamptz` | SÍ | — | Cierre |
+
+**Índices:** `session_id`, `status`, `profile_id`
 
 ---
 

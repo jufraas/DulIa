@@ -56,3 +56,4 @@ class InterviewHistoryItem(BaseModel):
     global_score: int | None = None
     created_at: datetime
     status: str
+    version: int = Field(default=1, description="1=quiz lineal, 2=conversacional")

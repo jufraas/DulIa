@@ -12,5 +12,6 @@ GEMINI_RATE_LIMIT = os.getenv("RATE_LIMIT_GEMINI", "10/minute")
 INTERVIEW_START_LIMIT = os.getenv("RATE_LIMIT_INTERVIEW_START", "5/minute")
 INTERVIEW_ANSWER_LIMIT = os.getenv("RATE_LIMIT_INTERVIEW_ANSWER", "10/minute")
 INTERVIEW_FINISH_LIMIT = os.getenv("RATE_LIMIT_INTERVIEW_FINISH", "3/minute")
+INTERVIEW_V2_TURN_LIMIT = os.getenv("RATE_LIMIT_INTERVIEW_V2_TURN", "15/minute")
 
 limiter = Limiter(key_func=get_remote_address)
