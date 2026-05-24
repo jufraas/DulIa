@@ -21,7 +21,7 @@ Plataforma web con IA — coach de carrera para jóvenes colombianos. **Sin logi
 
 ## Stack
 
-`FastAPI` + `React/Vite/Tailwind` + `PostgreSQL/Supabase` + `Gemini API` + pipeline (mock / Adzuna)
+`FastAPI` + `React/Vite/Tailwind` + `PostgreSQL/Supabase` + `Gemini API` + pipeline (**Get on Board** local + **Remotive** remoto internacional)
 
 ## Flujo frontend (SPA)
 
@@ -69,7 +69,7 @@ Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 |--------|--------|
 | Backend | ✅ Fases 0–10 (mock + real); falta deploy |
 | Frontend | ✅ MVP UI completo; falta deploy prod |
-| Pipeline | 🚧 Datos en `jobs` pendientes |
+| Pipeline | ✅ Operativo | getonbrd + remotive (+ mock dev); adzuna/jooble deprecated |
 | Gemini | ✅ Profile extraction + coach |
 
 Ver [PROJECT_STATE.md](PROJECT_STATE.md).
@@ -96,7 +96,7 @@ backend/
 | POST | `/api/profile/parse-cv` | ✅ |
 | GET | `/api/profile/{session_id}` | ✅ |
 | GET | `/api/jobs/recommended/{session_id}` | ✅ |
-| GET | `/api/market/dashboard` | ✅ |
+| GET | `/api/market/dashboard` | ✅ (+ `por_modalidad`, `por_fuente`) |
 | POST | `/api/coach/chat` | ✅ |
 | GET | `/api/plan/{session_id}` | ⚠️ legacy — no usar en front |
 | GET | `/api/profile/{session_id}/radar-data` | ✅ Plan 2 F3 |

@@ -16,3 +16,5 @@ class MarketDashboard(BaseModel):
     crecimiento_semanal_pct: Optional[float]
     ciudad_filtro: Optional[str]
     sector_filtro: Optional[str]
+    por_modalidad: dict[str, int] = {}      # remoto | presencial | hibrido
+    por_fuente: dict[str, int] = {}         # getonbrd | remotive | mock | …

@@ -12,6 +12,7 @@ logger = get_logger(__name__)
 USE_MOCK = os.getenv("USE_MOCK_DATA", "false").lower() == "true"
 TOP_SECTORES = 5
 TOP_EMPRESAS = 5
+MODALIDADES_CANONICAS = ("remoto", "presencial", "hibrido")
 
 
 async def obtener_dashboard(
@@ -82,6 +83,20 @@ def _agregar(jobs: list[dict], ciudad: str | None, sector: str | None) -> Market
 
     crecimiento = _crecimiento_semanal(jobs)
 
+    modalidades = Counter(
+        j["modality"]
+        for j in jobs
+        if j.get("modality") in MODALIDADES_CANONICAS
+    )
+    por_modalidad = {m: modalidades.get(m, 0) for m in MODALIDADES_CANONICAS}
+
+    fuentes = Counter(
+        str(j["source"]).lower().strip()
+        for j in jobs
+        if j.get("source")
+    )
+    por_fuente = dict(sorted(fuentes.items(), key=lambda x: (-x[1], x[0])))
+
     return MarketDashboard(
         total_vacantes_activas=total,
         top_sectores=top_sectores,
@@ -90,6 +105,8 @@ def _agregar(jobs: list[dict], ciudad: str | None, sector: str | None) -> Market
         crecimiento_semanal_pct=crecimiento,
         ciudad_filtro=ciudad,
         sector_filtro=sector,
+        por_modalidad=por_modalidad,
+        por_fuente=por_fuente,
     )
 
 
@@ -146,4 +163,6 @@ def _mock_dashboard(ciudad: str | None, sector: str | None) -> MarketDashboard:
         crecimiento_semanal_pct=12.4,
         ciudad_filtro=ciudad,
         sector_filtro=sector,
+        por_modalidad={"remoto": 58, "presencial": 198, "hibrido": 56},
+        por_fuente={"getonbrd": 100, "remotive": 8, "mock": 204},
     )

@@ -1,6 +1,6 @@
 # SCHEMA — Base de datos DulIA
 
-> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Mock data pendiente, a cargo del pipeline.
+> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** (~127) + **remotive** (~8) en `jobs`.
 > **BD:** PostgreSQL 17 vía Supabase (proyecto DulIA)
 > **Última actualización:** 2026-05-23
 
@@ -66,7 +66,7 @@ Vacantes laborales (schema **inglés**, compatible Adzuna/pipeline). El pipeline
 | `education_level_req` | `text` | SÍ | — | Nivel educativo mínimo |
 | `modality` | `text` | SÍ | — | `presencial`, `remoto`, `hibrido` |
 | `status` | `text` | NO | `'green'` | `green` 🟢 / `yellow` 🟡 / `red` 🔴 |
-| `source` | `text` | NO | — | Origen (adzuna, mock, etc.) |
+| `source` | `text` | NO | — | Origen: `getonbrd`, `remotive`, `mock` (legacy: `adzuna`, `jooble`) |
 | `url` | `text` | SÍ | — | URL de la vacante |
 | `unique_hash` | `text` | NO | — | SHA256(title+company+url), UNIQUE |
 | `description` | `text` | SÍ | — | Descripción |
