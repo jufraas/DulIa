@@ -22,11 +22,13 @@ El frontend usa **`frontend/.env.local`** (no el `backend/.env`). Copia la plant
 cp .env.example .env.local
 ```
 
+Script opcional: `../scripts/setup-env.sh` copia `.env.example` → `.env` en backend y frontend.
+
 | Variable | Default dev | Notas |
 |----------|-------------|-------|
 | `VITE_API_URL` | `/api` | Proxy Vite → `127.0.0.1:8000` (evita CORS si abres por IP de red) |
-| `VITE_SUPABASE_URL` | — | Misma URL que `SUPABASE_URL` del backend |
-| `VITE_SUPABASE_ANON_KEY` | — | Misma anon key que `SUPABASE_KEY` del backend |
+| `VITE_SUPABASE_URL` | — | Misma URL que `SUPABASE_URL` del backend (opcional) |
+| `VITE_SUPABASE_ANON_KEY` | — | Misma anon key que `SUPABASE_KEY` del backend; **nunca** `service_role` |
 
 **Dos `.env` en el repo:** credenciales del API/Gemini van en `backend/.env`; las del cliente Vite (prefijo `VITE_`) van aquí. Ninguno se commitea.
 
@@ -58,6 +60,9 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
 | `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
 | `/vacantes` | Vacantes | Semáforo de confianza; **Volver a mi análisis** → `/resultados` |
+| `/login` | Login | Email/password; banner demo si faltan envs Supabase |
+| `/registro` | Registro | Upsert a `user_accounts` tras signUp |
+| `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
 
 ## Flujo de datos
 
@@ -84,6 +89,14 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `getMarketDashboard` | GET `/market/dashboard/{session_id}` (preferido) o `/market/dashboard?city=...` |
 | `getRadarData` | GET `/profile/{id}/radar-data` |
 | `postCoachChat` | POST `/coach/chat` |
+| `linkSession` | POST `/auth/link-session` (tras login, best-effort) |
+
+### Auth (opcional)
+
+- `services/supabase.js` — cliente null-safe si faltan envs.
+- `context/AuthProvider.jsx` + `hooks/useAuth.js` — sesión reactiva.
+- `components/auth/ProtectedRoute.jsx` — solo `/perfil` protegida.
+- `components/auth/AuthDisabledBanner.jsx` — aviso en login/registro sin envs.
 
 ## Estructura relevante
 

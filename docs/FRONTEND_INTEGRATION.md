@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Termómetro solo en `/resultados`; `/vacantes` semáforo + refetch jobs.
+**Última actualización:** 2026-05-24 · Auth Supabase opcional, coach global, proxy `/api`, termómetro solo en `/resultados`.
 
 ---
 
@@ -34,8 +34,9 @@
 | `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch jobs** al montar (sin cache stale) |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
+| Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro`, `/perfil` protegida, `linkSession` |
 
-Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Backend: [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md).
 
 ---
 
@@ -49,19 +50,19 @@ Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026
 | `frontend/.env.local` | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
 
 Copiar plantillas: `cp backend/.env.example backend/.env` y `cp frontend/.env.example frontend/.env.local`.  
-Las credenciales Supabase son las **mismas** en ambos lados; en el front van con prefijo `VITE_`. Reiniciar uvicorn y `npm run dev` tras editar.
+Script opcional: `../scripts/setup-env.sh`. Reiniciar uvicorn y `npm run dev` tras editar.
 
 | Variable (frontend) | Valor dev |
 |---------------------|-----------|
 | `VITE_API_URL` | `/api` (proxy Vite → `:8000`; en prod URL absoluta del backend) |
-| `VITE_SUPABASE_URL` | = `SUPABASE_URL` del backend |
-| `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend |
+| `VITE_SUPABASE_URL` | = `SUPABASE_URL` del backend (opcional) |
+| `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend (opcional) |
 
 | Infra local | Comando / nota |
 |-------------|----------------|
 | Backend | `cd backend && .\.venv\Scripts\uvicorn.exe main:app --reload --port 8000` (Windows) |
 | Frontend | `cd frontend && npm run dev` — proxy `/api` en `vite.config.js` |
-| Migraciones | `002_plan2_tables.sql` + `004_plan2_backend_fixes.sql` en Supabase |
+| Migraciones | `002`, `004`, `008`, `009`, **`010`**, **`011`** en Supabase SQL Editor |
 | Swagger | http://localhost:8000/docs |
 
 **`session_id`:** UUID en `localStorage` bajo la clave `dulia_session_id`. Enviarlo en body o path según el endpoint.  
@@ -387,6 +388,30 @@ Errores: `{ "detail": "mensaje" }` — códigos 404, 429, 500.
 | Spinner infinito | Timeout red | Reintentar; PDF &lt; 5 MB |
 
 Decisión técnica: [decisions/2026-05-24-frontend-vite-proxy-coach-global.md](decisions/2026-05-24-frontend-vite-proxy-coach-global.md).
+
+---
+
+## Auth (opcional)
+
+El wizard y `/resultados` siguen **100% anónimos** con `dulia_session_id`. Login/registro es capa adicional.
+
+| Pieza | Archivo | Rol |
+|-------|---------|-----|
+| Cliente Supabase | `services/supabase.js` | `null` si faltan envs; app no rompe |
+| Sesión reactiva | `context/AuthProvider.jsx` | `getSession` + `onAuthStateChange` |
+| Hook | `hooks/useAuth.js` | `{ user, session, loading, isConfigured, signOut }` |
+| Ruta protegida | `components/auth/ProtectedRoute.jsx` | Solo `/perfil` → redirect `/login` |
+| Vinculación | `services/api.js` → `linkSession()` | Tras `SIGNED_IN`, best-effort |
+| Cuenta usuario | tabla `user_accounts` | `/perfil` — no usar `profiles` para datos de cuenta |
+
+**Flujo:**
+
+1. Usuario completa wizard anónimo (`profiles.session_id`).
+2. Opcional: registro/login en Supabase.
+3. `AuthProvider` detecta `SIGNED_IN` → `POST /api/auth/link-session`.
+4. Backend setea `profiles.user_id` si el perfil coach existe.
+
+Sin `VITE_SUPABASE_*`: banner informativo en login/registro, botones disabled, header sin link "Iniciar sesión".
 
 ---
 

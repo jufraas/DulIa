@@ -10,6 +10,8 @@ import RegisterPage from './pages/RegisterPage'
 import ResultsPage from './pages/ResultsPage'
 import VacanciesPage from './pages/VacanciesPage'
 import WelcomePage from './pages/WelcomePage'
+import AuthProvider from './context/AuthProvider'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 import { hydrateSession } from './services/sessionHydration'
 
 /**
@@ -22,21 +24,30 @@ function App() {
   }, [])
 
   return (
-    <BrowserRouter>
-      <AppCoachShell>
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/sobre" element={<AboutPage />} />
-          <Route path="/comenzar" element={<OnboardingPage />} />
-          <Route path="/resultados" element={<ResultsPage />} />
-          <Route path="/vacantes" element={<VacanciesPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro" element={<RegisterPage />} />
-          <Route path="/perfil" element={<ProfilePage />} />
-          <Route path="/construccion" element={<ConstruccionPage />} />
-        </Routes>
-      </AppCoachShell>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppCoachShell>
+          <Routes>
+            <Route path="/" element={<WelcomePage />} />
+            <Route path="/sobre" element={<AboutPage />} />
+            <Route path="/comenzar" element={<OnboardingPage />} />
+            <Route path="/resultados" element={<ResultsPage />} />
+            <Route path="/vacantes" element={<VacanciesPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/registro" element={<RegisterPage />} />
+            <Route
+              path="/perfil"
+              element={(
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              )}
+            />
+            <Route path="/construccion" element={<ConstruccionPage />} />
+          </Routes>
+        </AppCoachShell>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

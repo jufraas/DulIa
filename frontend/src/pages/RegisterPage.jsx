@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import DuliaLogo from '../components/brand/DuliaLogo'
+import AuthDisabledBanner from '../components/auth/AuthDisabledBanner'
+import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/supabase'
 
 function EyeIcon({ open }) {
@@ -68,52 +70,74 @@ function PasswordStrength({ password }) {
   )
 }
 
+const disabledBtn = { opacity: 0.45, cursor: 'not-allowed' }
+
+async function upsertUserAccount(userId, data) {
+  if (!supabase) return null
+  return supabase.from('user_accounts').upsert({
+    user_id: userId,
+    nombre: data.nombre,
+    apellido: data.apellido,
+    telefono: data.telefono,
+    updated_at: new Date().toISOString(),
+  })
+}
+
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { user, isConfigured } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ nombre: '', apellido: '', email: '', telefono: '', password: '' })
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!supabase) return undefined
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate('/', { replace: true })
-    })
-  }, [navigate])
+    if (user) navigate('/', { replace: true })
+  }, [user, navigate])
 
   function set(field) {
     return e => setForm(f => ({ ...f, [field]: e.target.value }))
   }
 
   async function handleGoogleRegister() {
-    if (!supabase) {
-      setError('Registro no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
-      return
-    }
-    const { error } = await supabase.auth.signInWithOAuth({
+    if (!supabase || !isConfigured) return
+    setError(null)
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
     })
-    if (error) setError(error.message)
+    if (oauthError) setError(oauthError.message)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
-    if (!supabase) {
-      setError('Registro no disponible: configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local')
-      return
-    }
-    const { error } = await supabase.auth.signUp({
+    if (!supabase || !isConfigured) return
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { nombre: form.nombre, apellido: form.apellido, telefono: form.telefono } },
+      options: {
+        data: {
+          nombre: form.nombre,
+          apellido: form.apellido,
+          telefono: form.telefono,
+        },
+      },
     })
-    if (error) {
-      setError(error.message)
-    } else {
-      navigate('/')
+
+    if (signUpError) {
+      setError(signUpError.message)
+      return
     }
+
+    if (data.user?.id) {
+      const { error: accountError } = await upsertUserAccount(data.user.id, form)
+      if (accountError && import.meta.env.DEV) {
+        console.warn('[DulIA] user_accounts upsert:', accountError.message)
+      }
+    }
+
+    navigate('/')
   }
 
   const inputStyle = {
@@ -126,6 +150,7 @@ export default function RegisterPage() {
     fontSize: '15px',
     outline: 'none',
     boxSizing: 'border-box',
+    ...(isConfigured ? {} : disabledBtn),
   }
 
   return (
@@ -143,22 +168,22 @@ export default function RegisterPage() {
           padding: '40px 36px',
         }}
       >
-        {/* Logo */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
           <DuliaLogo height={36} />
         </div>
 
-        {/* Título */}
         <h1 style={{ textAlign: 'center', color: '#F1F0FB', fontSize: '22px', fontWeight: '700', marginBottom: '28px', lineHeight: '1.3' }}>
           <span style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             Crea tu cuenta.
           </span>
         </h1>
 
-        {/* Botón Google */}
+        <AuthDisabledBanner />
+
         <button
           type="button"
           onClick={handleGoogleRegister}
+          disabled={!isConfigured}
           style={{
             width: '100%',
             display: 'flex',
@@ -172,54 +197,29 @@ export default function RegisterPage() {
             padding: '11px 16px',
             fontSize: '15px',
             fontWeight: '600',
-            cursor: 'pointer',
+            cursor: isConfigured ? 'pointer' : 'not-allowed',
             marginBottom: '20px',
+            ...(isConfigured ? {} : disabledBtn),
           }}
         >
           <GoogleIcon />
           Continuar con Google
         </button>
 
-        {/* Divisor */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
           <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
           <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '13px' }}>o</span>
           <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* Nombre y Apellido — 2 columnas */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={form.nombre}
-              onChange={set('nombre')}
-              required
-              style={inputStyle}
-            />
-            <input
-              type="text"
-              placeholder="Apellido"
-              value={form.apellido}
-              onChange={set('apellido')}
-              required
-              style={inputStyle}
-            />
+            <input type="text" placeholder="Nombre" value={form.nombre} onChange={set('nombre')} required disabled={!isConfigured} style={inputStyle} />
+            <input type="text" placeholder="Apellido" value={form.apellido} onChange={set('apellido')} required disabled={!isConfigured} style={inputStyle} />
           </div>
 
-          {/* Email */}
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={form.email}
-            onChange={set('email')}
-            required
-            style={inputStyle}
-          />
+          <input type="email" placeholder="Correo electrónico" value={form.email} onChange={set('email')} required disabled={!isConfigured} style={inputStyle} />
 
-          {/* Teléfono con prefijo */}
           <div style={{ display: 'flex', gap: '0' }}>
             <span
               style={{
@@ -242,15 +242,11 @@ export default function RegisterPage() {
               placeholder="Número de teléfono"
               value={form.telefono}
               onChange={set('telefono')}
-              style={{
-                ...inputStyle,
-                borderRadius: '0 12px 12px 0',
-                flex: 1,
-              }}
+              disabled={!isConfigured}
+              style={{ ...inputStyle, borderRadius: '0 12px 12px 0', flex: 1 }}
             />
           </div>
 
-          {/* Contraseña con toggle y fortaleza */}
           <div>
             <div style={{ position: 'relative' }}>
               <input
@@ -259,14 +255,13 @@ export default function RegisterPage() {
                 value={form.password}
                 onChange={set('password')}
                 required
-                style={{
-                  ...inputStyle,
-                  padding: '12px 44px 12px 14px',
-                }}
+                disabled={!isConfigured}
+                style={{ ...inputStyle, padding: '12px 44px 12px 14px' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
+                disabled={!isConfigured}
                 style={{
                   position: 'absolute',
                   right: '12px',
@@ -274,7 +269,7 @@ export default function RegisterPage() {
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: isConfigured ? 'pointer' : 'not-allowed',
                   color: 'rgba(255,255,255,0.4)',
                   display: 'flex',
                   alignItems: 'center',
@@ -296,6 +291,7 @@ export default function RegisterPage() {
 
           <button
             type="submit"
+            disabled={!isConfigured}
             style={{
               width: '100%',
               backgroundColor: '#EC4899',
@@ -305,15 +301,15 @@ export default function RegisterPage() {
               padding: '13px 16px',
               fontSize: '16px',
               fontWeight: '700',
-              cursor: 'pointer',
+              cursor: isConfigured ? 'pointer' : 'not-allowed',
               marginTop: '4px',
+              ...(isConfigured ? {} : disabledBtn),
             }}
           >
             Crear mi cuenta
           </button>
         </form>
 
-        {/* Aviso legal */}
         <p style={{ textAlign: 'center', marginTop: '14px', color: 'rgba(255,255,255,0.3)', fontSize: '12px', lineHeight: '1.5' }}>
           Al registrarte aceptas nuestros{' '}
           <span style={{ color: 'rgba(139,92,246,0.7)' }}>Términos de servicio</span>
@@ -321,13 +317,9 @@ export default function RegisterPage() {
           <span style={{ color: 'rgba(139,92,246,0.7)' }}>Política de privacidad</span>.
         </p>
 
-        {/* Link a login */}
         <p style={{ textAlign: 'center', marginTop: '16px', color: 'rgba(255,255,255,0.45)', fontSize: '14px' }}>
           ¿Ya tienes cuenta?{' '}
-          <Link
-            to="/login"
-            style={{ color: '#8B5CF6', fontWeight: '600', textDecoration: 'none' }}
-          >
+          <Link to="/login" style={{ color: '#8B5CF6', fontWeight: '600', textDecoration: 'none' }}>
             Inicia sesión →
           </Link>
         </p>

@@ -347,4 +347,18 @@ export async function getMarketDashboard(filters = {}, profile = null, sessionId
   }
 }
 
+/**
+ * Vincula el perfil coach anónimo (session_id) al usuario autenticado (user_id).
+ * @param {string} sessionId
+ * @param {string} userId
+ * @returns {Promise<{ linked: boolean, profile_id: string, already_linked?: boolean }>}
+ */
+export async function linkSession(sessionId, userId) {
+  const { data } = await api.post('/auth/link-session', {
+    session_id: sessionId,
+    user_id: userId,
+  })
+  return data
+}
+
 export default api

@@ -20,7 +20,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | Tema | Detalle |
 |------|---------|
 | Formato | JSON (`Content-Type: application/json`) |
-| Auth | Ninguna. `session_id` = UUID en `localStorage` (clave sugerida: `dulia_session_id`) |
+| Auth | Coach: ninguna (`session_id` en localStorage). Auth opcional Supabase solo en front; `POST /auth/link-session` vincula sesión anónima |
 | Errores | `{ "detail": "mensaje" }` — 404, 422, 429, 500 según FastAPI |
 | CORS | Dev: `*` o `CORS_ORIGINS`; prod: solo `CORS_ORIGINS` (ver `.env.example`) |
 | Rate limit | `POST /profile`, `POST /profile/parse-cv`, `POST /profile/.../analyze`, `POST /profile/.../action-plan`, `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
@@ -58,6 +58,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 4. Onboarding terminado → `POST /api/profile` con el mismo `session_id`.
 5. Pantalla resultados → `loadResultsBundle` → store (`jobs`, `market`, `plan`, `radar`, `timeline`); `RadarMatch` + `MarketThermometer`.
 6. `/vacantes` → semáforo; **Volver** → `/resultados` (perfil en store).
+7. **Opcional:** login/registro Supabase → `AuthProvider` vincula `session_id` vía `POST /auth/link-session`.
 7. Refresh en `/resultados` o `/vacantes` → rehidratación conserva sesión.
 
 ### Plan 2 — integrado en frontend (`loadResultsBundle`)
@@ -757,6 +758,41 @@ Campos mínimos por vacante: ver `docs/SCHEMA.md` tabla `jobs`.
 
 ---
 
+## Auth — vincular sesión anónima (opcional)
+
+Tras login/registro en el frontend, best-effort para asociar el perfil coach al usuario.
+
+### `POST /auth/link-session`
+
+**Body:**
+
+```json
+{
+  "session_id": "uuid-del-localStorage",
+  "user_id": "uuid-de-auth.users"
+}
+```
+
+**Respuesta 200:**
+
+```json
+{
+  "linked": true,
+  "profile_id": "uuid-del-perfil-coach",
+  "already_linked": false
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | No existe `profiles` con ese `session_id` |
+| 409 | El perfil ya está vinculado a otro `user_id` |
+| 500 | Error interno |
+
+Idempotente si el mismo `user_id` ya está vinculado (`already_linked: true`).
+
+---
+
 ## Rutas frontend (SPA)
 
 Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
@@ -768,6 +804,9 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/comenzar` | Wizard onboarding (3 pasos) |
 | `/resultados` | Análisis IA, plan (tabs 30/60/90), radar, timeline, coach, PDF |
 | `/vacantes` | Semáforo, chips skills, links `url`; volver a `/resultados` |
+| `/login` | Login email/password (+ Google pendiente config) |
+| `/registro` | Registro + upsert `user_accounts` |
+| `/perfil` | Cuenta de usuario (protegida); requiere sesión Supabase |
 
 Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
 
