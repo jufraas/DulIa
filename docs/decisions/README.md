@@ -41,6 +41,7 @@ Cada decisión importante vive en **un archivo `.md` propio**. Plantilla: [`_TEM
 | 2026-05-23 | [2026-05-23-frontend-plan2-locations-thermometer.md](./2026-05-23-frontend-plan2-locations-thermometer.md) | Plan 2 API, termómetro UI, mocks bundle |
 | 2026-05-23 | [2026-05-23-frontend-colombia-locations-wizard.md](./2026-05-23-frontend-colombia-locations-wizard.md) | Selects DANE departamento → municipio |
 | 2026-05-24 | [2026-05-24-frontend-vite-proxy-coach-global.md](./2026-05-24-frontend-vite-proxy-coach-global.md) | Proxy `/api`, upload CV con fetch, coach global |
+| 2026-05-24 | [2026-05-24-frontend-progress-foundation.md](./2026-05-24-frontend-progress-foundation.md) | Mi Progreso: stores, mocks, `/progreso` |
 
 Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_OWNERS.md).
 

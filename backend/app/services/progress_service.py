@@ -324,3 +324,8 @@ async def add_tasks_from_weak_skills(session_id: str, weak_skills: list[str]) ->
         updated_total_tareas=total,
         plan_updated_at=updated_at,
     )
+
+
+def reset_progress_store() -> None:
+    """Solo tests — limpia progreso mock en memoria."""
+    _mock_progress.clear()

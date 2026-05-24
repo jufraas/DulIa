@@ -12,6 +12,8 @@ npm install
 npm run dev          # http://localhost:5173
 npm run build        # verificar antes de push
 npm run lint         # ESLint (solo src/ + config; ver abajo)
+npm run test:progress   # mini tests mocks progreso/entrevista (11 tests, sin Vitest)
+npm run test:progress:api   # smoke E2E contra backend :8000 (opcional)
 ```
 
 ## Variables de entorno
@@ -63,6 +65,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/login` | Login | Email/password; banner demo si faltan envs Supabase |
 | `/registro` | Registro | Upsert a `user_accounts` tras signUp |
 | `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
+| `/progreso` | Mi progreso | Protegida; timeline, barras animadas, TaskList lateral, scroll a tareas |
 
 ## Flujo de datos
 
@@ -90,12 +93,18 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `getRadarData` | GET `/profile/{id}/radar-data` |
 | `postCoachChat` | POST `/coach/chat` |
 | `linkSession` | POST `/auth/link-session` (tras login, best-effort) |
+| `hasProfile` | GET `/user/has-profile` (guard post-login; mock demo) |
+| `getProgress` / `toggleTask` / `initProgress` | Progreso del plan 30-60-90 — API o mock (`dataSource` en store) |
+| `startInterview` / `submitAnswer` / `finishInterview` | Mock interview por skill — backend M3 in-memory |
+| `interviewHistory` / `addTasksFromWeakSkills` | Historial + tareas desde skills débiles |
+
+Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`. UI progreso: `components/progress/` (`PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, `ProgressDataSourceBanner`). Entrevista: `components/interview/GeminiThinkingLoader.jsx`. Utilidades: `utils/apiErrors.js`, `utils/progressScroll.js`. Env: `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local.
 
 ### Auth (opcional)
 
 - `services/supabase.js` — cliente null-safe si faltan envs.
 - `context/AuthProvider.jsx` + `hooks/useAuth.js` — sesión reactiva.
-- `components/auth/ProtectedRoute.jsx` — solo `/perfil` protegida.
+- `components/auth/ProtectedRoute.jsx` — `/perfil` y `/progreso` protegidas.
 - `components/auth/AuthDisabledBanner.jsx` — aviso en login/registro sin envs.
 
 ## Estructura relevante
@@ -103,7 +112,7 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 ```
 src/
 ├── pages/
-├── components/         # about/, welcome/, onboarding/, results/, pdf/, vacancies/, motion/, …
+├── components/         # about/, welcome/, onboarding/, results/, progress/, pdf/, vacancies/, motion/, …
 ├── components/motion/
 │   └── RevealOnScroll.jsx   # Framer Motion: mount (hero) | scroll (secciones)
 ├── hooks/              # useOnboardingForm, useResultsSectionNav, useCoachContext, …

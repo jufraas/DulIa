@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Auth Supabase opcional, coach global, proxy `/api`, termómetro solo en `/resultados`.
+**Última actualización:** 2026-05-24 · Mi Progreso M3 E2E completo (API + fallback mock + tests).
 
 ---
 
@@ -35,8 +35,16 @@
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch jobs** al montar (sin cache stale) |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro`, `/perfil` protegida, `linkSession` |
+| Mi Progreso — M2.4 timeline | ✅ | `PlanTimeline.jsx`; `ThirtyDayPlan` en resultados **sin cambios** |
+| Mi Progreso — M2.5 barras | ✅ | `ProgressOverview` + hooks animación |
+| Mi Progreso — M2.6 lock overlay | ✅ | `PhaseLockOverlay` en fases 60/90 bloqueadas |
+| Mi Progreso — M2.7 TaskList | ✅ | Panel lateral con filtros en `/progreso` |
+| Mi Progreso — M2.8 scroll | ✅ | Click tarea → tab + scroll + highlight en timeline |
+| Progress / interview API | ✅ | Backend M3 in-memory; `withProgressFallback` + banner mock en `/progreso` |
+| Mi Progreso — M3 dataSource | ✅ | Stores `dataSource`; `VITE_FORCE_PROGRESS_MOCK`; `ProgressDataSourceBanner` |
+| Mock interview loader | ✅ | `GeminiThinkingLoader.jsx` (UI J2 pendiente) |
 
-Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
 
 ---
 
@@ -427,12 +435,13 @@ Sin `VITE_SUPABASE_*`: banner informativo en login/registro, botones disabled, h
 ### Flujo progreso (tab Progreso)
 
 ```
-POST /progress/{session_id}/init     (opcional — GET también lazy-init)
-GET  /progress/{session_id}          → stats + completed_tasks
-PATCH /progress/{session_id}/task    → { task_id, completed }
+POST /progress/init              { session_id }  (opcional — GET también lazy-init)
+GET  /progress/{session_id}      → tasks[], global_pct, phases[]
+PATCH /progress/task             { session_id, task_id, completed }
+POST /progress/add-from-skills   { session_id, weak_skills }
 ```
 
-Convención `task_id`: `fase_30:semana_1:idx_0` (ver ENDPOINTS.md sección Progreso).
+Convención `task_id` pública: `p30-t0-completar-cv` (ver ENDPOINTS.md). Persistencia interna en Supabase vía adaptador.
 
 ### Flujo mock interview
 
@@ -443,7 +452,7 @@ POST /interview/{id}/finish
 GET  /interview/history/{session_id}
 ```
 
-Desde resultados: `POST /progress/{session_id}/add-tasks-from-weak-skills` con `weak_skills` del finish.
+Desde resultados: `POST /progress/add-from-skills` con `weak_skills` del finish.
 
 ### Coach context-aware
 
@@ -458,7 +467,7 @@ Todos los endpoints anteriores funcionan sin Supabase/Gemini. Perfil mock acepta
 1. `has-profile` + redirect
 2. `GET /progress` + toggle task
 3. Interview E2E
-4. `add-tasks-from-weak-skills` desde pantalla resultados
+4. `add-from-skills` desde pantalla resultados
 5. Coach — verificar respuestas mencionan progreso cuando pregunta por el plan
 
 ---

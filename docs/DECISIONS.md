@@ -34,6 +34,7 @@
 | 2026-05-24 | backend | Rate limits asimétricos mock interview | [decisions/2026-05-24-interview-rate-limits.md](./decisions/2026-05-24-interview-rate-limits.md) |
 | 2026-05-24 | backend | Add-tasks in-place en action_plans | [decisions/2026-05-24-add-tasks-action-plan-inplace.md](./decisions/2026-05-24-add-tasks-action-plan-inplace.md) |
 | 2026-05-24 | backend + ia | Pool entrevistas con fuentes reales (ETL B7) | [decisions/2026-05-24-interview-pool-real-sources.md](./decisions/2026-05-24-interview-pool-real-sources.md) |
+| 2026-05-24 | frontend | Mi Progreso — foundation (stores, mocks, `/progreso`) | [decisions/2026-05-24-frontend-progress-foundation.md](./decisions/2026-05-24-frontend-progress-foundation.md) |
 
 ### Panorama B1–B7 (hackathon progreso + interview)
 

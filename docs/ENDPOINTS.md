@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Backend B1–B6 completo (progreso + interview + coach context)
+**Última actualización:** 2026-05-24 · Backend B1–B7 + adaptador M3 (progreso Supabase con contrato público frontend)
 
 ## Resumen de endpoints (referencia rápida)
 
@@ -18,10 +18,10 @@
 | POST | `/coach/chat` | Coach (context-aware B6) | No | 10/min |
 | GET | `/user/has-profile` | ¿Tiene perfil tras login? | No* | — |
 | POST | `/auth/link-session` | Vincular session ↔ user | No | — |
-| GET | `/progress/{session_id}` | Progreso del plan | No | — |
-| PATCH | `/progress/{session_id}/task` | Marcar tarea | No | — |
-| POST | `/progress/{session_id}/init` | Init progreso | No | — |
-| POST | `/progress/{session_id}/add-tasks-from-weak-skills` | Tareas desde entrevista | No | — |
+| GET | `/progress/{session_id}` | Progreso del plan (shape M3) | No | — |
+| PATCH | `/progress/task` | Marcar tarea `{ session_id, task_id, completed }` | No | — |
+| POST | `/progress/init` | Init progreso `{ session_id }` | No | — |
+| POST | `/progress/add-from-skills` | Tareas desde entrevista `{ session_id, weak_skills }` | No | — |
 | POST | `/interview/start` | Iniciar entrevista | No | 5/min |
 | POST | `/interview/{id}/answer` | Evaluar respuesta | No | 10/min |
 | POST | `/interview/{id}/finish` | Cerrar entrevista | No | 3/min |
@@ -69,15 +69,15 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | `GET /profile/.../radar-data` | 5 dimensiones mock | Calculado desde perfil + análisis + mercado |
 | `GET /profile/.../timeline-data` | Timeline mock | Desde plan de acción; 404 en real sin plan |
 | `GET /user/has-profile` | Mock: user `11111111-…` → true; resto false | Query `profiles.user_id` en Supabase |
-| `GET /progress/{id}` | Mock en memoria + plan mock | `plan_progress` + stats desde `action_plans` |
-| `PATCH /progress/{id}/task` | Mock en memoria | Actualiza `completed_tasks` JSONB |
-| `POST /progress/{id}/init` | Idempotente mock | Insert en `plan_progress` si falta |
+| `GET /progress/{id}` | Mock en memoria + plan mock | `plan_progress` Supabase → adaptador M3 |
+| `PATCH /progress/task` | Mock en memoria | Actualiza `completed_tasks` JSONB (IDs internos B3) |
+| `POST /progress/init` | Idempotente mock | Insert en `plan_progress` si falta |
+| `POST /progress/add-from-skills` | Modifica plan mock in-memory | Update `action_plans.fase_30` |
 | `POST /interview/start` | Caché demo por skill | Gemini + insert `mock_interviews` |
 | `POST /interview/{id}/answer` | Evaluación mock heurística | Gemini + append `answers` jsonb |
 | `POST /interview/{id}/finish` | Feedback mock fijo | Gemini + cierre entrevista |
 | `GET /interview/history/{id}` | Dict en memoria | Query Supabase |
 | `POST /coach/chat` | Mock con contexto progreso/entrevista si existe | Gemini + `_build_user_context` |
-| `POST /progress/.../add-tasks-from-weak-skills` | Modifica plan mock in-memory | Update `action_plans.fase_30` |
 
 > Guía paso a paso para frontend: [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md)
 
@@ -798,6 +798,35 @@ Campos mínimos por vacante: ver `docs/SCHEMA.md` tabla `jobs`.
 
 ---
 
+## Progreso del plan + mock interview ✅ (M3 E2E)
+
+Cliente en `frontend/src/services/api.js` con fallback a `src/mocks/mockProgress.js` y `mockInterview.js`.
+
+**Backend:** rutas públicas M3 en `routes/progress.py` → `progress_m3_service.py` → `progress_adapter.py` (mapeo IDs/shape) → `progress_service.py` (persistencia Supabase `plan_progress` + desbloqueo 80%). Entrevista: `routes/user.py` (contrato M3) o `interview_router.py` (B5) según despliegue.
+
+| Método | Ruta | Descripción | Estado backend |
+|--------|------|-------------|----------------|
+| GET | `/user/has-profile?user_id=` | ¿Usuario ya tiene perfil coach? (UUID Supabase) | ✅ |
+| GET | `/progress/{session_id}` | Estado progreso M3 (`tasks[]`, `global_pct`, `phases[]`); lazy-init | ✅ |
+| PATCH | `/progress/task` | Marcar tarea `{ session_id, task_id, completed }` — **404** si tarea no existe | ✅ |
+| POST | `/progress/init` | Inicializar progreso `{ session_id }` desde action-plan | ✅ |
+| POST | `/progress/add-from-skills` | Agregar tareas desde weak skills entrevista | ✅ |
+| POST | `/interview/start` | Iniciar entrevista `{ session_id, skill, role? }` | ✅ |
+| POST | `/interview/{id}/answer` | Enviar respuesta — **404** si sesión no existe | ✅ |
+| POST | `/interview/{id}/finish` | Cerrar y obtener score/feedback | ✅ |
+| GET | `/interview/history?user_id=` | Últimas entrevistas (máx. 10 por usuario) | ✅ |
+
+**Notas M3:**
+- Progreso **persiste en Supabase** (`plan_progress.completed_tasks` con IDs internos `fase_30:semana_N:idx_M`); el adaptador expone IDs públicos `p30-t0-slug` al frontend.
+- `has-profile`: devuelve `{ has_profile: false }` si `user_id` no es UUID válido o Supabase no está configurado.
+- Frontend: `dataSource: 'api' | 'mock'` en stores; banner en `/progreso` si usa mock; `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local.
+
+Regla unlock fases: **80%** de la fase anterior. Ver [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
+
+**Tests:** `npm run test:progress` (11 unit) · `npm run test:progress:api` (smoke contra :8000) · `pytest backend/tests/test_m3_progress_api.py` (progreso, 3+).
+
+---
+
 ## Auth — vincular sesión anónima (opcional)
 
 Tras login/registro en el frontend, best-effort para asociar el perfil coach al usuario.
@@ -879,40 +908,47 @@ Tras login/registro, el frontend decide si redirigir a `/comenzar` (sin perfil) 
 
 ---
 
-## Progreso — plan 30/60/90
+## Progreso — plan 30/60/90 (contrato público M3)
 
-Persistencia de tareas completadas. Requiere perfil (`profiles`) existente. El plan se lee de `action_plans` (o mock); si no hay plan, `total_tareas=0` y porcentajes en 0.
+Persistencia en `plan_progress` (Supabase). Requiere perfil (`profiles`). El plan se lee de `action_plans`. Capa adaptadora: `progress_m3_service` + `progress_adapter`.
 
-### Convención `task_id`
+### Convención `task_id` (frontend)
 
 ```
-fase_{30|60|90}:semana_{N}:idx_{M}
+p{30|60|90}-t{índice}-{slug-del-label}
 ```
 
-- `semana_N` = campo `acciones[].semana` del JSON del plan.
-- `idx_M` = índice 0-based entre tareas de la misma semana en esa fase.
+Ejemplo: `p30-t0-completar-cv` = primera tarea de fase 30.
 
-Ejemplo: `fase_30:semana_1:idx_0` = primera tarea de la semana 1 en fase 30.
+**Internamente** (JSONB `completed_tasks`): `fase_{30|60|90}:semana_{N}:idx_{M}` — el adaptador traduce en ambos sentidos.
 
 **Desbloqueo de fases:** fase 60 si fase 30 ≥ 80% completada; fase 90 si fase 60 ≥ 80%.
 
 ### `GET /progress/{session_id}`
 
-**Respuesta 200:**
+**Respuesta 200 (shape M3):**
 
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
-  "profile_id": "uuid-del-perfil",
-  "started_at": "2026-05-24T12:00:00Z",
-  "current_phase": 30,
-  "current_week": 2,
-  "completed_tasks": ["fase_30:semana_1:idx_0"],
-  "progreso_global_pct": 8,
-  "progreso_fase_pct": 25,
-  "total_tareas": 12,
-  "tareas_completadas": 1,
-  "fases_desbloqueadas": [30]
+  "current_day": 12,
+  "global_pct": 8,
+  "active_phase": "30",
+  "tasks": [
+    {
+      "id": "p30-t0-completar-cv",
+      "label": "Completar CV",
+      "phase": "30",
+      "week": 1,
+      "completed": false,
+      "completed_at": null
+    }
+  ],
+  "phases": [
+    { "phase": "30", "pct": 8, "locked": false, "completed_count": 1, "total_count": 12 }
+  ],
+  "next_milestone": { "dia": 30, "logro": "Primer hito" },
+  "unlock_threshold_pct": 80
 }
 ```
 
@@ -923,41 +959,31 @@ Ejemplo: `fase_30:semana_1:idx_0` = primera tarea de la semana 1 en fase 30.
 
 Lazy-init: crea fila en `plan_progress` si no existe.
 
-### `POST /progress/{session_id}/init`
+### `POST /progress/init`
 
-Idempotente — crea registro de progreso si falta.
+**Body:**
 
-| Código | Cuándo |
-|--------|--------|
-| 201 | Fila creada |
-| 200 | Ya existía |
-| 404 | Sin perfil |
-| 500 | Error interno |
+```json
+{ "session_id": "550e8400-e29b-41d4-a716-446655440000" }
+```
 
-Body: ninguno. Respuesta: mismo shape que `GET /progress/{session_id}`.
+Idempotente — crea registro de progreso si falta. **Respuesta 200:** mismo shape M3 que `GET /progress/{session_id}`.
 
-### `PATCH /progress/{session_id}/task`
+### `PATCH /progress/task`
 
 **Body:**
 
 ```json
 {
-  "task_id": "fase_30:semana_1:idx_0",
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "task_id": "p30-t0-completar-cv",
   "completed": true
 }
 ```
 
-**Respuesta 200:** mismo shape que `ProgressResponse` (stats recalculados).
+**Respuesta 200:** shape M3 completo (stats recalculados). **404** si `task_id` no existe o progreso no encontrado.
 
-| Código | Cuándo |
-|--------|--------|
-| 404 | Sin perfil |
-| 422 | Body inválido |
-| 500 | Error interno |
-
----
-
-### `POST /progress/{session_id}/add-tasks-from-weak-skills`
+### `POST /progress/add-from-skills`
 
 Agrega tareas de refuerzo a `fase_30.acciones` del action plan (desde resultados de entrevista).
 
@@ -965,26 +991,12 @@ Agrega tareas de refuerzo a `fase_30.acciones` del action plan (desde resultados
 
 ```json
 {
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
   "weak_skills": ["Excel avanzado", "Comunicación verbal"]
 }
 ```
 
-**Respuesta 200:**
-
-```json
-{
-  "added_tasks": [
-    {
-      "task_id": "fase_30:semana_2:idx_1",
-      "tarea": "Mejorar: Excel avanzado",
-      "skill": "Excel avanzado",
-      "semana": 2
-    }
-  ],
-  "updated_total_tareas": 14,
-  "plan_updated_at": "2026-05-24T12:00:00Z"
-}
-```
+**Respuesta 200:** shape M3 completo con tareas nuevas incluidas. **404** si no hay progreso/plan.
 
 | Código | Cuándo |
 |--------|--------|
@@ -992,7 +1004,7 @@ Agrega tareas de refuerzo a `fase_30.acciones` del action plan (desde resultados
 | 422 | Lista vacía |
 | 500 | Error interno |
 
-Tras agregar, `GET /progress/{session_id}` refleja `total_tareas` incrementado.
+Tras agregar, `GET /progress/{session_id}` refleja las tareas nuevas en `tasks[]`.
 
 ---
 
@@ -1151,7 +1163,8 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/login` | Login email/password (+ Google pendiente config) |
 | `/registro` | Registro + upsert `user_accounts` |
 | `/perfil` | Cuenta de usuario (protegida); requiere sesión Supabase |
+| `/progreso` | Mi progreso — plan checkeable (protegida); mock si API cae o `VITE_FORCE_PROGRESS_MOCK` |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`, **`mockProgress.js`**, **`mockInterview.js`**. Persistencia: `sessionCache.js` + `sessionHydration.js`. Tests: `npm run test:progress`, `npm run test:progress:api`.
 
 **Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)

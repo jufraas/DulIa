@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend B1–B7 ✅:** progreso + mock interview con pool real + coach context-aware. Listo para pitch con procedencia honesta.
+2026-05-24 — **Backend B1–B7 ✅** + **adaptador M3 progreso** (Supabase detrás de contrato público frontend) + **Front M3 ✅** (`/progreso`, stores, fallback mock).
 
 ## Estado por módulo
 
@@ -30,6 +30,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
+| `/progreso` | Plan checkeable + fases (protegida) | Migue | ✅ Bloque 2 UI + M3 E2E API |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -67,13 +68,15 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
+| Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
+| Mi Progreso — M3 E2E | ✅ | Backend Supabase + adaptador M3; `dataSource` banner; `test:progress:api`; pytest M3 |
 
 ### Pendiente UI (pre-pitch)
 
 | Pieza | Prioridad | Notas |
 |-------|-----------|-------|
 | Deploy Vercel + backend prod | Alta | `VITE_API_URL`, CORS |
-| Prueba E2E back real | Alta | `USE_MOCK_DATA=false` |
+| Prueba E2E back real | ✅ | Progreso Supabase + smoke (`test:progress:api`); interview pendiente alinear contrato |
 | Copy landing hardcode | Baja | Prototipos kit `Landing.jsx` / `Wizard.jsx` (huérfanos) |
 
 Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).
@@ -102,6 +105,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | **B5** | Endpoints REST mock interview | ✅ start/answer/finish/history + rate limits |
 | **B6** | Coach context-aware + add-tasks | ✅ + docs finales |
 | **B7** | Reemplazo pool con fuentes reales | ✅ ~521 preguntas tech (GitHub + HF) + 108 no-tech AI; ETL + migraciones 014–015 |
+| M3 Progreso + interview (front) | UI + stores + fallback mock | ✅ `/progreso`; `progress.py` → `progress_m3_service` → Supabase |
 
 ## Leyenda
 
