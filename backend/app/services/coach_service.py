@@ -161,12 +161,24 @@ def _continuity_suffix(historial: list) -> str:
     )
 
 
+def _historial_role(turno) -> str:
+    if isinstance(turno, dict):
+        return turno.get("role", "usuario")
+    return getattr(turno, "role", "usuario")
+
+
+def _historial_texto(turno) -> str:
+    if isinstance(turno, dict):
+        return turno.get("texto", "")
+    return getattr(turno, "texto", "")
+
+
 def _build_gemini_contents(historial: list, mensaje: str) -> list[dict]:
     """Arma historial multi-turno para Gemini (máx. 10 turnos previos)."""
     contents: list[dict] = []
     for turno in historial[-10:]:
-        role = "user" if getattr(turno, "role", turno.get("role")) == "usuario" else "model"
-        texto = getattr(turno, "texto", turno.get("texto", ""))
+        role = "user" if _historial_role(turno) == "usuario" else "model"
+        texto = _historial_texto(turno)
         if texto:
             contents.append({"role": role, "parts": [texto]})
     contents.append({"role": "user", "parts": [mensaje]})
