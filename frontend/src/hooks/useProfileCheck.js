@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
+import { hasProfile as fetchHasProfile } from '../services/api'
 
 export async function checkProfile(userId) {
   if (!userId) return false
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || ''
-    const res = await fetch(`${apiUrl}/api/user/has-profile?user_id=${userId}`)
-    if (!res.ok) return false
-    const data = await res.json()
-    return Boolean(data?.has_profile)
+    const result = await fetchHasProfile(userId)
+    return Boolean(result?.has_profile)
   } catch {
     return false
   }
@@ -16,14 +14,11 @@ export async function checkProfile(userId) {
 
 export default function useProfileCheck() {
   const [hasProfile, setHasProfile] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(Boolean(supabase))
   const [userId, setUserId] = useState(null)
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false)
-      return undefined
-    }
+    if (!supabase) return undefined
 
     let cancelled = false
 

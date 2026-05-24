@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import DuliaLogo from '../components/brand/DuliaLogo'
 import AuthDisabledBanner from '../components/auth/AuthDisabledBanner'
+import RedirectIfHasProfile from '../components/auth/RedirectIfHasProfile'
 import { useAuth } from '../hooks/useAuth'
+import { checkProfile } from '../hooks/useProfileCheck'
 import { supabase } from '../services/supabase'
 
 function EyeIcon({ open }) {
@@ -33,7 +35,12 @@ function GoogleIcon() {
 
 const disabledBtn = { opacity: 0.45, cursor: 'not-allowed' }
 
-export default function LoginPage() {
+async function resolvePostLoginPath(userId) {
+  const hasCoachProfile = await checkProfile(userId)
+  return hasCoachProfile ? '/progreso' : '/comenzar'
+}
+
+function LoginPageContent() {
   const navigate = useNavigate()
   const { user, isConfigured } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
@@ -42,7 +49,14 @@ export default function LoginPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (user) navigate('/', { replace: true })
+    if (!user) return undefined
+    let cancelled = false
+    void resolvePostLoginPath(user.id).then((path) => {
+      if (!cancelled) navigate(path, { replace: true })
+    })
+    return () => {
+      cancelled = true
+    }
   }, [user, navigate])
 
   async function handleGoogleLogin() {
@@ -59,11 +73,11 @@ export default function LoginPage() {
     e.preventDefault()
     setError(null)
     if (!supabase || !isConfigured) return
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) {
       setError(signInError.message)
-    } else {
-      navigate('/')
+    } else if (data.user?.id) {
+      navigate(await resolvePostLoginPath(data.user.id))
     }
   }
 
@@ -231,5 +245,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <RedirectIfHasProfile fallbackPath="/progreso">
+      <LoginPageContent />
+    </RedirectIfHasProfile>
   )
 }

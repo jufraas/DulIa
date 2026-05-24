@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front + Back:** Mi Progreso M3 E2E completo — API progreso/entrevista en memoria, fallback mock, tests.
+2026-05-24 — **Front:** Mi Progreso M2+M3 + integración Jufra J1–J3 (merge post-pull).
 
 ## Estado por módulo
 
@@ -30,7 +30,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
-| `/progreso` | Plan checkeable + fases (protegida) | Migue | ✅ Bloque 2 UI + M3 E2E API |
+| `/progreso` | Plan checkeable + fases + CTA entrevista (protegida) | Migue + Jufra | ✅ |
+| `/entrevistas` | Simulador entrevista mock + historial (protegida) | Jufra + Migue | ✅ |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -69,14 +70,15 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
 | Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
-| Mi Progreso — M3 E2E | ✅ | Backend in-memory; `dataSource` banner; `test:progress:api`; pytest M3 |
+| Mi Progreso — M3 E2E | ✅ | Backend in-memory en FRONT; fallback mock; tests |
+| Integración J1–J3 | ✅ | Auth redirect, nav, entrevista UI + store, merge fix |
 
 ### Pendiente UI (pre-pitch)
 
 | Pieza | Prioridad | Notas |
 |-------|-----------|-------|
 | Deploy Vercel + backend prod | Alta | `VITE_API_URL`, CORS |
-| Prueba E2E back real | ✅ | Progreso + interview smoke (`test:progress:api`); persistencia Supabase post-MVP |
+| Merge FRONT ← main (Backend Supabase) | Alta | PR #21 — progreso/entrevista persistente |
 | Copy landing hardcode | Baja | Prototipos kit `Landing.jsx` / `Wizard.jsx` (huérfanos) |
 
 Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md).

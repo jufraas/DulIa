@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Mi Progreso M3 E2E completo (API + fallback mock + tests).
+**Última actualización:** 2026-05-24 · Mi Progreso + entrevista integrados (J1–J3 + M2/M3).
 
 ---
 
@@ -40,9 +40,11 @@
 | Mi Progreso — M2.6 lock overlay | ✅ | `PhaseLockOverlay` en fases 60/90 bloqueadas |
 | Mi Progreso — M2.7 TaskList | ✅ | Panel lateral con filtros en `/progreso` |
 | Mi Progreso — M2.8 scroll | ✅ | Click tarea → tab + scroll + highlight en timeline |
-| Progress / interview API | ✅ | Backend M3 in-memory; `withProgressFallback` + banner mock en `/progreso` |
-| Mi Progreso — M3 dataSource | ✅ | Stores `dataSource`; `VITE_FORCE_PROGRESS_MOCK`; `ProgressDataSourceBanner` |
-| Mock interview loader | ✅ | `GeminiThinkingLoader.jsx` (UI J2 pendiente) |
+| Progress / interview API | ✅ | `withProgressFallback`; `InterviewPage` usa `useInterviewStore` |
+| Mi Progreso — M3 dataSource | ✅ | Banner mock en `/progreso` |
+| J1 — useProfileCheck | ✅ | Login/registro → `/progreso` o `/comenzar` |
+| J2 — Interview UI | ✅ | `/entrevistas`, `GeminiThinkingLoader`, add-to-plan |
+| J3 — Nav + empty states | ✅ | `SiteHeader`, empty plan e historial vacío |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
 

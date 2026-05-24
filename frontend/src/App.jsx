@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage'
 import ResultsPage from './pages/ResultsPage'
 import VacanciesPage from './pages/VacanciesPage'
 import ProgressPage from './pages/ProgressPage'
+import InterviewPage from './pages/InterviewPage'
 import WelcomePage from './pages/WelcomePage'
 import AuthProvider from './context/AuthProvider'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -35,6 +36,14 @@ function App() {
             <Route path="/resultados" element={<ResultsPage />} />
             <Route path="/vacantes" element={<VacanciesPage />} />
             <Route path="/progreso" element={<ProgressPage />} />
+            <Route
+              path="/entrevistas"
+              element={(
+                <ProtectedRoute>
+                  <InterviewPage />
+                </ProtectedRoute>
+              )}
+            />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro" element={<RegisterPage />} />
             <Route

@@ -43,7 +43,7 @@
  * @property {string | null} role
  */
 
-const MOCK_QUESTIONS = [
+const INTERVIEW_QUESTION_TEMPLATES = [
   'Cuéntame sobre un proyecto reciente donde usaste {skill}. ¿Qué problema resolviste?',
   '¿Cómo explicarías {skill} a alguien que no es técnico?',
   'Describe una situación difícil trabajando en equipo relacionada con {skill}.',
@@ -64,7 +64,7 @@ let sessionCounter = 1
  * @param {number} index
  */
 function questionText(skill, index) {
-  const template = MOCK_QUESTIONS[index] ?? MOCK_QUESTIONS[0]
+  const template = INTERVIEW_QUESTION_TEMPLATES[index] ?? INTERVIEW_QUESTION_TEMPLATES[0]
   return template.replace(/\{skill\}/g, skill)
 }
 
@@ -83,7 +83,7 @@ export function startMockInterview(sessionId, skill, role = null) {
     current_question: {
       index: 1,
       text: questionText(skill, 0),
-      total: MOCK_QUESTIONS.length,
+      total: INTERVIEW_QUESTION_TEMPLATES.length,
     },
     answers_count: 0,
     status: /** @type {'active'} */ ('active'),
@@ -104,14 +104,14 @@ export function submitMockAnswer(interviewId, answer) {
   session.answers.push(answer.trim())
   session.answers_count = session.answers.length
 
-  if (session.answers_count >= MOCK_QUESTIONS.length) {
+  if (session.answers_count >= INTERVIEW_QUESTION_TEMPLATES.length) {
     return structuredClone(session)
   }
 
   session.current_question = {
     index: session.answers_count + 1,
     text: questionText(session.skill, session.answers_count),
-    total: MOCK_QUESTIONS.length,
+    total: INTERVIEW_QUESTION_TEMPLATES.length,
   }
   activeSessions.set(interviewId, session)
   return structuredClone(session)
