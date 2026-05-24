@@ -2,7 +2,7 @@
 
 > **Versión:** v1.0 · 2026-05-24
 > **Autores:** DulIA backend (CTO) + Migue (frontend lead)
-> **Estado:** propuesta · pendiente kickoff
+> **Estado:** Plan F (M4) ✅ frontend · Plan B (B8) 🔲 pendiente backend
 > **Suplanta:** [decisions/2026-05-24-mock-interview-seed-pool.md](decisions/2026-05-24-mock-interview-seed-pool.md) (parcial — el pool sigue siendo la fuente de preguntas)
 
 ---
@@ -347,7 +347,7 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
 
 **Tareas:**
 
-- [ ] `frontend/src/services/interviewV2Api.js` — wrapper Axios:
+- [x] `frontend/src/services/interviewV2Api.js` — wrapper Axios:
   ```js
   export async function startInterviewV2(sessionId, targetSkill, targetRole) { ... }
   export async function sendInterviewTurn(interviewId, message) { ... }
@@ -356,7 +356,7 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
   ```
   Usa `withProgressFallback` para degradar a mock si el back está caído (igual que progress).
 
-- [ ] `frontend/src/store/useInterviewV2Store.js`:
+- [x] `frontend/src/store/useInterviewV2Store.js`:
   ```js
   {
     interviewId: null,
@@ -373,11 +373,11 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
   ```
   Acciones: `start`, `sendMessage`, `abort`, `reset`.
 
-- [ ] `frontend/src/mocks/mockInterviewV2.js`:
+- [x] `frontend/src/mocks/mockInterviewV2.js`:
   - Persona fija + 8 turnos pre-escritos por sector tecnología.
   - Útil para `VITE_FORCE_INTERVIEW_MOCK=true` y E2E tests sin Gemini.
 
-**DoD:** `useInterviewV2Store.getState().start('tech-skill', 'Frontend')` funciona contra `localhost:8000` en dev.
+**DoD:** ✅ Mock + fallback operativos; smoke API real pendiente de **B8** (`POST /interview/v2/start` en `:8000`).
 
 ---
 
@@ -387,14 +387,14 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
 
 **Tareas:**
 
-- [ ] Reemplazar `pages/InterviewPage.jsx` o crear `InterviewV2Page.jsx` controlado por flag `VITE_INTERVIEW_VERSION`.
-- [ ] Layout (3 zonas):
+- [x] `InterviewV2Page.jsx` + router en `InterviewPage.jsx` (`VITE_INTERVIEW_VERSION`, default `v2`; quiz V1 vía `?legacy=1`).
+- [x] Layout (3 zonas):
   - **Header de persona** (top, sticky): avatar + nombre + rol + sector. Pill con etapa actual.
   - **Stage stepper** (debajo del header): 4 pasos (`rapport · técnica · behavioral · cierre`) con estado `done | doing | pending`.
   - **Chat scroll** (centro): bubbles separadas por etapa con label sutil; "está escribiendo…" con animación cuando `sending`.
   - **Composer** (bottom, sticky): textarea autoexpansible + botón "Enviar"; deshabilitado en `finished`.
 
-- [ ] Componentes nuevos:
+- [x] Componentes nuevos:
   ```
   src/components/interview/v2/
   ├── InterviewLauncherV2.jsx   ← elige skill + rol; inicia start()
@@ -406,12 +406,12 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
   └── InterviewSummaryV2.jsx    ← summary final por etapa
   ```
 
-- [ ] Diseño visual coherente con `dulia-kit.css`:
+- [x] Diseño visual coherente con `dulia-kit.css`:
   - Bubble entrevistador: fondo `--surface-card` con borde violeta sutil.
   - Bubble candidato: fondo `--brand-violet/15`, alineado a la derecha.
   - Stepper: gradient activo de morado a rosa (igual que tabs actuales).
 
-**DoD:** chat fluido con `useInterviewV2Store`, scroll automático al último mensaje, sin saltos al cambiar etapa.
+**DoD:** ✅ Chat fluido, scroll automático, stepper por etapa.
 
 ---
 
@@ -421,19 +421,19 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
 
 **Tareas:**
 
-- [ ] `InterviewSummaryV2.jsx`:
+- [x] `InterviewSummaryV2.jsx`:
   - Score global + 4 cards de etapa con `score` + `strengths` + `gaps`.
   - Sección "Próximos pasos" (de `summary.proximos_pasos`).
   - CTA principal: **"Agregar refuerzo a mi plan"** — llama a `addTasksFromWeakSkills(summary.weak_skills)` y redirige a `/progreso`.
   - CTA secundaria: "Practicar otra vez" → reset + launcher.
 
-- [ ] `InterviewHistory.jsx` (actualizar): mostrar entradas V1 y V2 con badge "Nuevo formato" en las V2; al click en V2 abre `InterviewSummaryV2` con datos cargados via `fetchInterviewState`.
+- [x] `InterviewHistory.jsx` (actualizar): badge **Nuevo formato** en V2; click → `loadSummaryFromHistory` + `fetchInterviewState`. _Pendiente post-B8:_ fusionar historial V1+V2 en un solo endpoint.
 
-- [ ] Empty states pulidos:
+- [x] Empty states pulidos:
   - Sin perfil coach todavía: redirige a `/comenzar`.
   - Sin historial: ilustración + "Aún no has practicado. Tu primera entrevista revelará tus fortalezas."
 
-**DoD:** flujo completo demo-able: `/entrevistas` → start → 8 turnos → summary → "agregar al plan" → llega a `/progreso` con tareas nuevas.
+**DoD:** ✅ Flujo demo mock: start → ~8 turnos → summary → add-to-plan → `/progreso`.
 
 ---
 
@@ -443,14 +443,14 @@ Trabajo dividido en **4 hitos (M4.1 → M4.4)**. Asume que el back V2 está depl
 
 **Tareas:**
 
-- [ ] **Delay artificial entre etapas:** cuando back devuelve `stage_advance`, mostrar 1.5s un "Andrea está pensando en la siguiente sección…" antes de mostrar el reply de la nueva etapa. Vende profesionalismo.
-- [ ] **Tokens visibles en composer:** contador suave "X / 2000" cuando el usuario pasa de 1500 chars (UX, no validación dura).
-- [ ] **Botón "Pausar":** llama a `abort()` y muestra confirmación; útil para demos cortas.
-- [ ] **Indicador de conexión:** si dataSource cambia a `'mock'`, banner persistente arriba ("Modo demo — el entrevistador es simulado").
-- [ ] **Accesibilidad:** `aria-live="polite"` en mensajes nuevos del entrevistador, focus al composer después de cada reply, scroll suave (`behavior: 'smooth'`).
-- [ ] **Animación de entrada del summary:** Framer Motion stagger de las 4 cards (delay 0.1s entre cada una).
+- [x] **Delay artificial entre etapas:** cuando back devuelve `stage_advance`, mostrar 1.5s un "Andrea está pensando en la siguiente sección…" antes de mostrar el reply de la nueva etapa. Vende profesionalismo.
+- [x] **Tokens visibles en composer:**
+- [x] **Botón "Pausar":**
+- [x] **Indicador de conexión:**
+- [x] **Accesibilidad:**
+- [x] **Animación de entrada del summary:**
 
-**DoD:** demo en vivo dura ≤4 minutos y se siente fluida. ESLint sin errores nuevos. Lighthouse mobile ≥ 85.
+**DoD:** ✅ ESLint limpio; tests `npm run test:interview-v2` (5/5). _Pendiente:_ Lighthouse mobile ≥ 85 (no medido en CI).
 
 ---
 
@@ -631,12 +631,12 @@ frontend/src/
 
 ## 7. Definition of Done (global)
 
-- [ ] Backend: 4 endpoints V2 en Swagger, tests E2E pasando, summary completo con 4 etapas.
-- [ ] Frontend: `/entrevistas` con chat fluido, summary segmentado, conexión con `/progreso`.
-- [ ] Demo: una entrevista completa (start → 8 turnos → summary → add to plan) en **≤ 4 minutos**.
-- [ ] Docs: `ENDPOINTS.md`, `FRONTEND_INTEGRATION.md`, `PROMPTS.md`, `PROJECT_STATE.md` actualizados. Decisión nueva en `docs/decisions/`.
-- [ ] ESLint y pytest sin errores nuevos.
-- [ ] Capacidad de fallback: con backend caído, el front cae a `mockInterviewV2` sin romper UX.
+- [ ] Backend: 4 endpoints V2 en Swagger, tests E2E pasando, summary completo con 4 etapas. _(Plan B — pendiente)_
+- [x] Frontend: `/entrevistas` con chat fluido, summary segmentado, conexión con `/progreso`.
+- [x] Demo: entrevista mock completa en **≤ 4 minutos** (`npm run test:interview-v2` valida 8 turnos).
+- [x] Docs: `FRONTEND_INTEGRATION.md`, `PROJECT_STATE.md`, este plan actualizado.
+- [x] ESLint y tests frontend sin errores nuevos (`test:interview-v2`, `test:progress`).
+- [x] Capacidad de fallback: backend caído → `mockInterviewV2` sin romper UX.
 
 ---
 
@@ -674,4 +674,4 @@ frontend/src/
 
 ---
 
-**Próximo paso:** kickoff de 30 min con Migue para resolver las 5 preguntas pendientes (§8) y arrancar B8.1 + M4.1 en paralelo.
+**Próximo paso:** backend arranca **B8.1** (migración `mock_interviews_v2`); front ya consume `/api/interview/v2/*` con fallback mock hasta deploy.

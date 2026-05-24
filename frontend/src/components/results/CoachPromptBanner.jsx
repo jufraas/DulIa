@@ -37,7 +37,7 @@ export default function CoachPromptBanner() {
           <p className="mt-1 mb-0 text-[14px] leading-relaxed text-[color:var(--fg-2)]">
             {topScore != null && topScore > 0
               ? `Pregúntame sobre tu score (${topScore}), el plan o cómo postularte — sin salir de esta pantalla.`
-              : 'Pregúntame sobre el análisis, el plan o las vacantes — sin salir de esta pantalla.'}
+              : 'Pregúntame sobre el análisis, el plan o las oportunidades — sin salir de esta pantalla.'}
           </p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import PdfDownloadCard from './PdfDownloadCard'
 import ProfileSummary from './ProfileSummary'
+import RegisterProgressButton from './RegisterProgressButton'
 import ScoreCard from './ScoreCard'
 
 /**
@@ -27,7 +28,10 @@ export default function AnalysisOverviewGrid({
     <div className="analysis-overview-grid">
       <div className="card-dl analysis-overview-grid__left">
         <ScoreCard score={topScore} comparativa={comparativa} embedded />
-        <PdfDownloadCard onDownload={onDownloadPdf} downloading={downloadingPdf} />
+        <div className="analysis-overview-grid__actions">
+          <PdfDownloadCard onDownload={onDownloadPdf} downloading={downloadingPdf} />
+          <RegisterProgressButton />
+        </div>
       </div>
       <ProfileSummary
         profile={profile}

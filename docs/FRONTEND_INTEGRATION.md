@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Mi Progreso + entrevista integrados (J1–J3 + M2/M3).
+**Última actualización:** 2026-05-24 · UX polish (nav, copy, CTA progreso) + Entrevista V2 (M4) + Mi Progreso (M2/M3).
 
 ---
 
@@ -25,7 +25,9 @@
 | `POST /profile/parse-cv` | ✅ | `fetch` + FormData; proxy Vite; backend con `.venv` + `markitdown[pdf]` |
 | Coach global (FAB) | ✅ | `AppCoachShell` — todas las rutas excepto auth/construcción; banner solo `/resultados` |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px; nuevos bloques entre/al final; `.cursor/rules/results-layout-frozen.mdc` |
-| Nav secciones resultados | ✅ | `ResultsSectionNav` + `useResultsSectionNav` — 6 secciones (analisis, mercado, vacantes+plan, …) |
+| Nav secciones resultados | ✅ | 6 secciones; label **Oportunidades** (antes «Vacantes y plan»); `RegisterProgressButton` en análisis + PDF |
+| Nav global (`SiteHeader`) | ✅ | «Oportunidades» → `/vacantes`; **sin** link Entrevistas en header (acceso vía `/progreso`) |
+| Copy orientado al usuario | ✅ | Sin `session_id` en UI; banners offline/progreso sin jerga de backend; `PrivacyNotice` según auth |
 | Coach UX `/resultados` | ✅ | Banner dismissible, teaser FAB, bienvenida + chips; `CoachAskLink` en score/resumen/plan/radar/mercado |
 | Coach global SPA | ✅ | `AppCoachShell` + `coachPageContext.js`; FAB en landing, wizard, vacantes |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
@@ -40,13 +42,14 @@
 | Mi Progreso — M2.6 lock overlay | ✅ | `PhaseLockOverlay` en fases 60/90 bloqueadas |
 | Mi Progreso — M2.7 TaskList | ✅ | Panel lateral con filtros en `/progreso` |
 | Mi Progreso — M2.8 scroll | ✅ | Click tarea → tab + scroll + highlight en timeline |
-| Progress / interview API | ✅ | `withProgressFallback`; `InterviewPage` usa `useInterviewStore` |
+| Progress / interview API | ✅ | `withProgressFallback`; quiz V1 en `InterviewLegacyPage` |
+| Entrevista V2 — M4 | ✅ | Chat en `InterviewV2Page`; `interviewV2Api` + mock fallback |
+| J2 — Interview UI | ✅ | `/entrevistas` (V2 default), summary por etapa, add-to-plan |
 | Mi Progreso — M3 dataSource | ✅ | Banner mock en `/progreso` |
 | J1 — useProfileCheck | ✅ | Login/registro → `/progreso` o `/comenzar` |
-| J2 — Interview UI | ✅ | `/entrevistas`, `GeminiThinkingLoader`, add-to-plan |
 | J3 — Nav + empty states | ✅ | `SiteHeader`, empty plan e historial vacío |
 
-Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
+Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md) · Entrevista V2: [INTERVIEW_REDESIGN_PLAN.md](INTERVIEW_REDESIGN_PLAN.md).
 
 ---
 
@@ -67,6 +70,8 @@ Script opcional: `../scripts/setup-env.sh`. Reiniciar uvicorn y `npm run dev` tr
 | `VITE_API_URL` | `/api` (proxy Vite → `:8000`; en prod URL absoluta del backend) |
 | `VITE_SUPABASE_URL` | = `SUPABASE_URL` del backend (opcional) |
 | `VITE_SUPABASE_ANON_KEY` | = `SUPABASE_KEY` del backend (opcional) |
+| `VITE_INTERVIEW_VERSION` | `v2` (default chat) o `v1`; quiz legacy también en `?legacy=1` |
+| `VITE_FORCE_INTERVIEW_MOCK` | `true` — fuerza `mockInterviewV2` sin llamar a `/interview/v2/*` |
 
 | Infra local | Comando / nota |
 |-------------|----------------|
@@ -455,6 +460,24 @@ GET  /interview/history/{session_id}
 ```
 
 Desde resultados: `POST /progress/add-from-skills` con `weak_skills` del finish.
+
+### Flujo entrevista V2 conversacional (M4 — default en `/entrevistas`)
+
+Ver contrato completo en [INTERVIEW_REDESIGN_PLAN.md](INTERVIEW_REDESIGN_PLAN.md) §5.
+
+```
+POST /interview/v2/start              { session_id, target_skill?, target_role? }
+POST /interview/v2/{id}/turn          { message }   (max 2000 chars)
+POST /interview/v2/{id}/abort
+GET  /interview/v2/{id}               → rehidratar tras refresh (localStorage: dulia_interview_v2_id)
+GET  /interview/v2/history/{session_id}
+```
+
+**Frontend:** `services/interviewV2Api.js` + `store/useInterviewV2Store.js`. Si el backend B8 no responde → `mocks/mockInterviewV2.js` (banner “Modo demo”). Al iniciar: `ProcessStatusBar` (“Preparando tu entrevista”). `/progreso` usa historial V2 en el CTA.
+
+**Tests:** `cd frontend && npm run test:interview-v2` (5 smoke tests, sin Vitest).
+
+**Quiz V1 (legacy):** `InterviewLegacyPage` — `?legacy=1` o `VITE_INTERVIEW_VERSION=v1`.
 
 ### Coach context-aware
 

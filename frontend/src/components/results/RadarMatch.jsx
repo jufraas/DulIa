@@ -208,7 +208,7 @@ export default function RadarMatch({ profile = null, jobs = [], radar = null }) 
           ¿Qué tan cerca estás del mercado laboral?
         </h2>
         <p className="mt-2 mb-0 text-[15px] text-[color:var(--fg-2)]">
-          Tu perfil vs el promedio del mercado en {axes.length} dimensiones (datos del backend).
+          Tu perfil vs el promedio del mercado en {axes.length} dimensiones clave.
         </p>
         <CoachAskLink
           question="¿Qué habilidad me falta más según mi radar?"

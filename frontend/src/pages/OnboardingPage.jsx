@@ -42,7 +42,7 @@ export default function OnboardingPage() {
   const processTitle = cvParsing ? 'Leyendo tu CV' : 'Analizando tu perfil'
   const processMessage = cvParsing
     ? 'Extrayendo datos con IA. No cierres esta pestaña — puede tardar hasta un minuto.'
-    : 'Guardando tu perfil y preparando vacantes, plan y análisis…'
+    : 'Guardando tu perfil y preparando oportunidades, plan y análisis…'
 
   return (
     <PageShell>

@@ -1,6 +1,15 @@
 import { Shield } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function PrivacyNotice({ className = '' }) {
+  const { user, isConfigured } = useAuth()
+
+  const copy = user
+    ? 'Tu perfil queda vinculado a tu cuenta. Podrás retomar tu plan y progreso desde cualquier dispositivo.'
+    : isConfigured
+      ? 'Puedes completar el wizard sin cuenta. Si luego inicias sesión, vinculamos tu análisis para que guardes el progreso del plan.'
+      : 'Tus respuestas se usan solo para generar tu análisis y recomendaciones. No compartimos tus datos con terceros.'
+
   return (
     <div
       className={`flex gap-3 rounded-[14px] px-4 py-3 text-sm text-[color:var(--fg-2)] ${className}`}
@@ -10,11 +19,7 @@ export default function PrivacyNotice({ className = '' }) {
       }}
     >
       <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--violet-300)]" aria-hidden />
-      <p className="m-0 leading-relaxed">
-        <strong className="text-[color:var(--fg-1)]">Sin login.</strong> Usamos un{' '}
-        <code className="text-[color:var(--violet-300)]">session_id</code> en localStorage para
-        recomendarte vacantes. No guardamos contraseña ni sesión permanente.
-      </p>
+      <p className="m-0 leading-relaxed">{copy}</p>
     </div>
   )
 }

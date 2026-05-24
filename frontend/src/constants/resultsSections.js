@@ -4,7 +4,7 @@
 export const RESULTS_SECTIONS = [
   { id: 'resultados-analisis', label: 'Tu análisis' },
   { id: 'resultados-mercado', label: 'Mercado' },
-  { id: 'resultados-oportunidades-plan', label: 'Vacantes y plan' },
+  { id: 'resultados-oportunidades-plan', label: 'Oportunidades' },
   { id: 'resultados-radar', label: 'Radar match' },
   { id: 'resultados-timeline', label: 'Timeline' },
   { id: 'resultados-pdf', label: 'Descargar PDF' },

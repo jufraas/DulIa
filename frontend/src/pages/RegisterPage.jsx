@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import DuliaLogo from '../components/brand/DuliaLogo'
 import AuthDisabledBanner from '../components/auth/AuthDisabledBanner'
 import RedirectIfHasProfile from '../components/auth/RedirectIfHasProfile'
@@ -183,8 +184,26 @@ function RegisterPageContent() {
           border: '1px solid rgba(139,92,246,0.4)',
           boxShadow: '0 0 40px rgba(139,92,246,0.15), 0 0 0 1px rgba(139,92,246,0.1)',
           padding: '40px 36px',
+          position: 'relative',
         }}
       >
+        <Link
+          to="/"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: 14,
+            fontWeight: 600,
+            textDecoration: 'none',
+            marginBottom: 20,
+          }}
+        >
+          <ArrowLeft width={16} height={16} aria-hidden />
+          Volver al inicio
+        </Link>
+
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
           <DuliaLogo height={36} />
         </div>

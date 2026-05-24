@@ -13,6 +13,7 @@ npm run dev          # http://localhost:5173
 npm run build        # verificar antes de push
 npm run lint         # ESLint (solo src/ + config; ver abajo)
 npm run test:progress   # mini tests mocks progreso/entrevista (11 tests, sin Vitest)
+npm run test:interview-v2   # smoke entrevista conversacional V2 (5 tests)
 npm run test:progress:api   # smoke E2E contra backend :8000 (opcional)
 ```
 
@@ -62,11 +63,11 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
 | `/resultados` | Resultados | Nav por secciones, score+resumen alineados, termómetro, plan, radar, coach, PDF |
 | `/vacantes` | Vacantes | Semáforo de confianza; **Volver a mi análisis** → `/resultados` |
-| `/login` | Login | Email/password; banner demo si faltan envs Supabase |
-| `/registro` | Registro | Upsert a `user_accounts` tras signUp |
+| `/login` | Login | Email/password; **Volver al inicio**; banner demo si faltan envs Supabase |
+| `/registro` | Registro | Upsert a `user_accounts` tras signUp; **Volver al inicio** |
 | `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
-| `/progreso` | Mi progreso | Protegida; timeline, TaskList, CTA entrevistas |
-| `/entrevistas` | Simulador entrevista | Protegida; launcher, sesión, resultados, historial |
+| `/progreso` | Mi progreso | Protegida; timeline, TaskList, CTA entrevista V2 |
+| `/entrevistas` | Entrevista de práctica | Protegida; V2 chat (default) o quiz V1 (`?legacy=1`); acceso desde `/progreso` |
 
 ## Flujo de datos
 
@@ -96,10 +97,24 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `linkSession` | POST `/auth/link-session` (tras login, best-effort) |
 | `hasProfile` | GET `/user/has-profile` (guard post-login; mock demo) |
 | `getProgress` / `toggleTask` / `initProgress` | Progreso del plan 30-60-90 — API o mock (`dataSource` en store) |
-| `startInterview` / `submitAnswer` / `finishInterview` | Mock interview por skill — backend M3 in-memory |
+| `startInterview` / `submitAnswer` / `finishInterview` | Mock interview quiz V1 por skill |
+| `interviewV2Api` / `useInterviewV2Store` | Entrevista conversacional V2 — mock fallback hasta B8 |
 | `interviewHistory` / `addTasksFromWeakSkills` | Historial + tareas desde skills débiles |
 
-Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`. UI progreso: `components/progress/` (`PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, `ProgressDataSourceBanner`). Entrevista: `components/interview/GeminiThinkingLoader.jsx`. Utilidades: `utils/apiErrors.js`, `utils/progressScroll.js`. Env: `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local.
+Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`, `src/mocks/mockInterviewV2.js`. Stores: `useProgressStore`, `useInterviewStore`, `useInterviewV2Store`. UI progreso: `components/progress/`. Entrevista V2: `components/interview/v2/`, `pages/InterviewV2Page.jsx`. Utilidades: `utils/apiErrors.js`, `utils/progressScroll.js`, `utils/interviewV2Display.js`. Env: `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local; `VITE_INTERVIEW_VERSION=v2` (default).
+
+### Nav global (`SiteHeader`)
+
+| Enlace | Visible |
+|--------|---------|
+| Cómo funciona, Oportunidades (`/vacantes`), Sobre DulIA | Siempre |
+| Mi progreso | Solo con sesión Supabase |
+| Entrevistas | **No** en header — acceso desde `/progreso` |
+| Iniciar sesión / Empezar | Según auth configurado |
+
+### CTA «Registrar mi progreso» (`RegisterProgressButton`)
+
+En `/resultados` (análisis + banner PDF): si hay sesión → `/progreso`; si no → `/login` con `state.from = /progreso`. Requiere `VITE_SUPABASE_*` configurado.
 
 ### Auth (opcional)
 
@@ -162,12 +177,12 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Nav (6 ítems) | Contenido |
 |---------------|-----------|
-| Tu análisis | `AnalysisOverviewGrid` — contenedor único izq. (score + PDF) = resumen (580px desktop) |
+| Tu análisis | `AnalysisOverviewGrid` — score + PDF + **Registrar mi progreso** + resumen (580px desktop) |
 | Mercado | `MarketThermometer` |
-| Vacantes y plan | `OpportunitiesAndPlan` |
+| Oportunidades | `OpportunitiesAndPlan` (vacantes + plan 30d) |
 | Radar match | `RadarMatch` |
 | Timeline | `CareerTimeline` |
-| Descargar PDF | Banner final |
+| Descargar PDF | Banner final + **Registrar mi progreso** (compacto) |
 
 - Desktop: `ResultsSectionNav` vertical sticky (`dulia-kit.css`).
 - Móvil: chips horizontales sticky bajo el header.
@@ -189,7 +204,7 @@ Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessSta
 
 | Sección | Componente |
 |---------|------------|
-| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` embedded + `PdfDownloadCard`) vs `ProfileSummary` |
+| Tu análisis | `AnalysisOverviewGrid` — `card-dl` izq. (`ScoreCard` + `PdfDownloadCard` + `RegisterProgressButton`) vs `ProfileSummary` |
 | Termómetro mercado | `MarketThermometer` — scope perfil, desglose geo, skills demandadas (`tienes`), modalidad/fuente (`marketDisplay.js`) |
 | Vacantes + plan | `OpportunitiesAndPlan` — altura sync + scroll plan |
 | Match radar | `RadarMatch` |

@@ -11,18 +11,16 @@ import TaskList from '../components/progress/TaskList'
 import ProgressDataSourceBanner from '../components/progress/ProgressDataSourceBanner'
 import { useProfileStore } from '../store/useProfileStore'
 import { useProgressStore } from '../store/useProgressStore'
-import { useInterviewStore } from '../store/useInterviewStore'
-import { useAuth } from '../hooks/useAuth'
+import { useInterviewV2Store } from '../store/useInterviewV2Store'
 import ProtectedRoute from '../components/auth/ProtectedRoute'
 
 function ProgressInterviewCTA() {
-  const history = useInterviewStore((s) => s.history)
-  const fetchHistory = useInterviewStore((s) => s.fetchHistory)
-  const { user } = useAuth()
+  const history = useInterviewV2Store((s) => s.history)
+  const fetchHistory = useInterviewV2Store((s) => s.fetchHistory)
 
   useEffect(() => {
-    void fetchHistory(user?.id)
-  }, [fetchHistory, user?.id])
+    void fetchHistory()
+  }, [fetchHistory])
 
   const count = history.length
 
@@ -32,21 +30,22 @@ function ProgressInterviewCTA() {
         <div className="mb-2 flex items-center gap-2 text-[color:var(--fg-1)]">
           <Mic className="h-4 w-4 text-[color:var(--brand-pink)]" aria-hidden />
           <h2 className="m-0 font-[family-name:var(--font-display)] text-lg font-bold">
-            Practica con IA
+            Entrevista de práctica
           </h2>
         </div>
         <p className="m-0 text-sm text-[color:var(--fg-2)]">
-          Simula entrevistas técnicas por skill y recibe feedback inmediato.
+          Conversación en vivo por skill: rapport, técnica, behavioral y cierre, con feedback al
+          terminar.
         </p>
         <p className="mt-1.5 m-0 text-xs text-[color:var(--fg-3)]">
           {count === 0
-            ? 'Aún no has realizado entrevistas de práctica.'
-            : `${count} entrevista${count === 1 ? '' : 's'} en tu historial.`}
+            ? 'Aún no has practicado entrevistas.'
+            : `${count} práctica${count === 1 ? '' : 's'} en tu historial.`}
         </p>
       </div>
       <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
         <Link to="/entrevistas">
-          <Button variant="primary">Iniciar entrevista</Button>
+          <Button variant="primary">Iniciar conversación</Button>
         </Link>
         {count > 0 && (
           <Link
