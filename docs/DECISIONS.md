@@ -24,6 +24,7 @@
 | 2026-05-23 | pipeline | Get on Board + Remotive (fuentes finales) | [decisions/2026-05-23-pipeline-fuentes-getonbrd-remotive.md](./decisions/2026-05-23-pipeline-fuentes-getonbrd-remotive.md) |
 | 2026-05-23 | frontend | Animaciones landing (splash + Framer Motion) | [decisions/2026-05-23-frontend-landing-animations.md](./decisions/2026-05-23-frontend-landing-animations.md) |
 | 2026-05-23 | pipeline | Adzuna/Jooble descartadas — reframe local + remoto | inline ↓ (ver archivo pipeline arriba) |
+| 2026-05-23 | pipeline | Arquitectura híbrida cache-first + queue manual | [PIPELINE_HYBRID.md](./PIPELINE_HYBRID.md) — cron pendiente fase 2 |
 
 ## Decisiones stack (resumen)
 
@@ -35,6 +36,7 @@
 | 2026-05-23 | pydantic>=2.14.0a1 | Python 3.14 sin wheel estable de pydantic-core 2.x | Downgrade Python |
 | 2026-05-23 | Mock data + APIs públicas vs scrapers | Menor riesgo en 48h | Scrapers propios |
 | 2026-05-23 | Remotive + Get on Board como fuentes finales del pipeline | Adzuna sin Colombia; Jooble sin LATAM fiable. Reframe: oportunidades locales + remoto internacional. Termómetro: `por_fuente`, `por_modalidad` | Adzuna, Jooble, scrapers propios |
+| 2026-05-23 | Arquitectura híbrida cache-first con queue manual | Respuesta rápida desde cache; scrape on-demand vía `scrape_queue` + `run_queue.py`. Sin cron en hackathon | Cron inmediato, scrape síncrono en request |
 | 2026-05-23 | Sin auth — session_id | Evita setup de login | Supabase Auth, JWT |
 | 2026-05-23 | Tabla `jobs` en inglés | Compatible Adzuna/pipeline | Solo español en BD |
 | 2026-05-23 | slowapi 10 req/min | Protege cuota Gemini | Sin rate limit |

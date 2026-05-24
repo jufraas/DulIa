@@ -61,6 +61,12 @@ async def crear_perfil(data: OnboardingInput) -> ProfileOut:
 
     fila = resultado.data[0]
     logger.info(f"Perfil guardado: session_id={data.session_id}, ciudad={fila.get('ciudad')}")
+
+    try:
+        _registrar_interes(fila)
+    except Exception as exc:
+        logger.warning(f"user_interests falló: {exc}")
+
     return ProfileOut(**fila)
 
 
@@ -113,6 +119,31 @@ def _mock_perfil(data: OnboardingInput) -> dict:
         "salario_esperado_max": data.salario_esperado_max,
         "modalidad": data.modalidad,
     }
+
+
+def _registrar_interes(perfil: dict) -> None:
+    """INSERT best-effort en user_interests tras guardar perfil."""
+    sectores = perfil.get("sectores_interes") or []
+    sector = sectores[0] if sectores else None
+
+    row = {
+        "session_id": perfil["session_id"],
+        "city": perfil.get("ciudad"),
+        "department": perfil.get("departamento"),
+        "sector": sector,
+        "skills": perfil.get("habilidades") or [],
+        "modality": perfil.get("modalidad"),
+        "experience_years": perfil.get("experiencia_anios") or 0,
+        "education_level": perfil.get("nivel_educativo"),
+        "source": "profile_post",
+    }
+
+    supabase = get_supabase()
+    supabase.table("user_interests").insert(row).execute()
+    logger.info(
+        f"user_interests registrado: session_id={perfil['session_id']}, "
+        f"city={row['city']}, sector={row['sector']}"
+    )
 
 
 def _perfil_out_mock(data: OnboardingInput) -> ProfileOut:

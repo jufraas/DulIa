@@ -200,59 +200,87 @@ def _fetch_category(category: str, limit: int = 100) -> list[dict]:
     return resp.json().get("jobs") or []
 
 
-def run(categories: list[str] | None = None, max_jobs: int = 50, latam_only: bool = True):
+def fetch_jobs(
+    max_jobs: int = 50,
+    categories: list[str] | None = None,
+    latam_only: bool = True,
+    skill_keyword: str | None = None,
+) -> list[dict]:
+    """Obtiene vacantes de Remotive sin escribir en BD."""
     if categories is None:
         categories = DEFAULT_CATEGORIES
 
+    keyword = (skill_keyword or "").strip().lower()
     collected: list[dict] = []
     seen_hashes: set[str] = set()
-    skipped_location = 0
-
-    print(f"\n=== Remotive fetcher — categories={categories} latam_only={latam_only} ===")
 
     for category in categories:
         if len(collected) >= max_jobs:
             break
 
-        print(f"  Fetching [{category}] ...")
         try:
             jobs = _fetch_category(category)
-        except Exception as exc:
-            print(f"  Error en [{category}]: {exc}")
+        except Exception:
             continue
 
-        new_this_cat = 0
         for raw in jobs:
             if len(collected) >= max_jobs:
                 break
 
             cand_location = raw.get("candidate_required_location") or ""
             if latam_only and not _is_latam_friendly(cand_location):
-                skipped_location += 1
                 continue
 
             row = _map_row(raw)
+            if keyword:
+                haystack = " ".join(
+                    [
+                        row.get("title") or "",
+                        row.get("description") or "",
+                        " ".join(row.get("skills_required") or []),
+                    ]
+                ).lower()
+                if keyword not in haystack:
+                    continue
+
             h = row["unique_hash"]
             if h in seen_hashes:
                 continue
             seen_hashes.add(h)
             collected.append(row)
-            new_this_cat += 1
 
-        print(f"  [{category}]: +{new_this_cat} jobs  (total: {len(collected)})")
-        time.sleep(0.5)  # cortesía mínima
+        time.sleep(0.5)
 
-    if skipped_location:
-        print(f"  (omitidas por ubicación no LATAM-friendly: {skipped_location})")
+    return collected
+
+
+def upsert_jobs(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+    res = sb.table("jobs").upsert(rows, on_conflict="unique_hash").execute()
+    return len(res.data or [])
+
+
+def run(categories: list[str] | None = None, max_jobs: int = 50, latam_only: bool = True, skill_keyword: str | None = None):
+    if categories is None:
+        categories = DEFAULT_CATEGORIES
+
+    print(f"\n=== Remotive fetcher — categories={categories} latam_only={latam_only} ===")
+    collected = fetch_jobs(
+        max_jobs=max_jobs,
+        categories=categories,
+        latam_only=latam_only,
+        skill_keyword=skill_keyword,
+    )
 
     if not collected:
         print("\nNo jobs fetched.")
         return
 
     print(f"\nUpserting {len(collected)} jobs into Supabase ...")
-    res = sb.table("jobs").upsert(collected, on_conflict="unique_hash").execute()
-    print(f"Done — {len(res.data)} rows upserted.\n")
-    for v in res.data:
+    inserted = upsert_jobs(collected)
+    print(f"Done — {inserted} rows upserted.\n")
+    for v in collected[:10]:
         loc = v.get("location") or "Worldwide"
         st = v.get("status", "?")
         print(f"  [REMOTO] [{st}] {v.get('title','?')[:55]:55} — {v.get('company','?')} ({loc})")

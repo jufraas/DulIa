@@ -69,7 +69,7 @@ Ver [frontend/COMPONENT_OWNERS.md](../frontend/COMPONENT_OWNERS.md).
 |--------|--------|
 | Backend | ✅ Fases 0–10 (mock + real); falta deploy |
 | Frontend | ✅ MVP UI completo; falta deploy prod |
-| Pipeline | ✅ Operativo | getonbrd + remotive (+ mock dev); adzuna/jooble deprecated |
+| Pipeline | ✅ Híbrido | getonbrd + remotive + `run_queue.py`; ver [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md) |
 | Gemini | ✅ Profile extraction + coach |
 
 Ver [PROJECT_STATE.md](PROJECT_STATE.md).
