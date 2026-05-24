@@ -15,7 +15,7 @@ const team = [
     focus: 'Sobre DulIA, wizard, CV y integración con la API',
   },
   {
-    name: 'Joufra',
+    name: 'Jufra',
     initials: 'Jf',
     role: 'Experiencia & pitch',
     focus: 'Landing, resultados, vacantes e historia para el jurado',
