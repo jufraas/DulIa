@@ -25,7 +25,9 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/utils/analysisDisplay.js` | Parser respuesta analyze |
 | `src/utils/timelineDisplay.js` | Parser timeline API |
 | `src/utils/radarApi.js` | Parser radar API |
-| `src/utils/generateAnalysisPdf.js` | PDF completo (analyze, plan, radar, …) |
+| `src/utils/marketDisplay.js` | Labels modalidad/fuente (Get on Board, Remotive) para termómetro y PDF |
+| `src/components/shared/ProcessStatusBar.jsx` | Barra fija inferior — CV, submit wizard, PDF |
+| `src/utils/generateAnalysisPdf.js` | PDF completo (analyze, plan, radar, mercado modalidad/fuente, …) |
 | `src/store/useProfileStore.js` | Estado global + persistencia cache |
 | `src/utils/sessionCache.js` | Lectura/escritura localStorage sesión |
 
@@ -39,7 +41,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/components/layout/SiteFooter.jsx` | Footer global (copyright + contacto) |
 | `src/pages/VacanciesPage.jsx` | Pantalla 04 — semáforo; **Volver a mi análisis** → `/resultados` |
 | `src/components/vacancies/*` | Semáforo, filtros, filas |
-| `src/components/results/*` | Resultados: `OpportunitiesAndPlan`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
+| `src/components/results/*` | Resultados: `OpportunitiesAndPlan`, `MarketThermometer`, `RadarMatch`, `ThirtyDayPlan`, `CareerTimeline`, `CoachChatBubble`, … |
 | `src/components/layout/SiteHeader.jsx` | Header compartido (avisar antes de tocar) |
 | `src/components/layout/SiteFooter.jsx` | Footer global |
 

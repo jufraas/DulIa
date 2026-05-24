@@ -122,11 +122,13 @@ export function useOnboardingForm() {
       setCvParsing(true)
       setCvError('')
       setCvSuccessMessage('')
+      setCvFileName(file.name)
 
       try {
         const result = await parseCvPdf(file)
         applyCvResult(result, file.name)
       } catch (err) {
+        setCvFileName(null)
         setCvError(
           err instanceof Error ? err.message : 'No pudimos leer tu CV. Intenta de nuevo.',
         )

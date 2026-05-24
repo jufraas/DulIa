@@ -74,6 +74,20 @@ import {
  */
 
 /**
+ * @typedef {Object} MarketModalityCounts
+ * @property {number} [remoto]
+ * @property {number} [presencial]
+ * @property {number} [hibrido]
+ */
+
+/**
+ * @typedef {Object} MarketSourceCounts
+ * @property {number} [getonbrd]
+ * @property {number} [remotive]
+ * @property {number} [mock]
+ */
+
+/**
  * @typedef {Object} MarketDashboard
  * @property {number} [total_vacantes_activas]
  * @property {{ sector: string, count: number }[]} [top_sectores]
@@ -82,6 +96,8 @@ import {
  * @property {number|null} [crecimiento_semanal_pct]
  * @property {string|null} [ciudad_filtro]
  * @property {string|null} [sector_filtro]
+ * @property {MarketModalityCounts} [por_modalidad]
+ * @property {MarketSourceCounts} [por_fuente]
  */
 
 /**

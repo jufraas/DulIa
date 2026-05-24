@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Fix parse-cv (`markitdown[pdf]`) + layout resultados frontend.
+**Última actualización:** 2026-05-24 · Market dashboard `por_modalidad`/`por_fuente` + ProcessStatusBar frontend.
 
 ## Base URL
 
@@ -314,12 +314,23 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
   "top_empresas_verdes": ["Bancolombia", "Rappi", "Teleperformance"],
   "crecimiento_semanal_pct": 12.4,
   "ciudad_filtro": "Barranquilla",
-  "sector_filtro": null
+  "sector_filtro": null,
+  "por_modalidad": {
+    "remoto": 128,
+    "presencial": 7,
+    "hibrido": 0
+  },
+  "por_fuente": {
+    "getonbrd": 127,
+    "remotive": 8
+  }
 }
 ```
 
 | Campo | Notas |
 |-------|-------|
+| `por_modalidad` | Siempre incluye `remoto`, `presencial`, `hibrido` (puede ser 0) |
+| `por_fuente` | Conteo por `jobs.source`: `getonbrd` (local/LATAM), `remotive` (remoto internacional); en dev puede aparecer `mock` |
 | `salario_promedio` | Promedio del punto medio min/max; `null` si no hay salarios |
 | `crecimiento_semanal_pct` | Esta semana vs anterior; `null` sin histórico |
 | `ciudad_filtro` / `sector_filtro` | Eco de los query params enviados |

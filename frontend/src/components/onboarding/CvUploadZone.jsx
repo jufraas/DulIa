@@ -49,7 +49,7 @@ export default function CvUploadZone({
 
   return (
     <div
-      className="mb-2 rounded-[20px] border border-dashed transition-colors"
+      className="relative mb-2 rounded-[20px] border border-dashed transition-colors"
       style={{
         borderColor: dragOver ? 'rgba(168,85,247,0.65)' : 'rgba(168,85,247,0.35)',
         background: dragOver ? 'rgba(168,85,247,0.10)' : 'rgba(168,85,247,0.06)',
@@ -60,6 +60,7 @@ export default function CvUploadZone({
       }}
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
+      aria-busy={parsing || undefined}
     >
       <input
         ref={inputRef}
@@ -88,10 +89,15 @@ export default function CvUploadZone({
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="m-0 font-[family-name:var(--font-display)] text-base font-bold text-[color:var(--fg-1)]">
-                {hasFile ? 'CV cargado' : '¿Tienes hoja de vida en PDF?'}
+                {parsing ? 'Leyendo tu CV…' : hasFile ? 'CV cargado' : '¿Tienes hoja de vida en PDF?'}
               </p>
               <p className="mt-1 text-sm leading-relaxed text-[color:var(--fg-3)]">
-                {hasFile ? (
+                {parsing ? (
+                  <>
+                    Analizando <span className="text-[color:var(--violet-200)]">{fileName}</span>
+                    {' '}con IA. Esto puede tardar hasta un minuto.
+                  </>
+                ) : hasFile ? (
                   <>
                     <span className="text-[color:var(--violet-200)]">{fileName}</span>
                     {fieldsCount > 0 && (
@@ -125,7 +131,7 @@ export default function CvUploadZone({
           )}
         </div>
 
-        {!hasFile && (
+        {!hasFile && !parsing && (
           <Button
             type="button"
             variant="secondary"

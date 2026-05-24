@@ -2,6 +2,10 @@ import { jsPDF } from 'jspdf'
 import { parseAnalysisResponse, resolveEmployabilityScore } from './analysisDisplay'
 import { savedProfileToDisplayFields } from './formatProfileLabels'
 import { formatSalary } from './formatters'
+import {
+  formatMarketSourceSummary,
+  getModalityEntries,
+} from './marketDisplay'
 import { planToDisplayWeeks } from './planDisplay'
 import { RADAR_DIMENSION_KEYS, RADAR_DIMENSION_LABELS } from './radarApi'
 
@@ -194,9 +198,15 @@ export function generateAnalysisPdf({
 
   if (market) {
     y = sectionTitle(doc, y, 'Termómetro del mercado')
+    const sourceLine = formatMarketSourceSummary(market.por_fuente)
+    const modalityLine = getModalityEntries(market.por_modalidad)
+      .map(({ label, count }) => `${label}: ${count}`)
+      .join(' · ')
     /** @type {string[]} */
     const marketLines = [
       `Vacantes activas: ${market.total_vacantes_activas ?? '—'}`,
+      sourceLine,
+      modalityLine || null,
       market.salario_promedio
         ? `Salario promedio: ${formatSalary(market.salario_promedio, undefined)}`
         : null,

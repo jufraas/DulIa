@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Wizard: tags habilidades + validaciones edad/coherencia.
+**Última actualización:** 2026-05-24 · Market dashboard (`por_modalidad`, `por_fuente`) + `ProcessStatusBar`.
 
 ---
 
@@ -16,7 +16,7 @@
 | `POST .../action-plan` | ✅ | Tabs 30/60/90 en `ThirtyDayPlan` |
 | `GET .../radar-data` | ✅ | `RadarMatch` + PDF |
 | `GET .../timeline-data` | ✅ | `CareerTimeline` |
-| `GET market/dashboard` | ✅ | Termómetro; fallback si `jobs.city` vacío |
+| `GET market/dashboard` | ✅ | Termómetro; `por_modalidad` + `por_fuente` en UI y PDF |
 | `POST /coach/chat` | ✅ | `CoachChatBubble` flotante |
 | Fallbacks offline | ✅ | Solo si API cae — ver Network tab |
 | Wizard ubicación DANE | ✅ | 32 deptos / 1.119 municipios |
@@ -25,6 +25,7 @@
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
 | Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
 | Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
+| `ProcessStatusBar` | ✅ | Barra fija al leer CV, analizar perfil o generar PDF |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
 | PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 

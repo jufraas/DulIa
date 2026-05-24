@@ -9,6 +9,7 @@ import WizardHeader from '../components/onboarding/WizardHeader'
 import WizardStepper from '../components/onboarding/WizardStepper'
 import PageShell from '../components/layout/PageShell'
 import PrivacyNotice from '../components/shared/PrivacyNotice'
+import ProcessStatusBar from '../components/shared/ProcessStatusBar'
 import Container from '../components/ui/Container'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
 import { useOnboardingForm } from '../hooks/useOnboardingForm'
@@ -36,6 +37,12 @@ export default function OnboardingPage() {
     clearCv,
   } = useOnboardingForm()
 
+  const processActive = cvParsing || loading
+  const processTitle = cvParsing ? 'Leyendo tu CV' : 'Analizando tu perfil'
+  const processMessage = cvParsing
+    ? 'Extrayendo datos con IA. No cierres esta pestaña — puede tardar hasta un minuto.'
+    : 'Guardando tu perfil y preparando vacantes, plan y análisis…'
+
   return (
     <PageShell>
       <WizardHeader
@@ -45,7 +52,9 @@ export default function OnboardingPage() {
         onCancel={() => navigate('/')}
       />
 
-      <main className="relative z-[1] flex-1 pb-24 pt-10 sm:pt-14">
+      <main
+        className={`relative z-[1] flex-1 pt-10 sm:pt-14 ${processActive ? 'pb-36' : 'pb-24'}`}
+      >
         <Container className="max-w-[760px]">
           <WizardStepper step={step} />
 
@@ -136,6 +145,10 @@ export default function OnboardingPage() {
           </div>
         </Container>
       </main>
+
+      {processActive && (
+        <ProcessStatusBar title={processTitle} message={processMessage} />
+      )}
     </PageShell>
   )
 }

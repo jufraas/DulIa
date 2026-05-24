@@ -13,6 +13,7 @@ import ScoreCard from '../components/results/ScoreCard'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import SessionLoading from '../components/shared/SessionLoading'
+import ProcessStatusBar from '../components/shared/ProcessStatusBar'
 import { usePdfDownload } from '../hooks/usePdfDownload'
 import { useResultsData } from '../hooks/useResultsData'
 import { useSessionHydration } from '../hooks/useSessionHydration'
@@ -113,6 +114,13 @@ export default function ResultsPage() {
           </div>
         </Container>
       </main>
+
+      {downloading && (
+        <ProcessStatusBar
+          title="Generando tu PDF"
+          message="Armando score, plan y vacantes en un solo archivo…"
+        />
+      )}
     </PageShell>
   )
 }

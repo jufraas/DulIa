@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Wizard UX:** `TagField` habilidades técnicas + validaciones (edad ≥15, coherencia experiencia vs primer empleo).
+2026-05-24 — **Termómetro:** `por_modalidad` + `por_fuente` en market dashboard · **UX carga:** `ProcessStatusBar` (CV, análisis, PDF).
 
 ## Estado por módulo
 
@@ -38,7 +38,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
 | `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
-| `MarketThermometer` | ✅ | Montado en `/resultados` y `/vacantes` |
+| `MarketThermometer` | ✅ | `por_modalidad` + `por_fuente` (locales Get on Board + Remotive) en `/resultados` y `/vacantes` |
+| `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Plan 30d — fuente de datos | ✅ | API `action-plan` (fase_30) o mock `buildMockPlanFromProfile` (nombre, ciudad, 1 tarea/ skill) |
 | Navegación resultados ↔ vacantes | ✅ | `OpportunitiesPreview` → `/vacantes`; botón **Volver a mi análisis** → `/resultados` |

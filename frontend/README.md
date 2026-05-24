@@ -79,7 +79,7 @@ src/
 │   └── mock*.js
 ├── constants/colombiaLocations.js
 ├── store/useProfileStore.js
-├── utils/              # session, sessionCache, planDisplay, onboardingValidation, parseTags, …
+├── utils/              # session, sessionCache, planDisplay, marketDisplay, onboardingValidation, parseTags, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 
@@ -106,17 +106,20 @@ Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../
 
 Validación: `onboardingValidation.js` + `validateOnboardingStep.js`.
 
+Durante procesos lentos (lectura CV, envío del wizard) se muestra **`ProcessStatusBar`** — barra fija inferior con mensaje y nombre de archivo.
+
 ## Resultados (`/resultados`)
 
 | Sección | Componente |
 |---------|------------|
 | Score + PDF | `ScoreCard`, `PdfDownloadCard` (columna izq.); badge comparativa sin truncar |
 | Resumen IA | `ProfileSummary` — scroll interno (`.results-summary-scroll`) |
-| Termómetro mercado | `MarketThermometer.jsx` — `GET .../market/dashboard` o store |
+| Termómetro mercado | `MarketThermometer.jsx` — chips modalidad + fuente (`marketDisplay.js`); `GET .../market/dashboard` |
 | Vacantes + plan | `OpportunitiesAndPlan.jsx` — oportunidades define altura; `ThirtyDayPlan` igual alto + scroll |
 | Match radar | `RadarMatch.jsx` — 5 ejes usuario vs mercado vía `GET .../radar-data` |
 | Timeline + coach | `CareerTimeline.jsx`, `CoachChatBubble.jsx` |
-| PDF | `generateAnalysisPdf.js` — score, análisis, plan, radar, jobs, mercado |
+| PDF | `generateAnalysisPdf.js` — score, análisis, plan, radar, jobs, mercado (modalidad/fuente) |
+| Carga larga | `ProcessStatusBar.jsx` — generación PDF |
 
 ## División de trabajo
 
