@@ -49,4 +49,5 @@ Estado frontend kit ReBrand: ver [COMPONENT_OWNERS.md](../../frontend/COMPONENT_
 |-------|---------|---------|
 | 2026-05-23 | [2026-05-23-backend-plan2-phase1-fixes.md](./2026-05-23-backend-plan2-phase1-fixes.md) | RLS Plan 2, dashboard sin `location`, JSONB nativo |
 | 2026-05-23 | [2026-05-23-pipeline-fuentes-getonbrd-remotive.md](./2026-05-23-pipeline-fuentes-getonbrd-remotive.md) | Fuentes finales: getonbrd + remotive; Adzuna/Jooble deprecated |
+| 2026-05-24 | [2026-05-24-jobs-seniority-scoring.md](./2026-05-24-jobs-seniority-scoring.md) | Scoring v1.1: filtro junior + scores expresivos |
 | — | Ver [DECISIONS.md](../DECISIONS.md) | pydantic 3.14, slowapi, jobs en inglés, mock data |

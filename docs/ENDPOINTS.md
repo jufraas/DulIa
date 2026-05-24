@@ -2,7 +2,7 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Plan 2 verificado + parse-cv (`markitdown[pdf]`, pdfplumber) + termómetro `por_modalidad`/`por_fuente` + jobs cache-first (híbrido). Frontend: layout `/resultados`, timeouts API 120s.
+**Última actualización:** 2026-05-24 · Scoring v1.1 (seniority filter) + Plan 2 + parse-cv + termómetro híbrido.
 
 ## Base URL
 
@@ -285,7 +285,19 @@ Hasta **20** vacantes ordenadas por `score_compatibilidad` (0–100). Excluye `s
 
 > BD `jobs` en **inglés** (`title`, `company`, `status`, …). Ver `docs/PIPELINE_JOBS.md`. La API sigue en español.
 
-**Scoring (referencia):** 40% skills + 20% ciudad + 25% experiencia + 15% educación. Ver `docs/SCHEMA.md`.
+**Scoring (referencia v1.1):**
+
+| Componente | Puntos | Notas |
+|------------|--------|-------|
+| Skills | 0–40 | Match ratio × 40. Sin `skills_required` → **15** (no 40). |
+| Ciudad/modalidad | 0–20 | Remoto **15**; misma ciudad **20**; mismo depto **10**. |
+| Experiencia | 0–25 | Cumple → 25; si no, `max(0, 25 - brecha × 8)`. |
+| Educación | 0–15 | Según nivel vs requerido. |
+| Youth bonus | 0–5 | Perfil ≤2 años + `hires_youth=true`. |
+
+- Score final redondeado a **múltiplos de 5** (cap 100).
+- **Pre-filtro seniority:** perfiles ≤2 años exp no reciben vacantes senior/lead en top 20 (salvo título junior explícito o `hires_youth`).
+- Ver `docs/PROMPTS.md` (`JOB_MATCHER_SYSTEM` v1.1) y [decisions/2026-05-24-jobs-seniority-scoring.md](./decisions/2026-05-24-jobs-seniority-scoring.md).
 
 **Errores:** `500` error interno.
 

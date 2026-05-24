@@ -24,6 +24,48 @@ NIVEL_ORDEN = {
 }
 
 TOP_N = 20
+SENIORITY_TOLERANCE = 2  # años de holgura exp_req vs perfil (perfiles junior)
+YOUTH_BOOST = 5
+JUNIOR_EXP_THRESHOLD = 2.0
+SKILLS_MAX_PTS = 40
+SKILLS_EMPTY_PTS = 15
+CIUDAD_REMOTO_PTS = 15
+CIUDAD_EXACTA_PTS = 20
+CIUDAD_DEPTO_PTS = 10
+
+_SENIOR_TITLE_MARKERS = (
+    "senior",
+    "sr ",
+    "sr.",
+    " ssr",
+    "lead",
+    "tech lead",
+    "team lead",
+    "manager",
+    "director",
+    "head of",
+    "principal",
+    "staff ",
+    "architect",
+    "vp ",
+    "vice president",
+)
+
+_JUNIOR_TITLE_MARKERS = (
+    "junior",
+    "jr ",
+    "jr.",
+    "entry level",
+    "entry-level",
+    "trainee",
+    "intern",
+    "graduate",
+    "no experience",
+    "new grad",
+    "practicante",
+    "becario",
+    "estudiante",
+)
 
 
 async def recomendar_jobs(session_id: str) -> list[JobOut]:
@@ -43,13 +85,25 @@ async def recomendar_jobs(session_id: str) -> list[JobOut]:
     perfil = perfil_res.data[0]
 
     jobs, encolado = _resolver_jobs_cache(perfil, supabase)
+    compatible = [raw for raw in jobs if _seniority_compatible(perfil, raw)]
+    excluded = len(jobs) - len(compatible)
+    if excluded:
+        logger.info(
+            f"Filtro seniority: {excluded} vacantes excluidas — session_id={session_id}"
+        )
+    if not compatible:
+        logger.warning(
+            f"Sin vacantes compatibles por seniority — session_id={session_id}"
+        )
+        return []
+
     logger.info(
-        f"Calculando score para {len(jobs)} vacantes — session_id={session_id}, "
+        f"Calculando score para {len(compatible)} vacantes — session_id={session_id}, "
         f"encolado={encolado}"
     )
 
     resultados = []
-    for raw in jobs:
+    for raw in compatible:
         job_out, score_out = _calcular_score(perfil, raw)
         job_out.score_compatibilidad = score_out.score
         job_out.habilidades_match = _skills_match(perfil, raw)
@@ -210,6 +264,50 @@ def _resolver_jobs_cache(perfil: dict, supabase) -> tuple[list[dict], bool]:
     return all_active, True
 
 
+def _perfil_experiencia(perfil: dict) -> float:
+    return float(perfil.get("experiencia_anios") or 0)
+
+
+def _job_hires_youth(job: dict) -> bool:
+    return bool(job.get("hires_youth"))
+
+
+def _title_suggests_senior(title: str) -> bool:
+    t = _normalize_text(title)
+    return any(marker in t for marker in _SENIOR_TITLE_MARKERS)
+
+
+def _title_suggests_junior(title: str) -> bool:
+    t = _normalize_text(title)
+    return any(marker in t for marker in _JUNIOR_TITLE_MARKERS)
+
+
+def _seniority_compatible(perfil: dict, raw_job: dict) -> bool:
+    """
+    Perfiles junior (≤2 años): excluye roles senior o con exp_req muy alta.
+    hires_youth=true rescata vacantes explícitamente orientadas a jóvenes.
+    Perfiles con más experiencia: sin filtro duro.
+    """
+    exp_usuario = _perfil_experiencia(perfil)
+    if exp_usuario > JUNIOR_EXP_THRESHOLD:
+        return True
+
+    job = normalize_job_row(raw_job)
+    exp_req = float(job.get("experience_required") or 0)
+    hires_youth = _job_hires_youth(job)
+    title = job.get("title") or ""
+
+    if _title_suggests_senior(title):
+        if _title_suggests_junior(title):
+            return True
+        return False
+
+    if exp_req > exp_usuario + SENIORITY_TOLERANCE:
+        return hires_youth
+
+    return True
+
+
 def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     """Calcula el score 0-100 para un par perfil-vacante (columnas EN en BD)."""
     job = normalize_job_row(raw_job)
@@ -219,10 +317,9 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
 
     if skills_req:
         match_ratio = len(set(skills_perfil) & set(skills_req)) / len(skills_req)
+        pts_skills = round(match_ratio * SKILLS_MAX_PTS)
     else:
-        match_ratio = 1.0
-
-    pts_skills = round(match_ratio * 40)
+        pts_skills = SKILLS_EMPTY_PTS
 
     ciudad_perfil = (perfil.get("ciudad") or "").lower().strip()
     ciudad_job = job_city(raw_job).lower()
@@ -231,22 +328,22 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     modalidad_job = (job.get("modality") or "").lower()
 
     if modalidad_job == "remoto":
-        pts_ciudad = 20
+        pts_ciudad = CIUDAD_REMOTO_PTS
     elif ciudad_perfil and ciudad_job and ciudad_perfil == ciudad_job:
-        pts_ciudad = 20
+        pts_ciudad = CIUDAD_EXACTA_PTS
     elif depto_perfil and depto_job and depto_perfil == depto_job:
-        pts_ciudad = 10
+        pts_ciudad = CIUDAD_DEPTO_PTS
     else:
         pts_ciudad = 0
 
-    exp_usuario = float(perfil.get("experiencia_anios") or 0)
+    exp_usuario = _perfil_experiencia(perfil)
     exp_req = float(job.get("experience_required") or 0)
 
     if exp_usuario >= exp_req:
         pts_exp = 25
     else:
         brecha = exp_req - exp_usuario
-        pts_exp = max(0, round(25 - (brecha / 3) * 25))
+        pts_exp = max(0, round(25 - brecha * 8))
 
     nivel_usuario = NIVEL_ORDEN.get(perfil.get("nivel_educativo") or "", 0)
     nivel_req = NIVEL_ORDEN.get(job.get("education_level_req") or "", 0)
@@ -258,7 +355,12 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
     else:
         pts_edu = 0
 
-    score_total = pts_skills + pts_ciudad + pts_exp + pts_edu
+    pts_youth = 0
+    if exp_usuario <= JUNIOR_EXP_THRESHOLD and _job_hires_youth(job):
+        pts_youth = YOUTH_BOOST
+
+    raw_total = min(100, pts_skills + pts_ciudad + pts_exp + pts_edu + pts_youth)
+    score_total = round(raw_total / 5) * 5
 
     job_out = row_to_job_out(raw_job)
 
@@ -271,6 +373,7 @@ def _calcular_score(perfil: dict, raw_job: dict) -> tuple[JobOut, ScoreOut]:
             ciudad=pts_ciudad,
             experiencia=pts_exp,
             educacion=pts_edu,
+            youth=pts_youth,
         ),
         recomendaciones=_generar_recomendaciones(pts_skills, pts_ciudad, pts_exp, pts_edu, job),
     )

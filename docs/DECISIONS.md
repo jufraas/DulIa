@@ -25,6 +25,7 @@
 | 2026-05-23 | frontend | Animaciones landing (splash + Framer Motion) | [decisions/2026-05-23-frontend-landing-animations.md](./decisions/2026-05-23-frontend-landing-animations.md) |
 | 2026-05-23 | pipeline | Adzuna/Jooble descartadas — reframe local + remoto | inline ↓ (ver archivo pipeline arriba) |
 | 2026-05-23 | pipeline | Arquitectura híbrida cache-first + queue manual | [PIPELINE_HYBRID.md](./PIPELINE_HYBRID.md) — cron pendiente fase 2 |
+| 2026-05-24 | backend | Scoring v1.1 + filtro seniority junior | [decisions/2026-05-24-jobs-seniority-scoring.md](./decisions/2026-05-24-jobs-seniority-scoring.md) |
 
 ## Decisiones stack (resumen)
 
@@ -37,6 +38,7 @@
 | 2026-05-23 | Mock data + APIs públicas vs scrapers | Menor riesgo en 48h | Scrapers propios |
 | 2026-05-23 | Remotive + Get on Board como fuentes finales del pipeline | Adzuna sin Colombia; Jooble sin LATAM fiable. Reframe: oportunidades locales + remoto internacional. Termómetro: `por_fuente`, `por_modalidad` | Adzuna, Jooble, scrapers propios |
 | 2026-05-23 | Arquitectura híbrida cache-first con queue manual | Respuesta rápida desde cache; scrape on-demand vía `scrape_queue` + `run_queue.py`. Sin cron en hackathon | Cron inmediato, scrape síncrono en request |
+| 2026-05-24 | Scoring v1.1 + filtro seniority | Junior-first top 20; scores expresivos; analyze fallback calibrado | LLM re-rank; filtrar solo en pipeline |
 | 2026-05-23 | Sin auth — session_id | Evita setup de login | Supabase Auth, JWT |
 | 2026-05-23 | Tabla `jobs` en inglés | Compatible Adzuna/pipeline | Solo español en BD |
 | 2026-05-23 | slowapi 10 req/min | Protege cuota Gemini | Sin rate limit |

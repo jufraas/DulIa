@@ -157,21 +157,37 @@ REGLAS:
 
 ---
 
-## `JOB_MATCHER_SYSTEM` v1.0
+## `JOB_MATCHER_SYSTEM` v1.1
 
-> **Uso:** Scoring determinístico en `jobs_service.py` — no usa LLM. Referencia de criterios para el coach.
+> **Uso:** Scoring determinístico en `jobs_service.py` — no usa LLM. Referencia para coach y docs.
+> **Actualizado:** 2026-05-24
 
 ```
-El score 0-100 combina: 40% habilidades, 20% ciudad/modalidad, 25% experiencia, 15% educación.
-El backend excluye vacantes con semaforo "red" de las recomendaciones.
+Score 0–100 por vacante (redondeado a múltiplos de 5):
+
+Componentes base (máx. 100 antes de cap):
+- skills: 0–40 (match ratio × 40). Si job sin skills_required → 15 pts (no 40).
+- ciudad: remoto → 15; misma ciudad → 20; mismo departamento → 10; else 0.
+- experiencia: 25 si cumple; si no, max(0, 25 - brecha_años × 8).
+- educación: 15 / 8 / 0 según nivel vs requerido.
+- youth (bonus): +5 si perfil ≤2 años exp y job.hires_youth=true.
+
+Pre-filtro seniority (solo perfiles ≤2 años exp):
+- Excluye títulos senior/lead/staff/manager (salvo que también digan junior).
+- Excluye experience_required > perfil + 2 (salvo hires_youth=true).
+- Perfiles con >2 años: sin filtro duro.
+
+El backend excluye vacantes status=red y active=false.
+Top 20 ordenado por score_compatibilidad descendente.
 ```
 
 ---
 
-## `PROFILE_ANALYSIS` v1.0
+## `PROFILE_ANALYSIS` v1.1
 
 > **Uso:** `POST /api/profile/{session_id}/analyze` — análisis enriquecido del perfil.
-> **Actualizado:** 2026-05-23
+> **Actualizado:** 2026-05-24
+> **Cambios:** Calibración de overall, descripciones en prosa humana (area sigue en snake_case para API).
 
 ```
 Eres un experto en desarrollo de carrera y análisis de perfiles profesionales para el mercado laboral colombiano.
@@ -235,8 +251,13 @@ REGLAS:
 1. Sé específico, no genérico. Menciona habilidades y sectores concretos del perfil.
 2. Prioriza el contexto colombiano y del Caribe.
 3. Las recomendaciones deben ser accionables: "Haz X curso" no "Considera mejorar".
-4. El nivel_preparacion.overall debe calcularse honestamente (no siempre 80+).
-5. Máximo 3-4 items por categoría.
+4. El campo `area` usa snake_case (contrato API). El campo `descripcion` debe ser prosa en español legible — NO repitas el valor de `area` ni uses snake_case en descripcion.
+5. Calibra `nivel_preparacion.overall` con honestidad:
+   - Estudiante sin experiencia: típicamente 35–55.
+   - 1–2 años exp junior: 45–65.
+   - 3+ años con skills sólidas: 60–80.
+   - Evita fijar 65 u 80+ por defecto.
+6. Máximo 3–4 items por categoría.
 
 Devuelve SOLO el JSON, sin markdown ni texto adicional.
 ```

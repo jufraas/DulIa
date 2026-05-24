@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Backend:** arquitectura híbrida cache-first (`user_interests`, `scrape_queue`, `run_queue.py`); pipeline getonbrd + remotive (~380 jobs). **Front:** fix CV PDF + layout `/resultados` + timeouts API 120s. Pendiente: deploy.
+2026-05-24 — **Backend:** scoring v1.1 (filtro seniority + scores expresivos) + analyze fallback calibrado. Híbrido cache-first + ~380 jobs. **Front:** fix CV PDF + layout `/resultados`. Pendiente: deploy.
 
 ## Estado por módulo
 
@@ -85,6 +85,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | P2-F3 | Gráficas radar + timeline (API) | ✅ Real verificado |
 | P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
 | Híbrido | Cache-first + scrape_queue | ✅ Migraciones 008–009, `queue_service`, `run_queue.py` |
+| Scoring v1.1 | Seniority filter + scores expresivos | ✅ Fases A–D (2026-05-24) |
 
 ## Leyenda
 
@@ -116,5 +117,7 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | [decisions/2026-05-23-backend-plan2-phase1-fixes.md](decisions/2026-05-23-backend-plan2-phase1-fixes.md) | Fixes RLS, dashboard, JSONB |
 | [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) | Handoff Plan 2 (analyze, radar, timeline) |
 | [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md) | Cache-first, cola manual, CLIs |
+| [handoff-frontend-analysis-labels.md](handoff-frontend-analysis-labels.md) | Labels humanos en resumen analyze (Migue) |
+| [decisions/2026-05-24-jobs-seniority-scoring.md](decisions/2026-05-24-jobs-seniority-scoring.md) | Scoring v1.1 + filtro junior |
 | [EXTRA_IDEAS/README.md](EXTRA_IDEAS/README.md) | Ideas fuera del MVP |
 | [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md) | Roadmap fase 2 + guion pitch |
