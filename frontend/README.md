@@ -12,6 +12,7 @@ npm install
 npm run dev          # http://localhost:5173
 npm run build        # verificar antes de push
 npm run lint         # ESLint (solo src/ + config; ver abajo)
+npm run test:progress   # mini tests mocks progreso/entrevista (sin Vitest)
 ```
 
 ## Variables de entorno
@@ -63,6 +64,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/login` | Login | Email/password; banner demo si faltan envs Supabase |
 | `/registro` | Registro | Upsert a `user_accounts` tras signUp |
 | `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
+| `/progreso` | Mi progreso | Protegida; plan checkeable, fases 30/60/90, mock fallback (🚧 Bloque 2 timeline) |
 
 ## Flujo de datos
 
@@ -90,12 +92,18 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `getRadarData` | GET `/profile/{id}/radar-data` |
 | `postCoachChat` | POST `/coach/chat` |
 | `linkSession` | POST `/auth/link-session` (tras login, best-effort) |
+| `hasProfile` | GET `/user/has-profile` (guard post-login; mock demo) |
+| `getProgress` / `toggleTask` / `initProgress` | Progreso del plan 30-60-90 |
+| `startInterview` / `submitAnswer` / `finishInterview` | Mock interview por skill |
+| `interviewHistory` / `addTasksFromWeakSkills` | Historial + tareas desde skills débiles |
+
+Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`.
 
 ### Auth (opcional)
 
 - `services/supabase.js` — cliente null-safe si faltan envs.
 - `context/AuthProvider.jsx` + `hooks/useAuth.js` — sesión reactiva.
-- `components/auth/ProtectedRoute.jsx` — solo `/perfil` protegida.
+- `components/auth/ProtectedRoute.jsx` — `/perfil` y `/progreso` protegidas.
 - `components/auth/AuthDisabledBanner.jsx` — aviso en login/registro sin envs.
 
 ## Estructura relevante

@@ -758,6 +758,26 @@ Campos mínimos por vacante: ver `docs/SCHEMA.md` tabla `jobs`.
 
 ---
 
+## Progreso del plan + mock interview 🚧 (frontend listo, backend pendiente)
+
+Cliente implementado en `frontend/src/services/api.js` con fallback a `src/mocks/mockProgress.js` y `mockInterview.js`.
+
+| Método | Ruta | Descripción | Estado backend |
+|--------|------|-------------|----------------|
+| GET | `/user/has-profile?user_id=` | ¿Usuario ya tiene perfil coach? | 🚧 |
+| GET | `/progress/{session_id}` | Estado progreso (tareas, %, fases) | 🚧 |
+| PATCH | `/progress/task` | Marcar tarea `{ session_id, task_id, completed }` | 🚧 |
+| POST | `/progress/init` | Inicializar progreso desde action-plan | 🚧 |
+| POST | `/progress/add-from-skills` | Agregar tareas desde weak skills entrevista | 🚧 |
+| POST | `/interview/start` | Iniciar entrevista `{ session_id, skill, role? }` | 🚧 |
+| POST | `/interview/{id}/answer` | Enviar respuesta | 🚧 |
+| POST | `/interview/{id}/finish` | Cerrar y obtener score/feedback | 🚧 |
+| GET | `/interview/history?user_id=` | Últimas entrevistas | 🚧 |
+
+Regla unlock fases: **80%** de la fase anterior. Ver [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
+
+---
+
 ## Auth — vincular sesión anónima (opcional)
 
 Tras login/registro en el frontend, best-effort para asociar el perfil coach al usuario.
@@ -807,7 +827,8 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/login` | Login email/password (+ Google pendiente config) |
 | `/registro` | Registro + upsert `user_accounts` |
 | `/perfil` | Cuenta de usuario (protegida); requiere sesión Supabase |
+| `/progreso` | Mi progreso — plan checkeable (protegida); mock si API cae |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`. Persistencia: `sessionCache.js` + `sessionHydration.js`.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`, **`mockProgress.js`**, **`mockInterview.js`**. Persistencia: `sessionCache.js` + `sessionHydration.js`. Tests: `npm run test:progress`.
 
 **Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)

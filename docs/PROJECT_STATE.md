@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front:** auth Supabase opcional, coach global, proxy CV, termómetro solo en `/resultados`. **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs).
+2026-05-24 — **Front:** foundation Mi Progreso (`/progreso`, stores, mocks, API). Auth + coach global previos. **Backend:** progress/interview endpoints pendientes.
 
 ## Estado por módulo
 
@@ -30,6 +30,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
+| `/progreso` | Plan checkeable + fases (protegida) | Migue | 🚧 Bloque 1 ✅ foundation; Bloque 2 timeline |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -67,6 +68,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
+| Mi Progreso — foundation | 🚧 | `/progreso`, stores, mocks, `api.js`; Bloque 2 timeline checkeable pendiente |
 
 ### Pendiente UI (pre-pitch)
 
