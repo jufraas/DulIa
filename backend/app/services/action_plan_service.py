@@ -15,6 +15,13 @@ logger = get_logger(__name__)
 
 USE_MOCK = os.getenv("USE_MOCK_DATA", "false").lower() == "true"
 
+# Planes modificados en mock (ej. tareas desde entrevista)
+_mock_plan_overrides: dict[str, dict] = {}
+
+
+class PlanNotFoundError(Exception):
+    """No existe action_plans para el session_id."""
+
 
 class ActionPlanService:
     """Servicio para generar planes de acción personalizados 30-60-90 días."""
@@ -91,6 +98,8 @@ class ActionPlanService:
     async def get_action_plan(session_id: str) -> Optional[dict]:
         """Recupera plan existente o None si no existe."""
         if USE_MOCK:
+            if session_id in _mock_plan_overrides:
+                return _mock_plan_overrides[session_id]
             return ActionPlanService._mock_action_plan(session_id)
             
         supabase = get_supabase()
@@ -429,6 +438,86 @@ class ActionPlanService:
             "generado_en": datetime.now(timezone.utc).isoformat(),
             "mock": True
         }
+
+    @staticmethod
+    async def append_reinforcement_tasks(
+        session_id: str,
+        weak_skills: list[str],
+        current_week: int,
+    ) -> tuple[list[dict], list[str], int, datetime]:
+        """
+        Agrega tareas de refuerzo a fase_30.acciones (in-place en action_plans).
+        Retorna: (tareas agregadas, task_ids nuevos, total tareas plan, updated_at).
+        """
+        plan_resp = await ActionPlanService.get_action_plan(session_id)
+        if not plan_resp:
+            raise PlanNotFoundError(session_id)
+
+        plan_inner = plan_resp.get("plan") or {}
+        fase_30 = dict(plan_inner.get("fase_30") or {})
+        acciones = list(fase_30.get("acciones") or [])
+        count_before = len(acciones)
+
+        added_actions: list[dict] = []
+        skills_added: list[str] = []
+        for skill in weak_skills:
+            skill_clean = (skill or "").strip()
+            if not skill_clean:
+                continue
+            accion = {
+                "semana": current_week,
+                "tarea": f"Mejorar: {skill_clean}",
+                "duracion_estimada": "4 horas",
+                "recursos_necesarios": ["Curso gratuito sugerido"],
+                "como_verificar": "Demuestra dominio en próxima entrevista simulada",
+                "fuente": "mock_interview",
+            }
+            acciones.append(accion)
+            added_actions.append(accion)
+            skills_added.append(skill_clean)
+
+        if not added_actions:
+            raise ValueError("Lista de weak_skills vacía tras limpiar")
+
+        fase_30["acciones"] = acciones
+        plan_inner["fase_30"] = fase_30
+        now = datetime.now(timezone.utc)
+
+        if USE_MOCK:
+            plan_resp["plan"] = plan_inner
+            plan_resp["generado_en"] = now.isoformat()
+            _mock_plan_overrides[session_id] = plan_resp
+        else:
+            supabase = get_supabase()
+            supabase.table("action_plans").update(
+                {
+                    "fase_30": fase_30,
+                    "updated_at": now.isoformat(),
+                }
+            ).eq("session_id", session_id).execute()
+
+        # Calcular task_ids de las tareas nuevas
+        from app.services.progress_service import _count_total_tasks, _task_ids_for_phase
+
+        all_ids = _task_ids_for_phase(plan_inner, 30)
+        new_ids = all_ids[count_before:]
+        total = _count_total_tasks(plan_inner)
+
+        enriched = []
+        for i, accion in enumerate(added_actions):
+            enriched.append(
+                {
+                    "task_id": new_ids[i] if i < len(new_ids) else f"fase_30:semana_{current_week}:idx_extra_{i}",
+                    "tarea": accion["tarea"],
+                    "skill": skills_added[i],
+                    "semana": current_week,
+                }
+            )
+
+        logger.info(
+            f"Tareas refuerzo agregadas session_id={session_id} count={len(added_actions)}"
+        )
+        return enriched, new_ids, total, now
 
 
 # Instancia singleton para uso directo

@@ -4,17 +4,17 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front:** auth Supabase opcional, coach global, proxy CV, termómetro solo en `/resultados`. **Backend:** scoring v1.1 + termómetro híbrido (~380 jobs).
+2026-05-24 — **Backend B1–B6 ✅:** progreso + mock interview + coach context-aware. Listo para integración E2E y deploy.
 
 ## Estado por módulo
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
 | Repositorio | ✅ Listo | Ramas FRONT y Backend integradas |
-| Backend (FastAPI) | ✅ Fase 1 Plan 2 | Cadena real verificada (migración 004); deploy pendiente |
+| Backend (FastAPI) | ✅ B1–B6 completo | Progreso + interview + coach context; deploy pendiente |
 | Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mocks si API falla |
 | Pipeline | ✅ Híbrido | getonbrd + remotive; `run_queue.py` + `run_baseline.py`; cache-first en backend |
-| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008–011**; ~380 jobs activos |
+| Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008–013**; ~380 jobs; seed entrevistas 120 filas |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
 
 ## Frontend — avance detallado
@@ -95,6 +95,12 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 | P2-F2 | Coach function calling | 🚧 Código en `app/services/coach/` |
 | Híbrido | Cache-first + scrape_queue | ✅ Migraciones 008–009, `queue_service`, `run_queue.py` |
 | Scoring v1.1 | Seniority filter + scores expresivos | ✅ Fases A–D (2026-05-24) |
+| **B1** | Schema progreso + mock interviews + seed | ✅ Migración 012 + 120 preguntas (013) |
+| **B2** | `GET /api/user/has-profile` | ✅ Mock + real; migración 011 aplicada en prod |
+| **B3** | Endpoints progreso plan 30/60/90 | ✅ GET/PATCH/POST + mock + desbloqueo fases |
+| **B4** | Servicio mock interview + Gemini | ✅ pool, generar, evaluar, finalizar + 3 cachés demo |
+| **B5** | Endpoints REST mock interview | ✅ start/answer/finish/history + rate limits |
+| **B6** | Coach context-aware + add-tasks | ✅ + docs finales |
 
 ## Leyenda
 
@@ -109,12 +115,12 @@ Ver detalle post-MVP: [EXTRA_IDEAS/post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roa
 ## Próximos pasos inmediatos
 
 ### Pitch / demo
-1. **Backend:** `USE_MOCK_DATA=false`, migraciones 002+004, uvicorn `:8000` — smoke en [ENDPOINTS.md](ENDPOINTS.md#troubleshooting--modo-real-use_mock_datafalse)
-2. **E2E:** wizard → resultados — Network con 200 en Plan 2; UI ya consume `analysis`/plan real
-3. Pipeline: `run_queue.py --batch 5` tras perfiles exóticos; ver [PIPELINE_HYBRID.md](PIPELINE_HYBRID.md)
-4. Deploy: **pospuesto** — `VITE_API_URL` + `CORS_ORIGINS`
+1. **Backend:** `USE_MOCK_DATA=false`, uvicorn `:8000` — smoke E2E progreso + interview + coach
+2. **Integración front:** Jufra/Migue — tabs progreso + interview (ver FRONTEND_INTEGRATION.md)
+3. Deploy: Railway + Vercel — `VITE_API_URL` + `CORS_ORIGINS`
 
 ### Post-MVP (no bloquean pitch)
+- Progreso plan + entrevistas simuladas (B2–B6 en curso) → ver fases backend arriba
 - Login opcional + timeline del plan con progreso → [post-mvp-roadmap.md](EXTRA_IDEAS/post-mvp-roadmap.md)
 - Startup Analyzer (spinoff) → [ideallamativamacondo.md](EXTRA_IDEAS/ideallamativamacondo.md)
 

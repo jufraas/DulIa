@@ -1,8 +1,8 @@
 # SCHEMA — Base de datos DulIA
 
-> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009). Auth opcional: `user_accounts` + `profiles.user_id` (migraciones 010–011).
+> **Estado:** ✅ Tablas creadas en Supabase — proyecto DulIA (`ikyrbkbhxpoycverkdqh`). Pipeline activo: **getonbrd** + **remotive**. Cola híbrida: `user_interests` + `scrape_queue` (migraciones 008–009). Auth opcional: `user_accounts` + `profiles.user_id` (migraciones 010–011). Progreso plan + mock interviews: migraciones **012–013**.
 > **BD:** PostgreSQL 17 vía Supabase (proyecto DulIA)
-> **Última actualización:** 2026-05-24
+> **Última actualización:** 2026-05-24 (B1 — progreso + entrevistas)
 
 ---
 
@@ -14,8 +14,13 @@ profiles ──< scoring_history >── jobs
     │ user_id (nullable)           companies
     └── user_interests             │
 profiles ── (demanda) ──> scrape_queue ──> jobs (pipeline CLI)
+    │
+    ├── plan_progress (1:1 por profile_id)
+    └── mock_interviews (1:N)
 
 user_accounts ── FK auth.users (cuenta opcional, separada del coach)
+
+interview_questions_seed (banco curado, sin FK — lectura por sector/nivel)
 ```
 
 ---
@@ -233,6 +238,70 @@ Historial de scores calculados para pares perfil-vacante. Evita recalcular en ca
 | `calculado_at` | `timestamptz` | NO | `now()` | Cuándo se calculó |
 
 **Índices:** `(profile_id, job_id)` (único), `profile_id`, `score DESC`
+
+---
+
+## Tabla: `plan_progress`
+
+Progreso del plan 30/60/90 por perfil coach. Una fila por `profile_id`. Migración `012_progress_and_interviews.sql`.
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | PK |
+| `profile_id` | `uuid` | NO | — | FK → `profiles.id` ON DELETE CASCADE (UNIQUE) |
+| `user_id` | `uuid` | SÍ | — | FK → `auth.users(id)` ON DELETE SET NULL |
+| `session_id` | `text` | NO | — | Copia del `session_id` del perfil (consultas rápidas) |
+| `started_at` | `timestamptz` | NO | `now()` | Inicio del seguimiento |
+| `current_phase` | `integer` | NO | `30` | Fase activa: `30`, `60` o `90` |
+| `current_week` | `integer` | NO | `1` | Semana dentro de la fase |
+| `completed_tasks` | `jsonb` | NO | `'[]'` | Array de `task_id` completados (ej. `"fase_30:semana_1:idx_0"`) |
+| `updated_at` | `timestamptz` | NO | `now()` | Última actualización |
+
+**Índices:** `profile_id` (único), `user_id`, `session_id`
+
+---
+
+## Tabla: `mock_interviews`
+
+Sesiones del simulador de entrevistas con IA. Migración `012_progress_and_interviews.sql`.
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | PK |
+| `profile_id` | `uuid` | NO | — | FK → `profiles.id` ON DELETE CASCADE |
+| `user_id` | `uuid` | SÍ | — | FK → `auth.users(id)` ON DELETE SET NULL |
+| `session_id` | `text` | NO | — | Sesión del browser |
+| `target_skill` | `text` | SÍ | — | Skill objetivo (ej. Excel, Python) |
+| `target_role` | `text` | SÍ | — | Rol objetivo (ej. auxiliar contable) |
+| `questions` | `jsonb` | NO | — | Preguntas generadas (pool + Gemini) |
+| `answers` | `jsonb` | NO | `'[]'` | Respuestas evaluadas con score y feedback |
+| `global_score` | `integer` | SÍ | — | Promedio 0–100 al finalizar |
+| `weak_skills` | `text[]` | SÍ | `'{}'` | Skills débiles detectadas |
+| `status` | `text` | NO | `'in_progress'` | `in_progress`, `completed`, `abandoned` |
+| `created_at` | `timestamptz` | NO | `now()` | Inicio de la entrevista |
+| `completed_at` | `timestamptz` | SÍ | — | Cierre de la entrevista |
+
+**Índices:** `user_id`, `profile_id`
+
+---
+
+## Tabla: `interview_questions_seed`
+
+Banco curado de preguntas de entrevista por sector (español CO, nivel junior). Seed: `013_seed_interview_questions.sql` (120 filas, 12 por sector).
+
+| Columna | Tipo | Nulable | Default | Descripción |
+|---------|------|---------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | PK |
+| `sector` | `text` | NO | — | `tecnologia`, `marketing`, `ventas`, `contabilidad`, `servicio_cliente`, `operaciones`, `administracion`, `salud`, `educacion`, `general` |
+| `skill` | `text` | SÍ | — | Skill asociada (opcional) |
+| `nivel` | `text` | NO | — | `junior`, `mid`, `senior` |
+| `tipo` | `text` | NO | — | `tecnica`, `behavioral`, `situacional` |
+| `pregunta` | `text` | NO | — | Texto de la pregunta |
+| `rubrica` | `jsonb` | SÍ | — | `{keywords_clave, puntos_fuertes_esperados, red_flags}` |
+| `fuente` | `text` | SÍ | `'curado_dulia'` | Origen del contenido |
+| `idioma` | `text` | SÍ | `'es'` | Idioma |
+
+**Índices:** `(sector, nivel)`
 
 ---
 

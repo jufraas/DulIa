@@ -415,6 +415,54 @@ Sin `VITE_SUPABASE_*`: banner informativo en login/registro, botones disabled, h
 
 ---
 
+## Progreso del plan + Mock Interview (B1–B6)
+
+### Auth y redirección post-login
+
+1. Login Supabase → `GET /api/user/has-profile?user_id={uuid}`.
+2. Si `has_profile: true` → usar `session_id` devuelto para rehidratar (`GET /profile`, `/progress`, etc.).
+3. Si `false` → `/comenzar` (wizard).
+4. Best-effort: `POST /api/auth/link-session` tras `SIGNED_IN`.
+
+### Flujo progreso (tab Progreso)
+
+```
+POST /progress/{session_id}/init     (opcional — GET también lazy-init)
+GET  /progress/{session_id}          → stats + completed_tasks
+PATCH /progress/{session_id}/task    → { task_id, completed }
+```
+
+Convención `task_id`: `fase_30:semana_1:idx_0` (ver ENDPOINTS.md sección Progreso).
+
+### Flujo mock interview
+
+```
+POST /interview/start        { session_id, target_skill?, target_role? }
+POST /interview/{id}/answer  ×5  { question_idx, answer }  (min 20 chars)
+POST /interview/{id}/finish
+GET  /interview/history/{session_id}
+```
+
+Desde resultados: `POST /progress/{session_id}/add-tasks-from-weak-skills` con `weak_skills` del finish.
+
+### Coach context-aware
+
+`POST /coach/chat` — sin cambios en el contrato. El backend inyecta progreso + última entrevista al prompt si existen (v2.4 en PROMPTS.md).
+
+### Mock backend (`USE_MOCK_DATA=true`)
+
+Todos los endpoints anteriores funcionan sin Supabase/Gemini. Perfil mock acepta cualquier `session_id`. Interview usa caché Python/Excel/Atención al cliente.
+
+### Orden recomendado para integrar (Jufra)
+
+1. `has-profile` + redirect
+2. `GET /progress` + toggle task
+3. Interview E2E
+4. `add-tasks-from-weak-skills` desde pantalla resultados
+5. Coach — verificar respuestas mencionan progreso cuando pregunta por el plan
+
+---
+
 ## Referencias
 
 | Doc | Contenido |

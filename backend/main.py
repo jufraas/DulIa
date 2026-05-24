@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.utils.logger import get_logger
 from app.utils.limiter import limiter
 from app.utils.cors import get_cors_config
-from app.routes import health, profile, jobs, market, coach, charts, auth
+from app.routes import health, profile, jobs, market, coach, charts, auth, user_router, progress_router, interview_router
 
 logger = get_logger("dulia.main")
 
@@ -46,6 +46,9 @@ app.include_router(market.router, prefix="/api")
 app.include_router(coach.router, prefix="/api")
 app.include_router(charts.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(user_router.router, prefix="/api")
+app.include_router(progress_router.router, prefix="/api")
+app.include_router(interview_router.router, prefix="/api")
 
 
 @app.on_event("startup")

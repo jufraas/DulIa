@@ -2,7 +2,32 @@
 
 > **Fuente de verdad para el frontend.** Contrato final — Fase 10 verificada.
 
-**Última actualización:** 2026-05-24 · Scoring v1.1 + termómetro híbrido · Front: PDF por secciones, layout congelado, nav/coach.
+**Última actualización:** 2026-05-24 · Backend B1–B6 completo (progreso + interview + coach context)
+
+## Resumen de endpoints (referencia rápida)
+
+| Método | Ruta | Descripción | Auth | Rate limit |
+|--------|------|-------------|------|------------|
+| GET | `/health` | Health check | No | — |
+| POST | `/profile` | Crear/actualizar perfil | No | 10/min |
+| GET | `/profile/{session_id}` | Obtener perfil | No | — |
+| POST | `/profile/{session_id}/analyze` | Análisis IA | No | 10/min |
+| POST | `/profile/{session_id}/action-plan` | Plan 30-60-90 | No | 10/min |
+| GET | `/jobs/recommended/{session_id}` | Vacantes scoreadas | No | — |
+| GET | `/market/dashboard/{session_id}` | Termómetro personalizado | No | — |
+| POST | `/coach/chat` | Coach (context-aware B6) | No | 10/min |
+| GET | `/user/has-profile` | ¿Tiene perfil tras login? | No* | — |
+| POST | `/auth/link-session` | Vincular session ↔ user | No | — |
+| GET | `/progress/{session_id}` | Progreso del plan | No | — |
+| PATCH | `/progress/{session_id}/task` | Marcar tarea | No | — |
+| POST | `/progress/{session_id}/init` | Init progreso | No | — |
+| POST | `/progress/{session_id}/add-tasks-from-weak-skills` | Tareas desde entrevista | No | — |
+| POST | `/interview/start` | Iniciar entrevista | No | 5/min |
+| POST | `/interview/{id}/answer` | Evaluar respuesta | No | 10/min |
+| POST | `/interview/{id}/finish` | Cerrar entrevista | No | 3/min |
+| GET | `/interview/history/{session_id}` | Historial | No | — |
+
+\* `has-profile` recibe `user_id` en query (MVP sin JWT — ver decisión B2).
 
 ## Base URL
 
@@ -20,7 +45,7 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | Tema | Detalle |
 |------|---------|
 | Formato | JSON (`Content-Type: application/json`) |
-| Auth | Coach: ninguna (`session_id` en localStorage). Auth opcional Supabase solo en front; `POST /auth/link-session` vincula sesión anónima |
+| Auth | Coach: ninguna (`session_id` en localStorage). Auth opcional Supabase en front; `POST /auth/link-session` vincula sesión; `GET /user/has-profile` consulta perfil tras login |
 | Errores | `{ "detail": "mensaje" }` — 404, 422, 429, 500 según FastAPI |
 | CORS | Dev: `*` o `CORS_ORIGINS`; prod: solo `CORS_ORIGINS` (ver `.env.example`) |
 | Rate limit | `POST /profile`, `POST /profile/parse-cv`, `POST /profile/.../analyze`, `POST /profile/.../action-plan`, `POST /coach/chat`: **10 req/min por IP** (429 si excedes) |
@@ -43,6 +68,16 @@ https://<dominio>/api       ← producción (por definir al deployar)
 | `POST /profile/.../action-plan` | Plan mock 30-60-90 | Gemini + tabla `action_plans`; requiere análisis previo |
 | `GET /profile/.../radar-data` | 5 dimensiones mock | Calculado desde perfil + análisis + mercado |
 | `GET /profile/.../timeline-data` | Timeline mock | Desde plan de acción; 404 en real sin plan |
+| `GET /user/has-profile` | Mock: user `11111111-…` → true; resto false | Query `profiles.user_id` en Supabase |
+| `GET /progress/{id}` | Mock en memoria + plan mock | `plan_progress` + stats desde `action_plans` |
+| `PATCH /progress/{id}/task` | Mock en memoria | Actualiza `completed_tasks` JSONB |
+| `POST /progress/{id}/init` | Idempotente mock | Insert en `plan_progress` si falta |
+| `POST /interview/start` | Caché demo por skill | Gemini + insert `mock_interviews` |
+| `POST /interview/{id}/answer` | Evaluación mock heurística | Gemini + append `answers` jsonb |
+| `POST /interview/{id}/finish` | Feedback mock fijo | Gemini + cierre entrevista |
+| `GET /interview/history/{id}` | Dict en memoria | Query Supabase |
+| `POST /coach/chat` | Mock con contexto progreso/entrevista si existe | Gemini + `_build_user_context` |
+| `POST /progress/.../add-tasks-from-weak-skills` | Modifica plan mock in-memory | Update `action_plans.fase_30` |
 
 > Guía paso a paso para frontend: [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md)
 
@@ -795,6 +830,310 @@ Tras login/registro en el frontend, best-effort para asociar el perfil coach al 
 | 500 | Error interno |
 
 Idempotente si el mismo `user_id` ya está vinculado (`already_linked: true`).
+
+### `GET /user/has-profile`
+
+Tras login/registro, el frontend decide si redirigir a `/comenzar` (sin perfil) o `/progreso` / `/resultados` (con perfil).
+
+**Query params:**
+
+| Param | Tipo | Requerido | Descripción |
+|-------|------|-----------|-------------|
+| `user_id` | UUID | sí | ID de `auth.users` (Supabase) |
+
+**Ejemplo:** `GET /api/user/has-profile?user_id=550e8400-e29b-41d4-a716-446655440000`
+
+**Respuesta 200 — con perfil:**
+
+```json
+{
+  "has_profile": true,
+  "session_id": "uuid-del-localStorage",
+  "profile_id": "uuid-del-perfil-coach"
+}
+```
+
+**Respuesta 200 — sin perfil (usuario nuevo o sin wizard):**
+
+```json
+{
+  "has_profile": false,
+  "session_id": null,
+  "profile_id": null
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 422 | `user_id` no es UUID válido |
+| 500 | Error interno (ej. Supabase caído) |
+
+**Seguridad (MVP):** el backend **no valida JWT** — confía en el `user_id` que envía el frontend. Endurecer post-hackathon decodificando el token Supabase en middleware.
+
+**Mock (`USE_MOCK_DATA=true`):**
+
+| `user_id` | Respuesta |
+|-----------|-----------|
+| `11111111-1111-4111-8111-111111111111` | `has_profile: true` (session/profile mock fijos) |
+| Cualquier otro UUID | `has_profile: false` |
+
+---
+
+## Progreso — plan 30/60/90
+
+Persistencia de tareas completadas. Requiere perfil (`profiles`) existente. El plan se lee de `action_plans` (o mock); si no hay plan, `total_tareas=0` y porcentajes en 0.
+
+### Convención `task_id`
+
+```
+fase_{30|60|90}:semana_{N}:idx_{M}
+```
+
+- `semana_N` = campo `acciones[].semana` del JSON del plan.
+- `idx_M` = índice 0-based entre tareas de la misma semana en esa fase.
+
+Ejemplo: `fase_30:semana_1:idx_0` = primera tarea de la semana 1 en fase 30.
+
+**Desbloqueo de fases:** fase 60 si fase 30 ≥ 80% completada; fase 90 si fase 60 ≥ 80%.
+
+### `GET /progress/{session_id}`
+
+**Respuesta 200:**
+
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "profile_id": "uuid-del-perfil",
+  "started_at": "2026-05-24T12:00:00Z",
+  "current_phase": 30,
+  "current_week": 2,
+  "completed_tasks": ["fase_30:semana_1:idx_0"],
+  "progreso_global_pct": 8,
+  "progreso_fase_pct": 25,
+  "total_tareas": 12,
+  "tareas_completadas": 1,
+  "fases_desbloqueadas": [30]
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | No existe `profiles` con ese `session_id` |
+| 500 | Error interno |
+
+Lazy-init: crea fila en `plan_progress` si no existe.
+
+### `POST /progress/{session_id}/init`
+
+Idempotente — crea registro de progreso si falta.
+
+| Código | Cuándo |
+|--------|--------|
+| 201 | Fila creada |
+| 200 | Ya existía |
+| 404 | Sin perfil |
+| 500 | Error interno |
+
+Body: ninguno. Respuesta: mismo shape que `GET /progress/{session_id}`.
+
+### `PATCH /progress/{session_id}/task`
+
+**Body:**
+
+```json
+{
+  "task_id": "fase_30:semana_1:idx_0",
+  "completed": true
+}
+```
+
+**Respuesta 200:** mismo shape que `ProgressResponse` (stats recalculados).
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | Sin perfil |
+| 422 | Body inválido |
+| 500 | Error interno |
+
+---
+
+### `POST /progress/{session_id}/add-tasks-from-weak-skills`
+
+Agrega tareas de refuerzo a `fase_30.acciones` del action plan (desde resultados de entrevista).
+
+**Body:**
+
+```json
+{
+  "weak_skills": ["Excel avanzado", "Comunicación verbal"]
+}
+```
+
+**Respuesta 200:**
+
+```json
+{
+  "added_tasks": [
+    {
+      "task_id": "fase_30:semana_2:idx_1",
+      "tarea": "Mejorar: Excel avanzado",
+      "skill": "Excel avanzado",
+      "semana": 2
+    }
+  ],
+  "updated_total_tareas": 14,
+  "plan_updated_at": "2026-05-24T12:00:00Z"
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | Sin perfil o sin action plan |
+| 422 | Lista vacía |
+| 500 | Error interno |
+
+Tras agregar, `GET /progress/{session_id}` refleja `total_tareas` incrementado.
+
+---
+
+## Mock Interview — simulador con IA
+
+Flujo E2E: **start → 5× answer → finish → history**. Requiere perfil (`profiles`) existente. Preguntas: pool curado + Gemini (B4); fallback a caché demo en mock mode.
+
+**Rate limits (por IP):**
+
+| Endpoint | Límite |
+|----------|--------|
+| `POST /interview/start` | 5/min |
+| `POST /interview/{id}/answer` | 10/min |
+| `POST /interview/{id}/finish` | 3/min |
+| `GET /interview/history/{session_id}` | Sin límite |
+
+Ver decisión: [decisions/2026-05-24-interview-rate-limits.md](./decisions/2026-05-24-interview-rate-limits.md).
+
+### `POST /interview/start`
+
+**Body:**
+
+```json
+{
+  "session_id": "uuid-del-localStorage",
+  "target_skill": "Python",
+  "target_role": "Desarrollador junior"
+}
+```
+
+**Respuesta 200:**
+
+```json
+{
+  "interview_id": "uuid-de-la-entrevista",
+  "questions": [
+    {
+      "idx": 0,
+      "texto": "Cuéntame sobre un proyecto donde hayas usado Python...",
+      "tipo": "tecnica",
+      "skill": "Python",
+      "keywords_esperadas": ["proyecto", "código", "resultado"],
+      "rubrica": {
+        "keywords_clave": ["proyecto", "python"],
+        "puntos_fuertes_esperados": ["Ejemplo concreto"],
+        "red_flags": ["Respuesta vaga"]
+      }
+    }
+  ],
+  "created_at": "2026-05-24T12:00:00Z"
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | Sin perfil para `session_id` |
+| 429 | Rate limit |
+| 500 | Error interno / Gemini |
+
+---
+
+### `POST /interview/{interview_id}/answer`
+
+**Body:**
+
+```json
+{
+  "question_idx": 0,
+  "answer": "En la universidad hice un proyecto con Python y pandas para analizar ventas..."
+}
+```
+
+`answer` mínimo 20 caracteres.
+
+**Respuesta 200:**
+
+```json
+{
+  "question_idx": 0,
+  "score": 78,
+  "feedback": "Mencionaste puntos relevantes sobre Python...",
+  "fortalezas": ["Claridad en la idea principal"],
+  "areas_mejora": ["Python", "Ejemplos con métricas"]
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | Entrevista no encontrada |
+| 409 | Entrevista ya finalizada **o** `question_idx` ya respondido |
+| 422 | Índice fuera de rango o body inválido |
+| 429 | Rate limit |
+| 500 | Error interno |
+
+---
+
+### `POST /interview/{interview_id}/finish`
+
+Sin body.
+
+**Respuesta 200:**
+
+```json
+{
+  "interview_id": "uuid",
+  "global_score": 72,
+  "weak_skills": ["Excel avanzado", "Comunicación verbal"],
+  "feedback_general": "Completaste la simulación con 72/100...",
+  "recomendacion_siguiente_paso": "Dedica 30 min diarios a practicar..."
+}
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 404 | Entrevista no encontrada |
+| 409 | Ya finalizada **o** sin respuestas |
+| 429 | Rate limit |
+| 500 | Error interno |
+
+---
+
+### `GET /interview/history/{session_id}`
+
+**Respuesta 200** (lista vacía `[]` si nunca entrevistó):
+
+```json
+[
+  {
+    "id": "uuid",
+    "target_skill": "Python",
+    "target_role": "Desarrollador junior",
+    "global_score": 72,
+    "created_at": "2026-05-24T12:00:00Z",
+    "status": "completed"
+  }
+]
+```
+
+| Código | Cuándo |
+|--------|--------|
+| 500 | Error interno |
 
 ---
 

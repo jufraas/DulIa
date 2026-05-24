@@ -22,13 +22,13 @@ async def responder_chat(data: ChatMessage) -> ChatResponse:
     """
     if USE_MOCK:
         logger.info(f"[MOCK] Coach simulado — session_id={data.session_id}")
-        return _mock_respuesta(data)
+        return await _mock_respuesta(data)
 
     perfil = await _cargar_perfil(data.session_id)
     if not perfil:
         raise PerfilNoEncontradoError(data.session_id)
 
-    return await _responder_con_gemini(data.mensaje, perfil, data.historial)
+    return await _responder_con_gemini(data.mensaje, perfil, data.historial, data.session_id)
 
 
 async def _cargar_perfil(session_id: str) -> dict | None:
@@ -40,10 +40,61 @@ async def _cargar_perfil(session_id: str) -> dict | None:
     return resultado.data[0]
 
 
+async def _build_user_context(session_id: str) -> str:
+    """
+    Resumen corto de progreso + última entrevista para inyectar al system prompt.
+    Devuelve cadena vacía si no hay datos relevantes.
+    """
+    lineas: list[str] = []
+
+    try:
+        from app.services.progress_service import get_progress_with_stats
+
+        progreso = await get_progress_with_stats(session_id)
+        if progreso.total_tareas > 0:
+            fase_nombre = {30: "Fundamentos", 60: "Visibilidad", 90: "Consolidación"}.get(
+                progreso.current_phase, str(progreso.current_phase)
+            )
+            lineas.append(
+                f"- Plan: semana {progreso.current_week}, fase de {fase_nombre}. "
+                f"Lleva {progreso.tareas_completadas} de {progreso.total_tareas} tareas "
+                f"({progreso.progreso_global_pct}%)."
+            )
+    except Exception as e:
+        logger.debug(f"Sin contexto de progreso para coach session_id={session_id}: {e}")
+
+    try:
+        from app.services.interview_service import ultima_entrevista_completada
+
+        entrevista = await ultima_entrevista_completada(session_id)
+        if entrevista:
+            score = entrevista.get("global_score")
+            weak = entrevista.get("weak_skills") or []
+            if isinstance(weak, str):
+                weak = json.loads(weak)
+            weak_txt = ", ".join(list(weak)[:3]) if weak else "sin áreas críticas"
+            rol = entrevista.get("target_role") or entrevista.get("target_skill") or "simulación"
+            lineas.append(
+                f'- Última entrevista simulada (rol "{rol}"): {score}/100. '
+                f"Áreas débiles: {weak_txt}."
+            )
+    except Exception as e:
+        logger.debug(f"Sin contexto de entrevista para coach session_id={session_id}: {e}")
+
+    if not lineas:
+        return ""
+
+    return (
+        "CONTEXTO ACTUAL DEL USUARIO (úsalo solo si la pregunta lo amerita):\n"
+        + "\n".join(lineas)
+    )
+
+
 async def _responder_con_gemini(
     mensaje: str,
     perfil: dict,
     historial: list | None = None,
+    session_id: str | None = None,
 ) -> ChatResponse:
     """Invoca Gemini con system prompt + historial + mensaje del usuario."""
     historial = historial or []
@@ -54,7 +105,14 @@ async def _responder_con_gemini(
         return _fallback_respuesta(mensaje, perfil, historial)
 
     perfil_resumido = _crear_perfil_resumido(perfil)
+    user_context = ""
+    if session_id:
+        user_context = await _build_user_context(session_id)
+        if user_context:
+            user_context = user_context + "\n"
+
     system_instruction = system_template.replace("{perfil_json}", perfil_resumido)
+    system_instruction = system_instruction.replace("{user_context_block}", user_context)
     system_instruction += _continuity_suffix(historial)
 
     import google.generativeai as genai
@@ -233,10 +291,18 @@ def _fallback_respuesta(mensaje: str, perfil: dict, historial: list | None = Non
     )
 
 
-def _mock_respuesta(data: ChatMessage) -> ChatResponse:
+async def _mock_respuesta(data: ChatMessage) -> ChatResponse:
     """Coach simulado natural para desarrollo sin credenciales."""
     mensaje = data.mensaje.lower()
-    
+    contexto = await _build_user_context(data.session_id)
+    contexto_hint = ""
+    if contexto:
+        # Extraer línea de plan para respuestas más realistas en demo
+        if "Plan:" in contexto:
+            plan_line = [l for l in contexto.split("\n") if l.strip().startswith("- Plan:")]
+            if plan_line:
+                contexto_hint = plan_line[0].replace("- Plan:", "Veo que").strip() + " "
+
     if "vacante" in mensaje or "trabajo" in mensaje:
         return ChatResponse(
             respuesta=(
@@ -265,20 +331,43 @@ def _mock_respuesta(data: ChatMessage) -> ChatResponse:
             ],
         )
     
-    elif "plan" in mensaje or "próximo" in mensaje:
+    elif "plan" in mensaje or "próximo" in mensaje or "progreso" in mensaje:
+        if contexto_hint:
+            respuesta = (
+                f"{contexto_hint}"
+                f"Te sugiero priorizar la tarea pendiente de esta semana antes de abrir fase 60. "
+                f"¿Quieres que te proponga un orden concreto?"
+            )
+        else:
+            respuesta = (
+                "Según tu plan, esta semana conviene cerrar las tareas de Fundamentos. "
+                "¿Ya actualizaste LinkedIn o prefieres que revisemos el portafolio primero?"
+            )
         return ChatResponse(
-            respuesta=(
-                f"¡Qué más! Según tu plan, deberías estar terminando la semana 2 — "
-                f"¿Ya lograste actualizar el LinkedIn? Si sí, el siguiente paso es armar un portafolio. "
-                f"¿Necesitás ayuda con eso?"
-            ),
+            respuesta=respuesta,
             sugerencias_rapidas=[
                 "Ver mi plan completo",
                 "Ideas de proyectos",
                 "Actualizar progreso",
             ],
         )
-    
+
+    elif "entrevista" in mensaje or "simul" in mensaje:
+        if "entrevista" in contexto.lower():
+            respuesta = (
+                "Con base en tu última simulación, enfócate en reforzar las áreas débiles "
+                "con micro-práctica diaria. ¿Quieres agregar esas tareas a tu plan?"
+            )
+        else:
+            respuesta = (
+                "Una entrevista simulada te ayuda a detectar gaps antes de postular. "
+                "¿Quieres practicar por skill (Python, Excel, atención al cliente)?"
+            )
+        return ChatResponse(
+            respuesta=respuesta,
+            sugerencias_rapidas=["Simular entrevista", "Ver historial", "Agregar tareas al plan"],
+        )
+
     else:
         return ChatResponse(
             respuesta=(
@@ -317,7 +406,7 @@ async def responder_chat_con_funciones(data: ChatMessage) -> ChatResponse:
     """
     if USE_MOCK:
         logger.info(f"[MOCK] Coach con function calling — session_id={data.session_id}")
-        resp = _mock_respuesta(data)
+        resp = await _mock_respuesta(data)
         resp.funcion_ejecutada = "buscar_vacantes_simulado"
         resp.acciones_disponibles = ["buscar_vacantes", "analizar_mercado", "obtener_plan"]
         return resp
@@ -358,10 +447,10 @@ async def responder_chat_con_funciones(data: ChatMessage) -> ChatResponse:
     # PASO 3: Generar respuesta con contexto
     if funcion_ejecutada and resultado_funcion:
         return await _generar_respuesta_con_datos(
-            data.mensaje, perfil, funcion_ejecutada, resultado_funcion, data.historial
+            data.mensaje, perfil, funcion_ejecutada, resultado_funcion, data.historial, data.session_id
         )
     else:
-        return await _responder_con_gemini(data.mensaje, perfil, data.historial)
+        return await _responder_con_gemini(data.mensaje, perfil, data.historial, data.session_id)
 
 
 async def _generar_respuesta_con_datos(
@@ -370,6 +459,7 @@ async def _generar_respuesta_con_datos(
     funcion: str,
     datos: dict,
     historial: list | None = None,
+    session_id: str | None = None,
 ) -> ChatResponse:
     """Genera respuesta usando los datos reales de la función ejecutada."""
     historial = historial or []
@@ -379,7 +469,14 @@ async def _generar_respuesta_con_datos(
 
     system_template = get_prompt("CAREER_COACH_SYSTEM")
     perfil_resumido = _crear_perfil_resumido(perfil)
+    user_context = ""
+    if session_id:
+        user_context = await _build_user_context(session_id)
+        if user_context:
+            user_context = user_context + "\n"
+
     system_instruction = system_template.replace("{perfil_json}", perfil_resumido)
+    system_instruction = system_instruction.replace("{user_context_block}", user_context)
     system_instruction += _continuity_suffix(historial)
     system_instruction += "\n\nUsa los datos del sistema proporcionados arriba para responder de forma específica y concreta."
     system_instruction += contexto

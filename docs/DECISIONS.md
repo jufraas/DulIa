@@ -29,6 +29,21 @@
 | 2026-05-24 | frontend | PDF html2canvas + layout análisis | [decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md](./decisions/2026-05-24-frontend-pdf-html2canvas-layout-analisis.md) |
 | 2026-05-24 | frontend | Proxy Vite `/api` + coach global | [decisions/2026-05-24-frontend-vite-proxy-coach-global.md](./decisions/2026-05-24-frontend-vite-proxy-coach-global.md) |
 | 2026-05-24 | full-stack | Auth Supabase opcional + vinculación session_id | [decisions/2026-05-24-auth-supabase-vinculado.md](./decisions/2026-05-24-auth-supabase-vinculado.md) |
+| 2026-05-24 | backend + ia | Híbrido seed-pool + Gemini para mock interviews | [decisions/2026-05-24-mock-interview-seed-pool.md](./decisions/2026-05-24-mock-interview-seed-pool.md) |
+| 2026-05-24 | backend | Progreso plan: JSONB `completed_tasks` + convención task_id | [decisions/2026-05-24-plan-progress-task-id-jsonb.md](./decisions/2026-05-24-plan-progress-task-id-jsonb.md) |
+| 2026-05-24 | backend | Rate limits asimétricos mock interview | [decisions/2026-05-24-interview-rate-limits.md](./decisions/2026-05-24-interview-rate-limits.md) |
+| 2026-05-24 | backend | Add-tasks in-place en action_plans | [decisions/2026-05-24-add-tasks-action-plan-inplace.md](./decisions/2026-05-24-add-tasks-action-plan-inplace.md) |
+
+### Panorama B1–B6 (hackathon progreso + interview)
+
+| Fase | Decisión clave | Doc |
+|------|----------------|-----|
+| B1 | Seed-pool 120 preguntas + tablas progreso/interview | [mock-interview-seed-pool](./decisions/2026-05-24-mock-interview-seed-pool.md) |
+| B2 | has-profile sin JWT (MVP) | Atajo documentado en ENDPOINTS |
+| B3 | JSONB completed_tasks + task_id + desbloqueo 80% | [plan-progress-task-id-jsonb](./decisions/2026-05-24-plan-progress-task-id-jsonb.md) |
+| B4 | Híbrido pool + Gemini evaluación | [mock-interview-seed-pool](./decisions/2026-05-24-mock-interview-seed-pool.md) |
+| B5 | Rate limits 5/10/3 min | [interview-rate-limits](./decisions/2026-05-24-interview-rate-limits.md) |
+| B6 | Coach context + add-tasks in-place | [add-tasks-action-plan-inplace](./decisions/2026-05-24-add-tasks-action-plan-inplace.md) |
 
 ## Decisiones stack (resumen)
 
@@ -43,6 +58,11 @@
 | 2026-05-23 | Arquitectura híbrida cache-first con queue manual | Respuesta rápida desde cache; scrape on-demand vía `scrape_queue` + `run_queue.py`. Sin cron en hackathon | Cron inmediato, scrape síncrono en request |
 | 2026-05-24 | Scoring v1.1 + filtro seniority | Junior-first top 20; scores expresivos; analyze fallback calibrado | LLM re-rank; filtrar solo en pipeline |
 | 2026-05-24 | Auth Supabase opcional vinculado | Login opcional; wizard anónimo intacto; `user_accounts` + link `profiles.user_id` | Auth obligatorio; mezclar cuenta en `profiles` |
+| 2026-05-24 | Seed-pool + Gemini entrevistas | 120 preguntas curadas CO + IA personaliza; demo estable con fallback | Solo HF tech EN; 100% Gemini |
+| 2026-05-24 | Progreso JSONB + task_id compuesto | PATCH simple; sin tabla relacional; IDs alineados a semanas UI | Tabla task_completions; hash de texto tarea |
+| 2026-05-24 | Rate limits interview 5/10/3 por min | 1 entrevista = 7 llamadas Gemini cabe en límites; protege cuota | Sin límite; límite uniforme 10/min |
+| 2026-05-24 | Add-tasks modifica action_plans in-place | Sin migración; front ve tareas al refetch plan | Columna extra_tasks en plan_progress |
+| 2026-05-24 | Coach prompt v2.4 + user_context_block | Progreso + entrevista solo si relevante a la pregunta | Meter JSON crudo al prompt |
 | 2026-05-23 | Sin auth — session_id (coach) | Evita fricción en demo; auth es capa aparte | Supabase Auth obligatorio |
 | 2026-05-23 | Tabla `jobs` en inglés | Compatible Adzuna/pipeline | Solo español en BD |
 | 2026-05-23 | slowapi 10 req/min | Protege cuota Gemini | Sin rate limit |
