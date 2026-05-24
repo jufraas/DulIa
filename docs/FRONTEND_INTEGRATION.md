@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Mi Progreso M2.4–M2.6; backend progress/interview pendiente.
+**Última actualización:** 2026-05-24 · Mi Progreso Bloque 2 completo (M2.4–M2.8); backend pendiente.
 
 ---
 
@@ -38,6 +38,8 @@
 | Mi Progreso — M2.4 timeline | ✅ | `PlanTimeline.jsx`; `ThirtyDayPlan` en resultados **sin cambios** |
 | Mi Progreso — M2.5 barras | ✅ | `ProgressOverview` + hooks animación |
 | Mi Progreso — M2.6 lock overlay | ✅ | `PhaseLockOverlay` en fases 60/90 bloqueadas |
+| Mi Progreso — M2.7 TaskList | ✅ | Panel lateral con filtros en `/progreso` |
+| Mi Progreso — M2.8 scroll | ✅ | Click tarea → tab + scroll + highlight en timeline |
 | Progress / interview API | 🚧 | Cliente en `api.js`; backend pendiente — fallback mock en demo |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).

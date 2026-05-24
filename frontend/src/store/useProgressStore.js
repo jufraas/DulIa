@@ -8,6 +8,8 @@ import {
 import { getOrCreateSessionId } from '../utils/session'
 import { useProfileStore } from './useProfileStore'
 
+/** @typedef {{ taskId: string, phase: import('../mocks/mockProgress').PlanPhase, week: number }} TaskFocusRequest */
+
 /** @typedef {import('../mocks/mockProgress').ProgressState} ProgressState */
 /** @typedef {import('../mocks/mockProgress').ProgressTask} ProgressTask */
 /** @typedef {'week' | 'pending' | 'completed'} TaskFilter */
@@ -36,8 +38,21 @@ export const useProgressStore = create((set, get) => ({
   loading: false,
   togglingTaskId: /** @type {string | null} */ (null),
   error: '',
+  focusRequest: /** @type {TaskFocusRequest | null} */ (null),
+  highlightedTaskId: /** @type {string | null} */ (null),
 
   setTaskFilter: (taskFilter) => set({ taskFilter }),
+
+  /** @param {ProgressTask} task */
+  requestTaskFocus: (task) =>
+    set({
+      focusRequest: { taskId: task.id, phase: task.phase, week: task.week },
+      highlightedTaskId: task.id,
+    }),
+
+  clearFocusRequest: () => set({ focusRequest: null }),
+
+  clearHighlightedTask: () => set({ highlightedTaskId: null }),
 
   fetchProgress: async (sessionId = getOrCreateSessionId()) => {
     const { savedProfile, plan } = useProfileStore.getState()
@@ -136,5 +151,7 @@ export const useProgressStore = create((set, get) => ({
       loading: false,
       togglingTaskId: null,
       error: '',
+      focusRequest: null,
+      highlightedTaskId: null,
     }),
 }))

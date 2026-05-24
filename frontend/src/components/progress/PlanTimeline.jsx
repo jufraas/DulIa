@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Calendar, Check, Loader2, Lock } from 'lucide-react'
 import { findProgressTaskByLabel } from '../../mocks/mockProgress'
 import { useProfileStore } from '../../store/useProfileStore'
 import { useProgressStore } from '../../store/useProgressStore'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../../utils/planDisplay'
+import { getTaskScrollTargetId, scrollToProgressTarget } from '../../utils/progressScroll'
 import { ActivePhaseProgressStrip } from './ProgressOverview'
 import PhaseLockOverlay from './PhaseLockOverlay'
 
@@ -34,7 +35,40 @@ export default function PlanTimeline() {
   const progress = useProgressStore((s) => s.progress)
   const togglingTaskId = useProgressStore((s) => s.togglingTaskId)
   const toggleTask = useProgressStore((s) => s.toggleTask)
+  const focusRequest = useProgressStore((s) => s.focusRequest)
+  const highlightedTaskId = useProgressStore((s) => s.highlightedTaskId)
+  const clearFocusRequest = useProgressStore((s) => s.clearFocusRequest)
+  const clearHighlightedTask = useProgressStore((s) => s.clearHighlightedTask)
   const [activeTab, setActiveTab] = useState('30')
+
+  useEffect(() => {
+    if (!focusRequest || !progress) return undefined
+
+    const task = progress.tasks.find((t) => t.id === focusRequest.taskId)
+    if (!task) {
+      clearFocusRequest()
+      return undefined
+    }
+
+    const targetId = getTaskScrollTargetId(task)
+
+    const tabFrame = requestAnimationFrame(() => {
+      setActiveTab(task.phase)
+      window.setTimeout(() => {
+        scrollToProgressTarget(targetId)
+        clearFocusRequest()
+      }, 60)
+    })
+
+    const highlightTimer = window.setTimeout(() => {
+      clearHighlightedTask()
+    }, 2400)
+
+    return () => {
+      cancelAnimationFrame(tabFrame)
+      window.clearTimeout(highlightTimer)
+    }
+  }, [focusRequest, progress, clearFocusRequest, clearHighlightedTask])
 
   if (!progress) return null
 
@@ -131,6 +165,7 @@ export default function PlanTimeline() {
                     weekNum={weekNum}
                     progressTasks={progress.tasks}
                     togglingTaskId={togglingTaskId}
+                    highlightedTaskId={highlightedTaskId}
                     onToggle={(taskId) => void toggleTask(taskId)}
                   />
                 )
@@ -152,6 +187,7 @@ export default function PlanTimeline() {
               emptyMessage="La fase de 60 días se generará cuando el backend complete tu plan."
               progressTasks={progress.tasks}
               togglingTaskId={togglingTaskId}
+              highlightedTaskId={highlightedTaskId}
               onToggle={(taskId) => void toggleTask(taskId)}
             />
           </PhaseLockOverlay>
@@ -170,6 +206,7 @@ export default function PlanTimeline() {
                 emptyMessage="La fase de 90 días se generará cuando el backend complete tu plan."
                 progressTasks={progress.tasks}
                 togglingTaskId={togglingTaskId}
+                highlightedTaskId={highlightedTaskId}
                 onToggle={(taskId) => void toggleTask(taskId)}
               />
               {milestones.length > 0 && (
@@ -241,10 +278,19 @@ export default function PlanTimeline() {
  *   week: { w: string, title: string, tasks: string[] },
  *   progressTasks: import('../../mocks/mockProgress').ProgressTask[],
  *   togglingTaskId: string | null,
+ *   highlightedTaskId: string | null,
  *   onToggle: (taskId: string) => void,
  * }} props
  */
-function TimelineWeekBlock({ index, weekNum, week, progressTasks, togglingTaskId, onToggle }) {
+function TimelineWeekBlock({
+  index,
+  weekNum,
+  week,
+  progressTasks,
+  togglingTaskId,
+  highlightedTaskId,
+  onToggle,
+}) {
   return (
     <div id={`timeline-week-${weekNum}`} className="flex gap-3.5">
       <div
@@ -269,6 +315,7 @@ function TimelineWeekBlock({ index, weekNum, week, progressTasks, togglingTaskId
           labels={week.tasks}
           progressTasks={progressTasks}
           togglingTaskId={togglingTaskId}
+          highlightedTaskId={highlightedTaskId}
           onToggle={onToggle}
         />
       </div>
@@ -285,6 +332,7 @@ function TimelineWeekBlock({ index, weekNum, week, progressTasks, togglingTaskId
  *   emptyMessage: string,
  *   progressTasks: import('../../mocks/mockProgress').ProgressTask[],
  *   togglingTaskId: string | null,
+ *   highlightedTaskId: string | null,
  *   onToggle: (taskId: string) => void,
  * }} props
  */
@@ -296,6 +344,7 @@ function TimelinePhaseBlock({
   emptyMessage,
   progressTasks,
   togglingTaskId,
+  highlightedTaskId,
   onToggle,
 }) {
   if (!phase) {
@@ -315,6 +364,7 @@ function TimelinePhaseBlock({
         labels={phase.tasks}
         progressTasks={progressTasks}
         togglingTaskId={togglingTaskId}
+        highlightedTaskId={highlightedTaskId}
         locked={locked}
         onToggle={onToggle}
       />
@@ -343,6 +393,7 @@ function TimelinePhaseBlock({
  *   labels: string[],
  *   progressTasks: import('../../mocks/mockProgress').ProgressTask[],
  *   togglingTaskId: string | null,
+ *   highlightedTaskId?: string | null,
  *   locked?: boolean,
  *   onToggle: (taskId: string) => void,
  * }} props
@@ -352,6 +403,7 @@ function InteractiveTaskList({
   labels,
   progressTasks,
   togglingTaskId,
+  highlightedTaskId = null,
   locked = false,
   onToggle,
 }) {
@@ -373,7 +425,11 @@ function InteractiveTaskList({
         const disabled = !taskId || (locked && !completed) || isToggling
 
         return (
-          <li key={`${phase}-${label}`}>
+          <li
+            key={`${phase}-${label}`}
+            id={taskId ? `timeline-task-${taskId}` : undefined}
+            className={highlightedTaskId === taskId ? 'progress-task--highlight' : undefined}
+          >
             <label
               className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-1 py-1 ${
                 disabled && !completed ? 'cursor-not-allowed opacity-60' : ''

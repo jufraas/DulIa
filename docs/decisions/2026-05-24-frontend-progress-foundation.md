@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-05-24
 - **Área:** frontend
-- **Estado:** activa — Bloque 2 parcial (M2.4–M2.6 ✅); M2.7–M2.8 pendientes
+- **Estado:** activa — Bloque 2 ✅ (M2.4–M2.8); M3 E2E backend pendiente
 - **Autor/es:** Migue (foundation + PlanTimeline), Jufra (auth guard + mock interview UI)
 
 ## Contexto
@@ -20,7 +20,7 @@ Con auth opcional Supabase, usuarios que ya completaron el wizard necesitan **se
 | Stores | `useProgressStore.js`, `useInterviewStore.js` |
 | Ruta | `/progreso` protegida con `ProtectedRoute` |
 | Página | `ProgressPage.jsx` — header + barras fase + lista tareas (sin tocar `ThirtyDayPlan` en `/resultados`) |
-| Tests | `npm run test:progress` → `scripts/test-progress-foundation.mjs` (9 tests) |
+| Tests | `npm run test:progress` → `scripts/test-progress-foundation.mjs` (10 tests) |
 
 ### Timeline checkeable (Migue — Bloque 2, M2.4)
 
@@ -49,6 +49,16 @@ Comportamiento M2.4: tabs 30/60/90, checkbox por tarea, UI optimista vía `usePr
 | Overlay candado | `PhaseLockOverlay.jsx` |
 | Integración | Tabs 60/90 en `PlanTimeline`; icono candado en tab bloqueado |
 | UX | Contenido difuminado + card centrada; mensaje 80% fase anterior |
+
+### TaskList lateral + scroll (Migue — M2.7–M2.8)
+
+| Pieza | Ubicación |
+|-------|-----------|
+| Panel lateral | `TaskList.jsx` — filtros semana / pendientes / completadas |
+| Scroll | `progressScroll.js` — `getTaskScrollTargetId`, anclas `timeline-task-*` |
+| Store | `requestTaskFocus`, `highlightedTaskId` en `useProgressStore` |
+| Layout | `ProgressPage` — grid `.progress-workspace` (sidebar + timeline) |
+| UX | Click en tarea → tab correcto + scroll suave + highlight ~2s |
 
 ### Reglas de fallback
 
@@ -84,8 +94,6 @@ GET    /api/interview/history?user_id=
 - No modifica layout congelado de `/resultados`.
 - Mismo patrón mock fallback que el resto del MVP.
 
-## Pendiente (Bloque 2–3)
+## Pendiente (Bloque 3)
 
-- M2.7 — `TaskList.jsx` lateral con filtros
-- M2.8 — click en tarea → scroll a fase del timeline
 - M3 — E2E backend real; mocks solo como fallback en demo

@@ -64,7 +64,7 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 | `/login` | Login | Email/password; banner demo si faltan envs Supabase |
 | `/registro` | Registro | Upsert a `user_accounts` tras signUp |
 | `/perfil` | Mi perfil | Protegida; datos cuenta + card análisis coach |
-| `/progreso` | Mi progreso | Protegida; timeline checkeable, barras animadas, overlay candado en fases bloqueadas |
+| `/progreso` | Mi progreso | Protegida; timeline, barras animadas, TaskList lateral, scroll a tareas |
 
 ## Flujo de datos
 
@@ -97,7 +97,7 @@ Si el backend/BD no responde, `mockResultsBundle.js` rellena datos personalizado
 | `startInterview` / `submitAnswer` / `finishInterview` | Mock interview por skill |
 | `interviewHistory` / `addTasksFromWeakSkills` | Historial + tareas desde skills débiles |
 
-Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`. UI progreso: `components/progress/` (`PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`).
+Ver mocks: `src/mocks/mockProgress.js`, `src/mocks/mockInterview.js`. Stores: `useProgressStore`, `useInterviewStore`. UI progreso: `components/progress/` (`PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`). Scroll: `utils/progressScroll.js`.
 
 ### Auth (opcional)
 

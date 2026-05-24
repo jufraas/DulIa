@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Front:** Mi Progreso M2.4–M2.6 (`PlanTimeline`, barras animadas, overlay candado). Foundation Bloque 1 previa. **Backend:** progress/interview pendientes.
+2026-05-24 — **Front:** Mi Progreso Bloque 2 completo (M2.4–M2.8). M3 E2E backend pendiente.
 
 ## Estado por módulo
 
@@ -30,7 +30,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | `/vacantes` | Panel vacantes con semáforo; **Volver → `/resultados`** | Joufra | ✅ |
 | `/login`, `/registro` | Auth opcional Supabase | Compartido | ✅ |
 | `/perfil` | Cuenta + resumen coach (protegida) | Compartido | ✅ |
-| `/progreso` | Plan checkeable + fases (protegida) | Migue | 🚧 M2.4–M2.6 ✅; M2.7–M2.8 pendientes |
+| `/progreso` | Plan checkeable + fases (protegida) | Migue | ✅ Bloque 2 UI; M3 backend pendiente |
 
 ### Piezas transversales (Migue — API / sesión)
 
@@ -68,7 +68,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | ESLint | ✅ | `npm run lint` sin errores; ignora ReBrand + prototipos kit (`Landing.jsx`, …) |
 | Deploy producción (Vercel) | 🔲 | Root: `frontend`, env `VITE_API_URL` + `VITE_SUPABASE_*` |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `user_accounts`, `POST /auth/link-session` |
-| Mi Progreso — Bloque 2 | 🚧 | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`; `TaskList` lateral pendiente |
+| Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
 
 ### Pendiente UI (pre-pitch)
 

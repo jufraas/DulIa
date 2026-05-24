@@ -21,6 +21,7 @@ import {
   submitMockAnswer,
 } from '../src/mocks/mockInterview.js'
 import { buildMockPlanFromProfile } from '../src/services/mockPlan.js'
+import { getTaskScrollTargetId } from '../src/utils/progressScroll.js'
 
 let passed = 0
 let failed = 0
@@ -129,6 +130,15 @@ await test('flujo mock interview 5 preguntas', () => {
   assert(result !== null, 'finish debe devolver resultado')
   assert(typeof result.score === 'number', 'score numérico')
   assert(Array.isArray(result.feedback), 'feedback array')
+})
+
+await test('getTaskScrollTargetId resuelve anclas scroll', () => {
+  const tasks = tasksFromPlan(plan)
+  const t30 = tasks.find((t) => t.phase === '30')
+  const t60 = tasks.find((t) => t.phase === '60')
+  assert(t30 && t60, 'plan demo debe tener tareas 30 y 60')
+  assert(getTaskScrollTargetId(t30) === `timeline-task-${t30.id}`, 'fase 30 → tarea')
+  assert(getTaskScrollTargetId(t60) === 'timeline-phase-60', 'fase 60 → bloque fase')
 })
 
 await test('phaseCompletionPct y globalCompletionPct', () => {

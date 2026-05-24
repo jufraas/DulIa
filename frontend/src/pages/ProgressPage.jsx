@@ -7,6 +7,7 @@ import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import PlanTimeline from '../components/progress/PlanTimeline'
 import ProgressOverview from '../components/progress/ProgressOverview'
+import TaskList from '../components/progress/TaskList'
 import { useProfileStore } from '../store/useProfileStore'
 import { useProgressStore } from '../store/useProgressStore'
 import ProtectedRoute from '../components/auth/ProtectedRoute'
@@ -36,7 +37,7 @@ function ProgressPageContent() {
       <SiteHeader />
 
       <main className="relative z-[1] flex-1 pb-28 pt-14">
-        <Container className="max-w-[960px]">
+        <Container className="max-w-[1100px]">
           <div className="anim-in mb-8">
             <div className="eyebrow-dl mb-3">
               <Target className="h-3.5 w-3.5" aria-hidden />
@@ -72,7 +73,8 @@ function ProgressPageContent() {
                 <ProgressOverview progress={progress} />
               </div>
 
-              <div className="anim-in-delay-3">
+              <div className="progress-workspace anim-in-delay-3">
+                <TaskList />
                 <PlanTimeline />
               </div>
             </>
