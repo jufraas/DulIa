@@ -5,6 +5,7 @@ import { useProfileStore } from '../../store/useProfileStore'
 import { useProgressStore } from '../../store/useProgressStore'
 import { planPhaseToDisplay, planToDisplayWeeks } from '../../utils/planDisplay'
 import { ActivePhaseProgressStrip } from './ProgressOverview'
+import PhaseLockOverlay from './PhaseLockOverlay'
 
 const TABS = [
   { id: '30', label: '30 días' },
@@ -77,12 +78,15 @@ export default function PlanTimeline() {
         )}
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {TABS.map((tab) => (
+          {TABS.map((tab) => {
+            const tabLocked = tab.id !== '30' && isPhaseLocked(tab.id)
+            return (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className="rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200"
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200"
+              aria-disabled={tabLocked || undefined}
               style={
                 activeTab === tab.id
                   ? {
@@ -97,9 +101,11 @@ export default function PlanTimeline() {
                     }
               }
             >
+              {tabLocked && <Lock className="h-3 w-3 shrink-0 opacity-80" aria-hidden />}
               {tab.label}
             </button>
-          ))}
+            )
+          })}
         </div>
 
         <ActivePhaseProgressStrip
@@ -134,32 +140,39 @@ export default function PlanTimeline() {
         )}
 
         {activeTab === '60' && (
-          <TimelinePhaseBlock
-            phaseId="timeline-phase-60"
-            phaseKey="60"
-            phase={phase60}
+          <PhaseLockOverlay
             locked={isPhaseLocked('60')}
-            lockMessage={phaseLockMessage('60', threshold)}
-            emptyMessage="La fase de 60 días se generará cuando el backend complete tu plan."
-            progressTasks={progress.tasks}
-            togglingTaskId={togglingTaskId}
-            onToggle={(taskId) => void toggleTask(taskId)}
-          />
-        )}
-
-        {activeTab === '90' && (
-          <div id="timeline-phase-90">
+            message={phaseLockMessage('60', threshold)}
+          >
             <TimelinePhaseBlock
-              phaseKey="90"
-              phase={phase90}
-              locked={isPhaseLocked('90')}
-              lockMessage={phaseLockMessage('90', threshold)}
-              emptyMessage="La fase de 90 días se generará cuando el backend complete tu plan."
+              phaseId="timeline-phase-60"
+              phaseKey="60"
+              phase={phase60}
+              locked={isPhaseLocked('60')}
+              emptyMessage="La fase de 60 días se generará cuando el backend complete tu plan."
               progressTasks={progress.tasks}
               togglingTaskId={togglingTaskId}
               onToggle={(taskId) => void toggleTask(taskId)}
             />
-            {milestones.length > 0 && (
+          </PhaseLockOverlay>
+        )}
+
+        {activeTab === '90' && (
+          <PhaseLockOverlay
+            locked={isPhaseLocked('90')}
+            message={phaseLockMessage('90', threshold)}
+          >
+            <div id="timeline-phase-90">
+              <TimelinePhaseBlock
+                phaseKey="90"
+                phase={phase90}
+                locked={isPhaseLocked('90')}
+                emptyMessage="La fase de 90 días se generará cuando el backend complete tu plan."
+                progressTasks={progress.tasks}
+                togglingTaskId={togglingTaskId}
+                onToggle={(taskId) => void toggleTask(taskId)}
+              />
+              {milestones.length > 0 && (
               <div className="mt-6 border-t border-[rgba(168,85,247,0.15)] pt-5">
                 <h4 className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-[color:var(--violet-200)]">
                   Hitos clave
@@ -213,7 +226,8 @@ export default function PlanTimeline() {
                 </ul>
               </div>
             )}
-          </div>
+            </div>
+          </PhaseLockOverlay>
         )}
       </div>
     </div>
@@ -268,7 +282,6 @@ function TimelineWeekBlock({ index, weekNum, week, progressTasks, togglingTaskId
  *   phaseKey: import('../../mocks/mockProgress').PlanPhase,
  *   phase: import('../../utils/planDisplay').PlanPhaseDisplay | null,
  *   locked: boolean,
- *   lockMessage: string,
  *   emptyMessage: string,
  *   progressTasks: import('../../mocks/mockProgress').ProgressTask[],
  *   togglingTaskId: string | null,
@@ -280,7 +293,6 @@ function TimelinePhaseBlock({
   phaseKey,
   phase,
   locked,
-  lockMessage,
   emptyMessage,
   progressTasks,
   togglingTaskId,
@@ -292,20 +304,6 @@ function TimelinePhaseBlock({
 
   return (
     <div id={phaseId} className="relative">
-      {locked && (
-        <div
-          className="mb-4 flex items-start gap-2 rounded-xl px-4 py-3 text-sm text-[color:var(--fg-2)]"
-          style={{
-            background: 'rgba(168,85,247,0.08)',
-            border: '1px solid rgba(168,85,247,0.25)',
-          }}
-          role="status"
-        >
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--violet-400)]" aria-hidden />
-          {lockMessage}
-        </div>
-      )}
-
       <h3 className="mb-2 text-[20px] font-bold text-[color:var(--fg-1)]">{phase.title}</h3>
       {phase.objetivo && (
         <p className="mb-4 text-[14px] leading-relaxed text-[color:var(--fg-2)]">

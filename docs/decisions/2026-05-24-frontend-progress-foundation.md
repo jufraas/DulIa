@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-05-24
 - **Área:** frontend
-- **Estado:** activa — Bloque 2 parcial (M2.4 ✅); M2.5–M2.8 pendientes
+- **Estado:** activa — Bloque 2 parcial (M2.4–M2.6 ✅); M2.7–M2.8 pendientes
 - **Autor/es:** Migue (foundation + PlanTimeline), Jufra (auth guard + mock interview UI)
 
 ## Contexto
@@ -31,7 +31,24 @@ Con auth opcional Supabase, usuarios que ya completaron el wizard necesitan **se
 | Integración | `ProgressPage.jsx` — stats + barras fase + `<PlanTimeline />` |
 | Solo lectura en resultados | `ThirtyDayPlan.jsx` **sin cambios** (layout congelado) |
 
-Comportamiento M2.4: tabs 30/60/90, checkbox por tarea, UI optimista vía `useProgressStore.toggleTask`, spinner durante sync, fases bloqueadas con aviso + candado, anclas `timeline-phase-*` / `timeline-week-*` para scroll (M2.8).
+Comportamiento M2.4: tabs 30/60/90, checkbox por tarea, UI optimista vía `useProgressStore.toggleTask`, spinner durante sync, anclas `timeline-phase-*` / `timeline-week-*` para scroll (M2.8).
+
+### Barras animadas (Migue — M2.5)
+
+| Pieza | Ubicación |
+|-------|-----------|
+| Overview global + fases | `ProgressOverview.jsx` |
+| Strip bajo tabs | `ActivePhaseProgressStrip` en `PlanTimeline` |
+| Hooks | `useAnimatedNumber.js`, `useProgressBarWidth.js` |
+| Estilos | `.progress-bar-*` en `dulia-kit.css` |
+
+### Overlay fases bloqueadas (Migue — M2.6)
+
+| Pieza | Ubicación |
+|-------|-----------|
+| Overlay candado | `PhaseLockOverlay.jsx` |
+| Integración | Tabs 60/90 en `PlanTimeline`; icono candado en tab bloqueado |
+| UX | Contenido difuminado + card centrada; mensaje 80% fase anterior |
 
 ### Reglas de fallback
 
@@ -69,8 +86,6 @@ GET    /api/interview/history?user_id=
 
 ## Pendiente (Bloque 2–3)
 
-- M2.5 — barras de progreso animadas en timeline
-- M2.6 — overlay candado más visible en fases bloqueadas
 - M2.7 — `TaskList.jsx` lateral con filtros
 - M2.8 — click en tarea → scroll a fase del timeline
 - M3 — E2E backend real; mocks solo como fallback en demo

@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Mi Progreso M2.4 (`PlanTimeline`); backend progress/interview pendiente.
+**Última actualización:** 2026-05-24 · Mi Progreso M2.4–M2.6; backend progress/interview pendiente.
 
 ---
 
@@ -35,8 +35,9 @@
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados`; **refetch jobs** al montar (sin cache stale) |
 | PDF export | ✅ | Bloques `[data-pdf-block]`, fondo `#0D0D0D`/hoja, PNG, `flushSync` (`react-dom`), alerta si falla |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `/login`, `/registro`, `/perfil` protegida, `linkSession` |
-| Mi Progreso — Bloque 1 | ✅ | Stores, mocks, API cliente |
-| Mi Progreso — M2.4 timeline | 🚧 | `PlanTimeline.jsx` en `/progreso`; `ThirtyDayPlan` en resultados **sin cambios** |
+| Mi Progreso — M2.4 timeline | ✅ | `PlanTimeline.jsx`; `ThirtyDayPlan` en resultados **sin cambios** |
+| Mi Progreso — M2.5 barras | ✅ | `ProgressOverview` + hooks animación |
+| Mi Progreso — M2.6 lock overlay | ✅ | `PhaseLockOverlay` en fases 60/90 bloqueadas |
 | Progress / interview API | 🚧 | Cliente en `api.js`; backend pendiente — fallback mock en demo |
 
 Ver: [decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md](decisions/2026-05-23-frontend-plan2-ui-sprints-complete.md) · Auth: [decisions/2026-05-24-auth-supabase-vinculado.md](decisions/2026-05-24-auth-supabase-vinculado.md) · Progreso: [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
