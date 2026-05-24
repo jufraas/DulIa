@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:progress": "node scripts/test-progress-foundation.mjs",
+    "test:api-fallback": "node scripts/test-api-fallback.mjs",
     "test:progress:api": "node scripts/test-progress-api.mjs",
     "test:interview-v2": "node scripts/test-interview-v2.mjs",
     "preview": "vite preview"

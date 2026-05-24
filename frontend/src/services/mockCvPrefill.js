@@ -47,7 +47,9 @@ export const MOCK_CV_PREFILL = {
  * @param {unknown} data
  */
 export function normalizeCvParseResponse(data) {
-  if (!data || typeof data !== 'object') return MOCK_CV_PREFILL
+  if (!data || typeof data !== 'object') {
+    throw new Error('Respuesta inválida al leer el CV.')
+  }
 
   const raw = /** @type {Record<string, unknown>} */ (data)
   const prefill =

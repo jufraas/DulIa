@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import PageShell from '../components/layout/PageShell'
 import SiteHeader from '../components/layout/SiteHeader'
@@ -8,7 +8,6 @@ import InterviewSession from '../components/interview/InterviewSession'
 import InterviewResults from '../components/interview/InterviewResults'
 import InterviewHistory from '../components/interview/InterviewHistory'
 import GeminiThinkingLoader from '../components/interview/GeminiThinkingLoader'
-import { MOCK_QUESTIONS, MOCK_INTERVIEW_RESULT } from '../mocks/mockInterview'
 import { useInterviewStore } from '../store/useInterviewStore'
 import { useAuth } from '../hooks/useAuth'
 import { mapHistoryToDisplay, mapInterviewResultToDisplay } from '../utils/interviewDisplay'
@@ -30,6 +29,7 @@ export default function InterviewLegacyPage() {
   const fetchHistory = useInterviewStore((s) => s.fetchHistory)
   const addTasksFromWeakSkills = useInterviewStore((s) => s.addTasksFromWeakSkills)
   const history = useInterviewStore((s) => s.history)
+  const activeSession = useInterviewStore((s) => s.activeSession)
   const submitting = useInterviewStore((s) => s.submitting)
   const error = useInterviewStore((s) => s.error)
   const lastResult = useInterviewStore((s) => s.lastResult)
@@ -66,7 +66,8 @@ export default function InterviewLegacyPage() {
         ? mapInterviewResultToDisplay(apiResult)
         : lastResult
           ? mapInterviewResultToDisplay(lastResult)
-          : MOCK_INTERVIEW_RESULT
+          : null
+      if (!display) return
       setResultado(display)
       setView('resultados')
       await fetchHistory()
@@ -95,7 +96,19 @@ export default function InterviewLegacyPage() {
     if (ok) navigate('/progreso')
   }
 
-  const questions = activeSkill ? (MOCK_QUESTIONS[activeSkill] ?? []) : []
+  const questions = useMemo(() => {
+    const texts = activeSession?.question_texts
+    if (Array.isArray(texts) && texts.length) return texts
+    const total = activeSession?.current_question?.total ?? 0
+    if (total > 0 && activeSkill) {
+      return Array.from({ length: total }, (_, i) =>
+        i === 0 && activeSession?.current_question?.text
+          ? activeSession.current_question.text
+          : `Pregunta ${i + 1} sobre ${activeSkill}`,
+      )
+    }
+    return []
+  }, [activeSession, activeSkill])
   const historialDisplay = mapHistoryToDisplay(history)
 
   return (
@@ -173,10 +186,8 @@ export default function InterviewLegacyPage() {
               onVerFeedback={() => {
                 if (lastResult) {
                   setResultado(mapInterviewResultToDisplay(lastResult))
-                } else {
-                  setResultado(MOCK_INTERVIEW_RESULT)
+                  setView('resultados')
                 }
-                setView('resultados')
               }}
               onNuevaEntrevista={handleNewInterview}
             />

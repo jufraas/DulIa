@@ -105,7 +105,7 @@ Tras `POST /profile`, el front ejecuta en secuencia:
 3. `GET /api/profile/{session_id}/radar-data` + `GET .../timeline-data`
 4. `GET /api/jobs/recommended/{session_id}` + `GET /api/market/dashboard/{session_id}`
 
-Fallbacks offline: `mockResultsBundle.js` (personalizado al perfil). Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md).
+Fallbacks offline (sin red): builders en `mockResultsBundle.js` vía `withOfflineMockFallback` en `api.js`. Ver [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md#política-mock-frontend).
 
 ### Claves `localStorage` (frontend)
 
@@ -743,7 +743,7 @@ const market = await fetch(
 
 ## Troubleshooting — modo real (`USE_MOCK_DATA=false`)
 
-Si el front muestra textos genéricos o plan “de plantilla”, revisar la pestaña Network **antes** de culpar a la UI: los fallbacks en `api.js` rellenan mocks cuando la API falla.
+Si el front muestra textos genéricos o plan “de plantilla”, revisar la pestaña Network: mock local solo si **no hay respuesta HTTP** (backend caído). Errores 4xx/5xx deben mostrarse al usuario; respuestas 200 vacías (`[]`) no se sustituyen por demo.
 
 ### Cadena Plan 2 (orden obligatorio)
 
@@ -820,10 +820,12 @@ Cliente en `frontend/src/services/api.js` con fallback a `src/mocks/mockProgress
 - Progreso **persiste en Supabase** (`plan_progress.completed_tasks` con IDs internos `fase_30:semana_N:idx_M`); el adaptador expone IDs públicos `p30-t0-slug` al frontend.
 - `has-profile`: devuelve `{ has_profile: false }` si `user_id` no es UUID válido o Supabase no está configurado.
 - Frontend: `dataSource: 'api' | 'mock'` en stores; banner en `/progreso` si usa mock; `VITE_FORCE_PROGRESS_MOCK=true` fuerza demo local.
+- `current_day`: calculado desde `plan_progress.started_at` (día 1 el primer día, +1 por día calendario, tope 90). Mock offline: `frontend/src/utils/progressDay.js`.
+- `GET /progress/{id}` → **404** en front dispara `POST /progress/init` (no mock con tareas precargadas).
 
 Regla unlock fases: **80%** de la fase anterior. Ver [decisions/2026-05-24-frontend-progress-foundation.md](decisions/2026-05-24-frontend-progress-foundation.md).
 
-**Tests:** `npm run test:progress` (11 unit) · `npm run test:progress:api` (smoke contra :8000) · `pytest backend/tests/test_m3_progress_api.py` (progreso, 3+).
+**Tests:** `npm run test:progress` (13 unit) · `npm run test:api-fallback` (5) · `npm run test:progress:api` (smoke contra :8000) · `pytest backend/tests/test_m3_progress_api.py` (progreso, 3+).
 
 ---
 
@@ -931,7 +933,7 @@ Ejemplo: `p30-t0-completar-cv` = primera tarea de fase 30.
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
-  "current_day": 12,
+  "current_day": 1,
   "global_pct": 8,
   "active_phase": "30",
   "tasks": [
@@ -1166,6 +1168,6 @@ Implementado en `frontend/src/App.jsx` — kit ReBrand, pantallas separadas:
 | `/progreso` | Mi progreso — plan checkeable (protegida); mock si API cae o `VITE_FORCE_PROGRESS_MOCK` |
 | `/entrevistas` | Simulador entrevista mock (protegida) |
 
-Cliente Axios: `frontend/src/services/api.js`. Fallbacks: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`, **`mockProgress.js`**, **`mockInterview.js`**. Persistencia: `sessionCache.js` + `sessionHydration.js`. Tests: `npm run test:progress`, `npm run test:progress:api`.
+Cliente Axios: `frontend/src/services/api.js`. Fallbacks offline: `mockData.js`, `mockCvPrefill.js`, `mockProfileFromPayload.js`, `mockPlan.js`, `mockResultsBundle.js`, `mockCoachChat.js`, **`mockProgress.js`**, **`mockInterview.js`**. Persistencia: `sessionCache.js` + `sessionHydration.js`. Tests: `npm run test:progress`, `npm run test:api-fallback`, `npm run test:progress:api`.
 
 **Post-MVP:** [EXTRA_IDEAS/post-mvp-roadmap.md](./EXTRA_IDEAS/post-mvp-roadmap.md)

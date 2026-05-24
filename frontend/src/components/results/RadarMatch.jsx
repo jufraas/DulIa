@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { buildMockRadarFromProfile } from '../../services/mockResultsBundle'
 import { radarAxesFromApi } from '../../utils/radarApi'
 import CoachAskLink from './CoachAskLink'
 
@@ -37,13 +36,9 @@ function matchPct(userScores, refScores, axes) {
  *   radar?: import('../../utils/radarApi').RadarChartData | null,
  * }} props
  */
-export default function RadarMatch({ profile = null, jobs = [], radar = null }) {
-  const chartData = useMemo(
-    () => radar ?? buildMockRadarFromProfile(profile, jobs),
-    [radar, profile, jobs],
-  )
-
-  const axes = useMemo(() => radarAxesFromApi(chartData), [chartData])
+export default function RadarMatch({ jobs = [], radar = null }) {
+  const chartData = radar
+  const axes = useMemo(() => (chartData ? radarAxesFromApi(chartData) : []), [chartData])
 
   const jobCards = useMemo(
     () =>

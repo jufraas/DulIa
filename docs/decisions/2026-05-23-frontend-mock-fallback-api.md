@@ -5,6 +5,10 @@
 - **Estado:** activa
 - **Autor/es:** Equipo frontend
 
+## Actualización 2026-05-23 — API-first
+
+El mock **solo** se activa cuando el backend no responde (sin red / timeout), detectado por `isBackendUnreachable()` en `utils/apiErrors.js`. Ya **no** se rellenan huecos en respuestas 200 vacías ni se sustituyen errores 4xx/5xx por demo. `fillResultsFallbacks()` dejó de inventar datos; `hasProfile` offline devuelve `has_profile: false`. Ver `npm run test:api-fallback`.
+
 ## Contexto
 
 Backend y frontend avanzan en paralelo. La demo no puede depender de que FastAPI/Supabase estén listos en cada prueba.
@@ -25,7 +29,7 @@ Fallbacks en `frontend/src/services/api.js` y módulos auxiliares. Desde 2026-05
 | `getMarketDashboard()` | `buildMockMarketFromProfile` | ✅ |
 | `getRadarData()` | `buildMockRadarFromProfile` | ✅ |
 | `getTimelineData()` | `buildMockTimelineFromProfile` | ✅ |
-| `loadResultsBundle()` | `fillResultsFallbacks()` — rellena huecos | ✅ |
+| `loadResultsBundle()` | Sin relleno de huecos — cada endpoint mock solo offline | ✅ (2026-05-23) |
 | `fetchHealth()` | `{ mock: true }` | ✅ |
 
 ## Por qué

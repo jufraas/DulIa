@@ -4,6 +4,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
+2026-05-23 — **API-first + progreso dinámico:** mock solo offline (`isBackendUnreachable`); `current_day` desde `started_at`; tests `test:api-fallback` + `test:progress` (13).
+
 2026-05-24 — **Layout análisis congelado** + PDF export (timeline, skills, captura score) + auth volver con historial.
 
 2026-05-24 — **UX polish (nav, copy, progreso):** sección «Oportunidades», CTA «Registrar mi progreso», entrevista V2, login/registro.
@@ -16,7 +18,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 |--------|--------|-------|
 | Repositorio | ✅ Listo | `main` unifica FRONT + Backend |
 | Backend (FastAPI) | ✅ B1–B7 completo | Progreso + interview pool real + coach context; deploy pendiente |
-| Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mocks si API falla |
+| Frontend (React+Vite) | ✅ MVP UI | Plan 2 en pantalla; mock solo si backend no responde |
 | Pipeline | ✅ Híbrido | getonbrd + remotive; `run_queue.py` + `run_baseline.py`; cache-first en backend |
 | Base de datos | ✅ Datos + schema | Plan 2 + migraciones 004, **008–015**; ~380 jobs; pool entrevistas **629 filas** |
 | Deploy | 🔲 No iniciado | Backend: Railway/Render + `CORS_ORIGINS`; Front: Vercel |
@@ -44,13 +46,13 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Design system (`dulia-tokens.css`, `dulia-kit.css`) | ✅ | Basado en ReBrand |
 | Landing — splash + animaciones (Framer Motion) | ✅ | `RevealOnScroll`, `WelcomePage` fases |
 | Wizard — ubicación DANE | ✅ | 32 deptos + 1.119 municipios; selects cascada |
-| `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data` + fallback `mockResultsBundle` |
+| `RadarMatch` en `/resultados` | ✅ | `GET .../radar-data`; sin radar mock en UI si API no devolvió datos |
 | `MarketThermometer` | ✅ | Solo `/resultados`; endpoint `GET /market/dashboard/{session_id}` |
 | `ProcessStatusBar` | ✅ | Barra fija inferior — CV, submit wizard, descarga PDF |
 | Plan 2 frontend | ✅ | `loadResultsBundle`: analyze → action-plan → jobs/market/radar/timeline |
 | Layout `/resultados` | ✅ | **Congelado** — `AnalysisOverviewGrid` 580px, `compactGrid`, `pdf-card-in-grid`; regla `.cursor/rules/results-layout-frozen.mdc` |
 | PDF export resultados | ✅ | html2canvas por bloques; intro alineada a UI; timeline + skills; `ScoreRing exportMode` |
-| Integración Axios → API | ✅ | `services/api.js` + fallbacks mock |
+| Integración Axios → API | ✅ | `services/api.js` + mock offline (`isBackendUnreachable`) |
 | Auth Supabase (opcional) | ✅ | `AuthProvider`, `ProtectedRoute`, `link-session`; login/registro ← historial |
 | Mi Progreso — Bloque 2 | ✅ | `PlanTimeline`, `ProgressOverview`, `PhaseLockOverlay`, `TaskList`, scroll |
 | Mi Progreso — M3 E2E | ✅ | Backend Supabase (`progress_m3_service`); banner `dataSource`; tests |
