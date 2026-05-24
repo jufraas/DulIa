@@ -15,7 +15,7 @@ Estructura para trabajar en paralelo sin conflictos.
 | `src/services/mockResultsBundle.js` | Mocks personalizados (jobs, market, plan, radar, timeline) |
 | `src/constants/colombiaLocations.js` | 32 deptos / 1.119 municipios DANE |
 | `src/services/sessionHydration.js` | Lógica rehidratación (cache + bundle) |
-| `src/services/mockCvPrefill.js` | Fallback parse-cv offline |
+| `src/services/mockCvPrefill.js` | Fallback parse-cv offline + `normalizeCvParseResponse` |
 | `src/services/mockCoachChat.js` | Fallback coach offline |
 | `src/services/mockPlan.js` | Fallback plan 30d offline |
 | `src/utils/planDisplay.js` | Normaliza action-plan → UI (tabs 30/60/90) |

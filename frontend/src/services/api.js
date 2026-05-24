@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { mockCoachChatResponse } from './mockCoachChat'
-import { MOCK_CV_PREFILL } from './mockCvPrefill'
+import { MOCK_CV_PREFILL, normalizeCvParseResponse } from './mockCvPrefill'
 import {
   buildMockJobsFromProfile,
   buildMockMarketFromProfile,
@@ -81,7 +81,7 @@ export async function parseCvPdf(file) {
       headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 60000,
     })
-    return data
+    return normalizeCvParseResponse(data)
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 400) {
       throw new Error(String(err.response.data?.detail ?? 'Archivo inválido'), { cause: err })
@@ -112,13 +112,15 @@ export async function postCoachChat(mensaje, sessionId = getOrCreateSessionId())
     return data
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 404) {
-      throw new Error('Completa el onboarding antes de usar el coach.')
+      throw new Error('Completa el onboarding antes de usar el coach.', { cause: err })
     }
     if (axios.isAxiosError(err) && err.response?.status === 429) {
-      throw new Error('Demasiadas preguntas seguidas. Espera un minuto e intenta de nuevo.')
+      throw new Error('Demasiadas preguntas seguidas. Espera un minuto e intenta de nuevo.', {
+        cause: err,
+      })
     }
     if (axios.isAxiosError(err) && err.response?.data?.detail) {
-      throw new Error(String(err.response.data.detail))
+      throw new Error(String(err.response.data.detail), { cause: err })
     }
     // Solo mock offline si el backend no responde (red) o está en modo mock explícito
     const unreachable =

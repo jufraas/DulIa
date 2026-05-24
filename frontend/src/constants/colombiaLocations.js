@@ -1233,13 +1233,35 @@ export function findDepartmentForCity(cityName) {
   return null
 }
 
-/**
- * @param {string | undefined} cityName
+/** Alias frecuentes en CVs (Gemini) → municipio canónico DANE */
+const CITY_ALIASES = {
+  bogota: 'Bogotá D.C.',
+  'bogota dc': 'Bogotá D.C.',
+  'distrito capital': 'Bogotá D.C.',
+  'santa fe de bogota': 'Bogotá D.C.',
+}
+
+/** @param {string} cityName */
+function resolveCityAlias(cityName) {
+  if (!cityName?.trim()) return cityName
+  return CITY_ALIASES[normalizeName(cityName)] || cityName
+}
+
+/** @param {string} departmentName */
+function resolveDepartmentAlias(departmentName) {
+  if (!departmentName?.trim()) return departmentName
+  const match = COLOMBIA_DEPARTMENTS.find(
+    (dept) => normalizeName(dept) === normalizeName(departmentName),
+  )
+  return match || departmentName
+}
+
+/** @param {string | undefined} cityName
  * @param {string | undefined} department
  */
 export function resolveLocationFields(cityName, department) {
-  const city = cityName?.trim() || ''
-  let departamento = department?.trim() || ''
+  let city = resolveCityAlias(cityName?.trim() || '')
+  let departamento = resolveDepartmentAlias(department?.trim() || '')
 
   if (departamento && !COLOMBIA_CITIES_BY_DEPARTMENT[departamento]) {
     departamento = ''

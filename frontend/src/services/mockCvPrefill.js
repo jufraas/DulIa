@@ -43,6 +43,31 @@ export const MOCK_CV_PREFILL = {
 }
 
 /**
+ * Normaliza la respuesta POST /profile/parse-cv del backend.
+ * @param {unknown} data
+ */
+export function normalizeCvParseResponse(data) {
+  if (!data || typeof data !== 'object') return MOCK_CV_PREFILL
+
+  const raw = /** @type {Record<string, unknown>} */ (data)
+  const prefill =
+    raw.prefill && typeof raw.prefill === 'object'
+      ? /** @type {Record<string, string | null | undefined>} */ (raw.prefill)
+      : {}
+
+  const fieldsFound = Array.isArray(raw.fields_found)
+    ? raw.fields_found.filter((item) => typeof item === 'string')
+    : Object.keys(prefill).filter((key) => prefill[key] != null && prefill[key] !== '')
+
+  return {
+    parsed: raw.parsed === true,
+    fields_found: fieldsFound,
+    prefill,
+    message: typeof raw.message === 'string' ? raw.message : undefined,
+  }
+}
+
+/**
  * @param {Record<string, string | undefined | null>} prefill
  * @param {string[]} [fieldsFound]
  * @returns {Partial<import('../store/useProfileStore').OnboardingFormState>}

@@ -32,3 +32,4 @@ node scripts/build-colombia-locations.mjs .tmp/colombia_completa.json
 
 - Payload `POST /profile` recibe strings canónicos alineados al mercado.
 - Borradores wizard y CV con solo ciudad infieren departamento vía `resolveLocationFields`.
+- **Alias CV/Gemini (2026-05-23):** nombres frecuentes (`Bogotá`, `Atlantico` sin tilde) se resuelven al municipio/departamento canónico DANE antes de rellenar los selects.
