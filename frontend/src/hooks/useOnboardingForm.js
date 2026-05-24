@@ -10,7 +10,7 @@ import { mergeCvPrefillIntoForm } from '../services/mockCvPrefill'
 import { EMPTY_ONBOARDING_FORM } from '../constants/emptyForm'
 import { WIZARD_STEPS } from '../constants/onboardingOptions'
 import { buildProfilePayload } from '../utils/buildProfilePayload'
-import { validateOnboardingStep } from '../utils/validateOnboardingStep'
+import { validateOnboardingStep, validateOnboardingForm } from '../utils/validateOnboardingStep'
 import { getOrCreateSessionId } from '../utils/session'
 import {
   clearWizardDraft,
@@ -168,7 +168,9 @@ export function useOnboardingForm() {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault()
-      if (!validateCurrentStep()) return
+      const allErrors = validateOnboardingForm(form)
+      setErrors(allErrors)
+      if (Object.keys(allErrors).length > 0) return
 
       setLoading(true)
       setApiError('')
@@ -202,7 +204,6 @@ export function useOnboardingForm() {
       }
     },
     [
-      validateCurrentStep,
       form,
       setSavedProfile,
       setFormSnapshot,

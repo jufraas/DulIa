@@ -4,7 +4,7 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 
 ## Última actualización
 
-2026-05-24 — **Fix CV PDF** (`markitdown[pdf]`, fallback pdfplumber) + **layout `/resultados`** (scroll resumen/plan, altura plan = oportunidades). Timeouts API 120s en llamadas Gemini.
+2026-05-24 — **Wizard UX:** `TagField` habilidades técnicas + validaciones (edad ≥15, coherencia experiencia vs primer empleo).
 
 ## Estado por módulo
 
@@ -48,6 +48,8 @@ _Actualiza este archivo cada vez que un módulo pase de estado._
 | Borrador wizard al refresh | ✅ | `dulia_wizard_draft` |
 | Subida CV PDF | ✅ | `parseCvPdf`; `markitdown[pdf]` + pdfplumber; validación MIME Windows |
 | Layout `/resultados` | ✅ | Score+PDF columna izq.; resumen con scroll; `OpportunitiesAndPlan` (altura sync + scroll plan) |
+| Wizard — habilidades tags | ✅ | `TagField` + sugerencias; sin comas manuales |
+| Wizard — validaciones | ✅ | Edad mín. 15; sin `primer_empleo` si `has_experience=si`; submit valida 3 pasos |
 | POST `/profile` + mock fallback | ✅ | `mockProfileFromPayload.js` |
 | GET jobs + market + plan + radar en bundle | ✅ | `loadResultsBundle()` tras wizard / rehidratación |
 | `analysis` en UI + store | ✅ | Fortalezas, recomendaciones, score `nivel_preparacion` |

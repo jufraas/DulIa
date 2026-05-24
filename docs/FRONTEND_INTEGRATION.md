@@ -3,7 +3,7 @@
 > **Para el equipo frontend.** Contrato técnico completo en [ENDPOINTS.md](ENDPOINTS.md).  
 > **Deploy:** pendiente — usar backend local hasta tener URL de producción.
 
-**Última actualización:** 2026-05-24 · Fix parse-cv real + layout resultados + timeouts 120s.
+**Última actualización:** 2026-05-24 · Wizard: tags habilidades + validaciones edad/coherencia.
 
 ---
 
@@ -23,6 +23,8 @@
 | `POST /profile/parse-cv` | ✅ | Real con `markitdown[pdf]`; validación PDF flexible en cliente |
 | Layout `/resultados` | ✅ | `OpportunitiesAndPlan` — plan = alto oportunidades + scroll interno |
 | Timeouts Axios | ✅ | 120s global + profile/analyze/action-plan/parse-cv |
+| Wizard habilidades (`TagField`) | ✅ | Tags + sugerencias; valor interno CSV → `habilidades[]` en POST |
+| Wizard validaciones | ✅ | `onboardingValidation.js` — edad ≥15; experiencia ≠ primer empleo junior |
 | Navegación vacantes | ✅ | Chips skills + `url`; volver a `/resultados` |
 | PDF export | ✅ | Score, análisis, plan, radar, jobs, mercado |
 
@@ -69,6 +71,17 @@ POST /api/profile                    ← guardar perfil
 En **mock** (`USE_MOCK_DATA=true`): no hace falta Supabase; analyze, action-plan, radar y timeline responden con datos de ejemplo.
 
 En **modo real**: orden estricto para timeline → `profile` → `analyze` → `action-plan` → `radar-data` / `timeline-data`.
+
+### Validaciones del wizard (`/comenzar`)
+
+| Regla | Implementación |
+|-------|----------------|
+| Edad mínima **15 años** | `validateAgeFields()` — edad exacta o rango |
+| Habilidades técnicas | `TagField` — mín. 1 tag; sugerencias en `SUGGESTED_TECH_SKILLS` |
+| Coherencia experiencia | Si `has_experience=si`, oculta y bloquea `opportunity_type=primer_empleo` |
+| Envío final | `validateOnboardingForm()` — valida los 3 pasos antes de `POST /profile` |
+
+Archivos: `utils/onboardingValidation.js`, `utils/validateOnboardingStep.js`, `components/ui/TagField.jsx`.
 
 ---
 

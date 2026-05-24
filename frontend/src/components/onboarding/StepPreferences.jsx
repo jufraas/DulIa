@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import {
   AVAILABILITY_OPTIONS,
   OPPORTUNITY_TYPE_OPTIONS,
   WORK_MODE_OPTIONS,
 } from '../../constants/onboardingOptions'
+import { filterOpportunityTypeOptions } from '../../utils/onboardingValidation'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import TextArea from '../ui/TextArea'
@@ -13,9 +15,21 @@ import TextArea from '../ui/TextArea'
  *   form: import('../../store/useProfileStore').OnboardingFormState,
  *   errors: Record<string, string>,
  *   update: (field: string) => (e: import('react').ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void,
+ *   patchForm: (patch: Partial<import('../../store/useProfileStore').OnboardingFormState>) => void,
  * }} props
  */
-export default function StepPreferences({ form, errors, update }) {
+export default function StepPreferences({ form, errors, update, patchForm }) {
+  const opportunityOptions = filterOpportunityTypeOptions(
+    form.has_experience,
+    OPPORTUNITY_TYPE_OPTIONS,
+  )
+
+  useEffect(() => {
+    if (form.has_experience === 'si' && form.opportunity_type === 'primer_empleo') {
+      patchForm({ opportunity_type: '' })
+    }
+  }, [form.has_experience, form.opportunity_type, patchForm])
+
   return (
     <>
       <TextArea
@@ -41,7 +55,12 @@ export default function StepPreferences({ form, errors, update }) {
         value={form.opportunity_type}
         onChange={update('opportunity_type')}
         error={errors.opportunity_type}
-        options={OPPORTUNITY_TYPE_OPTIONS}
+        options={opportunityOptions}
+        hint={
+          form.has_experience === 'si'
+            ? '"Primer empleo junior" no aplica si ya tienes experiencia laboral'
+            : undefined
+        }
       />
       <Select
         label="Disponibilidad"

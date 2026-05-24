@@ -34,13 +34,13 @@ Llamadas con Gemini (`profile`, `analyze`, `action-plan`, `parse-cv`) usan timeo
 |------|----------|-------------|
 | `/` | Landing | Splash + hero + features + CTA (scroll reveal) |
 | `/sobre` | Sobre DulIA | Problema, audiencia, modelo, equipo |
-| `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF opcional |
+| `/comenzar` | Onboarding | Wizard **3 pasos** + CV PDF; tags de habilidades; validaciones edad/coherencia |
 | `/resultados` | Resultados | Score, análisis IA, termómetro, plan 30-60-90, radar, timeline, coach, PDF |
 | `/vacantes` | Vacantes | Termómetro + semáforo; **Volver a mi análisis** → `/resultados` |
 
 ## Flujo de datos
 
-1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; opcional: CV → `parseCvPdf` → `normalizeCvParseResponse` → merge formulario).
+1. Usuario completa wizard en `/comenzar` (departamento + municipio DANE; CV opcional; **habilidades en tags** con sugerencias; validación edad ≥15 y coherencia experiencia/tipo de oportunidad).
 2. **POST** `/api/profile` con `session_id` (UUID en `localStorage`, clave `dulia_session_id`).
 3. **`loadResultsBundle()`**: analyze → action-plan → jobs + market + radar + timeline.
 4. Estado en Zustand (`savedProfile`, `jobs`, `market`, `plan`, `radar`, `timeline`, `analysis`).
@@ -79,7 +79,7 @@ src/
 │   └── mock*.js
 ├── constants/colombiaLocations.js
 ├── store/useProfileStore.js
-├── utils/              # session, sessionCache, planDisplay, radarApi, …
+├── utils/              # session, sessionCache, planDisplay, onboardingValidation, parseTags, …
 └── styles/             # dulia-tokens.css, dulia-kit.css
 ```
 
@@ -95,6 +95,16 @@ Referencia de diseño (no producción): `ReBrand/DulIA Design System (1)/`.
 | Dependencia | `framer-motion` — respeta `prefers-reduced-motion` |
 
 Detalle técnico: [docs/decisions/2026-05-23-frontend-landing-animations.md](../docs/decisions/2026-05-23-frontend-landing-animations.md).
+
+## Wizard (`/comenzar`)
+
+| Paso | Campos destacados |
+|------|-------------------|
+| 0 — Quién eres | CV PDF opcional, DANE, edad (mín. 15) |
+| 1 — Perfil laboral | `TagField` habilidades técnicas + sugerencias |
+| 2 — Qué buscas | Sin "primer empleo junior" si ya tiene experiencia |
+
+Validación: `onboardingValidation.js` + `validateOnboardingStep.js`.
 
 ## Resultados (`/resultados`)
 

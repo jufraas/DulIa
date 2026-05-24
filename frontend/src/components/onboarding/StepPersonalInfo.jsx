@@ -6,6 +6,7 @@ import {
   getCityOptions,
   getDepartmentOptions,
 } from '../../constants/colombiaLocations'
+import { MAX_AGE, MIN_AGE } from '../../utils/onboardingValidation'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 
@@ -63,12 +64,13 @@ export default function StepPersonalInfo({ form, errors, update, patchForm }) {
           label="Edad"
           name="edad"
           type="number"
-          min={16}
-          max={99}
+          min={MIN_AGE}
+          max={MAX_AGE}
           placeholder="Ej. 22"
           value={form.edad}
           onChange={update('edad')}
           error={errors.edad}
+          hint={`Mínimo ${MIN_AGE} años`}
         />
         <Select
           label="O rango de edad"

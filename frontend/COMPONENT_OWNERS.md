@@ -9,7 +9,10 @@ Estructura para trabajar en paralelo sin conflictos.
 |---------|-------------|
 | `src/pages/AboutPage.jsx` | Orquestador fino — **tu pantalla principal** |
 | `src/components/about/*` | Secciones de Sobre DulIA (hero, problema, audiencia, modelo, equipo, CTA) |
-| `src/components/onboarding/*` | Wizard + subida CV (`CvUploadZone`) |
+| `src/components/onboarding/*` | Wizard + subida CV (`CvUploadZone`) + pasos con validación |
+| `src/components/ui/TagField.jsx` | Tags habilidades técnicas (paso 1 wizard) |
+| `src/utils/onboardingValidation.js` | Edad mín. 15 + coherencia experiencia/oportunidad |
+| `src/utils/parseTags.js` | Parse CSV ↔ tags para skills |
 | `src/hooks/useOnboardingForm.js` | POST profile + `loadResultsBundle` + borrador wizard |
 | `src/services/api.js` | Cliente Axios + Plan 2 + fallbacks |
 | `src/services/mockResultsBundle.js` | Mocks personalizados (jobs, market, plan, radar, timeline) |

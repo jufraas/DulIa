@@ -1,3 +1,9 @@
+import { parseTags } from './parseTags'
+import {
+  validateAgeFields,
+  validateExperienceOpportunity,
+} from './onboardingValidation'
+
 /** @param {import('../store/useProfileStore').OnboardingFormState} form */
 export function validateOnboardingStep(currentStep, form) {
   /** @type {Record<string, string>} */
@@ -7,9 +13,7 @@ export function validateOnboardingStep(currentStep, form) {
     if (!form.name.trim()) errors.name = 'Escribe tu nombre'
     if (!form.departamento) errors.departamento = 'Selecciona tu departamento'
     if (!form.city.trim()) errors.city = 'Selecciona tu ciudad'
-    if (!form.edad && !form.age_range) {
-      errors.edad = 'Indica tu edad o rango'
-    }
+    Object.assign(errors, validateAgeFields(form))
     if (!form.current_situation) {
       errors.current_situation = 'Indica tu situación actual'
     }
@@ -31,7 +35,7 @@ export function validateOnboardingStep(currentStep, form) {
     if (form.has_experience === 'si' && !form.experience_years.trim()) {
       errors.experience_years = 'Indica cuántos años de experiencia tienes'
     }
-    if (!form.skills.trim()) errors.skills = 'Menciona al menos una habilidad'
+    if (!parseTags(form.skills).length) errors.skills = 'Agrega al menos una habilidad'
   }
 
   if (currentStep === 2) {
@@ -42,8 +46,19 @@ export function validateOnboardingStep(currentStep, form) {
     if (!form.opportunity_type) {
       errors.opportunity_type = 'Selecciona tipo de oportunidad'
     }
+    Object.assign(errors, validateExperienceOpportunity(form))
     if (!form.availability) errors.availability = 'Indica cuándo puedes empezar'
   }
 
+  return errors
+}
+
+/** Valida todos los pasos antes de enviar el perfil. */
+export function validateOnboardingForm(form) {
+  /** @type {Record<string, string>} */
+  const errors = {}
+  for (let step = 0; step < 3; step += 1) {
+    Object.assign(errors, validateOnboardingStep(step, form))
+  }
   return errors
 }

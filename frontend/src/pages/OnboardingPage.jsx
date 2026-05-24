@@ -99,7 +99,12 @@ export default function OnboardingPage() {
                       Campos sugeridos desde tu CV — confirma o edita lo que necesites.
                     </p>
                   )}
-                  <StepWorkProfile form={form} errors={errors} update={update} />
+                  <StepWorkProfile
+                    form={form}
+                    errors={errors}
+                    update={update}
+                    patchForm={patchForm}
+                  />
                 </>
               )}
               {step === 2 && (
@@ -109,7 +114,12 @@ export default function OnboardingPage() {
                       Preferencias iniciales desde tu CV — ajusta salario o modalidad si quieres.
                     </p>
                   )}
-                  <StepPreferences form={form} errors={errors} update={update} />
+                  <StepPreferences
+                    form={form}
+                    errors={errors}
+                    update={update}
+                    patchForm={patchForm}
+                  />
                 </>
               )}
 
