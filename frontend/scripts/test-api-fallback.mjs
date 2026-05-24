@@ -5,6 +5,11 @@
 import axios from 'axios'
 import { isBackendUnreachable } from '../src/utils/apiErrors.js'
 import { normalizeCvParseResponse } from '../src/services/mockCvPrefill.js'
+import {
+  markSpaNavigationReady,
+  resetLandingSplashState,
+  shouldShowLandingSplash,
+} from '../src/utils/landingSplash.js'
 
 /** Paridad con mockResultsBundle.fillResultsFallbacks — no importar el módulo (cadena mockData). */
 function fillResultsFallbacks(partial) {
@@ -69,6 +74,17 @@ test('normalizeCvParseResponse rechaza shape inválido', () => {
     if (!(err instanceof Error)) throw err
   }
   if (!threw) throw new Error('debe lanzar error, no devolver MOCK_CV_PREFILL')
+})
+
+test('landing splash — visible en carga inicial del documento', () => {
+  resetLandingSplashState()
+  if (!shouldShowLandingSplash()) throw new Error('debe mostrar splash antes de markSpaNavigationReady')
+})
+
+test('landing splash — omitido tras navegación SPA', () => {
+  resetLandingSplashState()
+  markSpaNavigationReady()
+  if (shouldShowLandingSplash()) throw new Error('no debe mostrar splash en visitas SPA a /')
 })
 
 console.log('')

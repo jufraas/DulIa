@@ -22,7 +22,8 @@ El kit ReBrand indica microanimaciones con `ease-out` y sin scroll-jacking.
   - `trigger="scroll"` — `whileInView` (features, cards, CTA).
 - **Orquestación splash:** `WelcomePage.jsx` con fases `splash` → `exit` → `done`.
 - **Montaje diferido:** el contenido de la landing monta en `exit` (fade del splash); el hero anima solo cuando `phase === 'done'`.
-- **Skip splash en SPA:** variable en memoria (`splashDismissedInSpa`); **recarga de página** vuelve a mostrar splash.
+- **Skip splash en SPA:** `utils/landingSplash.js` — `markSpaNavigationReady()` en `App.jsx` tras montar; splash solo si `shouldShowLandingSplash()` (carga/refresco del documento). Navegar a `/` por el router no repite splash; **F5 en `/`** sí.
+- **Sesión iniciada:** `WelcomePage` redirige a `/progreso` si hay usuario Supabase.
 
 ## Por qué
 
@@ -44,7 +45,9 @@ El kit ReBrand indica microanimaciones con `ease-out` y sin scroll-jacking.
 
 | Archivo | Rol |
 |---------|-----|
-| `pages/WelcomePage.jsx` | Fases splash + `heroEnter={phase === 'done'}` |
+| `pages/WelcomePage.jsx` | Fases splash + redirect auth + `heroEnter={phase === 'done'}` |
+| `utils/landingSplash.js` | Splash solo en carga/refresco, no en navegación SPA |
+| `App.jsx` | `markSpaNavigationReady()` tras montar |
 | `components/welcome/LandingSplash.jsx` | Overlay logo (CSS en `dulia-kit.css`) |
 | `components/welcome/HeroSection.jsx` | `RevealOnScroll` con `trigger="mount"` |
 | `components/welcome/FeaturesSection.jsx` | `trigger="scroll"` (default) en header y cards |
